@@ -110,3 +110,30 @@ Saat portal di-deploy ke Cloud/AWS dengan public ingress, developer mengharapkan
 2. Filter event `push` hanya untuk branch penting (`main`, `uat`, `staging`) dan cocokkan nama repo dengan service yang terdaftar di catalog.
 3. Enqueue `trivy_scan` task secara otomatis ke Asynq worker.
 4. *(Status: Backlog Deferred hingga portal memiliki public domain/ingress)*.
+
+---
+
+## 🎯 Backlog Item 8: Template↔Router Flow Audit (Silent 404 Routes) — [COMPLETED ✅]
+
+### 🔴 Problem Statement
+Ditemukan saat debugging fitur "Recreate Pipeline" — beberapa handler HTMX (`hx-post`/`hx-get`) di template ternyata memanggil path yang **tidak terdaftar** di `internal/api/router.go`. HTMX/browser tidak menampilkan error yang jelas ke user saat 404 terjadi pada `hx-*` swap, sehingga fitur terlihat "diam" (tombol tidak bereaksi) tanpa pesan kesalahan — bug jenis ini mudah lolos code review manual karena handler function-nya memang ada di kode (compile sukses), hanya lupa di-route.
+
+### 🔍 Metodologi Audit
+1. Ekstrak seluruh `hx-post`/`hx-get`/`hx-delete`/`hx-put` dari semua file `internal/templates/*.html` (termasuk yang dipanggil dinamis via `fetch()`/`htmx.ajax()` di inline `<script>`).
+2. Cocokkan satu per satu terhadap route yang terdaftar di `router.go`, termasuk yang dibungkus middleware chain (`r.With(...).Post(...)`).
+3. Verifikasi juga arah sebaliknya: route terdaftar yang tidak dipanggil template manapun (untuk deteksi dead code) — hasilnya semua valid (page navigation link biasa atau dipanggil via JS dinamis).
+
+### 🛠️ Bug Ditemukan & Diperbaiki
+| Route yang Hilang | Handler (sudah ada, tidak ter-route) | Fitur Terdampak |
+| :--- | :--- | :--- |
+| `POST /admin/integrations/{id}/test` | `TestIntegrationHandler` | Tombol "Test" per-row integration di `/admin/integrations` — selalu 404 diam-diam |
+| `POST /admin/integrations/test-live` | `TestLiveIntegrationHandler` | Test koneksi form default-env (belum ada integration tersimpan) |
+| `POST /tickets/preview` | `PreviewPipelineName` | Live preview nama Jenkins pipeline saat mengisi form "Create New Ticket" (country/domain/service_name) |
+| `POST /api/v1/admin/integrations/edit` | `EditIntegrationHandler` | Tombol "Save" di modal Edit Integration — form UI asli mengirim `id` via hidden field ke path tanpa `{id}`, bukan ke `/{id}/edit`; fitur Edit dari browser tidak pernah berfungsi sebelumnya |
+
+### ✅ Verification Results:
+- `go build ./...` ➔ **PASSED (0 error)**
+- `go test ./...` ➔ **ALL PASS (0 regresi di internal/api, internal/auth, internal/tasks, internal/worker/ci, internal/worker/infra)**
+- QA manual (curl, live container): keempat endpoint di atas terverifikasi **200 OK** dengan output benar (termasuk `/admin/integrations/{id}/test` yang benar-benar hit Google Gemini API live dan mengembalikan status "Active")
+- Regresi checked: catalog detail page, scan-schedule endpoint, Trivy vulnerability scan, static assets (brand logos, htmx.min.js, lucide.min.js) — semua tetap **200 OK**
+
