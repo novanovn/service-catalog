@@ -1,0 +1,651 @@
+{{ define "content" }}
+<div class="space-y-6 max-w-7xl mx-auto pb-16">
+    
+    <!-- Top Navigation / Breadcrumb Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-5">
+        <div>
+            <div class="flex items-center gap-2 text-xs text-slate-400 mb-1.5 font-medium">
+                <a href="/approvals" class="text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-1 font-semibold">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                    DevOps Approvals
+                </a>
+                <span>/</span>
+                <span class="font-mono text-slate-300 font-semibold">{{ .Item.ServiceName }}</span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex flex-wrap items-center gap-3">
+                <span class="text-white">DevOps Approval Review Workspace</span>
+                {{ if eq .Item.Status "APPROVED" }}
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-300 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5"></span>
+                    Approved & Active
+                </span>
+                {{ else if eq .Item.Status "REJECTED" }}
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-300 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20">
+                    <span class="w-1.5 h-1.5 rounded-full bg-rose-500 mr-1.5"></span>
+                    Rejected
+                </span>
+                {{ else }}
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-300 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20">
+                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse mr-1.5"></span>
+                    Pending Review
+                </span>
+                {{ end }}
+            </h1>
+            <p class="text-xs sm:text-sm text-slate-400 mt-1 font-normal">
+                Inspect Terraform HCL configurations, real security vulnerability scans, and approve CI/CD Multibranch pipeline provisioning.
+            </p>
+        </div>
+
+        <!-- Quick Top Actions -->
+        <div class="flex items-center gap-3">
+            <a href="/catalog/{{ .Item.ServiceName }}" target="_blank" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 shadow-xs dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700 dark:hover:bg-slate-700 transition-all">
+                <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                View Catalog Entry
+            </a>
+            <a href="{{ .Item.RepoURL }}" target="_blank" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-900 dark:bg-slate-800 text-white hover:bg-slate-800 dark:hover:bg-slate-700 shadow-sm border dark:border-slate-700 transition-all">
+                <svg class="w-3.5 h-3.5 text-slate-300" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+                GitHub Repository
+            </a>
+        </div>
+    </div>
+
+    {{ if or (eq .Item.Status "APPROVED") (eq .Item.Status "REJECTED") }}
+    <!-- Audit History Banner -->
+    <div class="rounded-2xl p-4.5 {{ if eq .Item.Status "APPROVED" }}bg-emerald-50 border border-emerald-200 text-emerald-950 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-200{{ else }}bg-rose-50 border border-rose-200 text-rose-950 dark:bg-rose-500/10 dark:border-rose-500/20 dark:text-rose-200{{ end }} flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 shadow-xs">
+        <div class="flex items-center gap-3">
+            <div class="p-2 rounded-xl {{ if eq .Item.Status "APPROVED" }}bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400{{ else }}bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-400{{ end }}">
+                {{ if eq .Item.Status "APPROVED" }}
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                {{ else }}
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                {{ end }}
+            </div>
+            <div>
+                <p class="text-xs font-bold leading-snug">
+                    {{ if eq .Item.Status "APPROVED" }}
+                    Approved by {{ .Item.ReviewedBy }} on {{ .Item.ReviewedAt }}
+                    {{ else }}
+                    Rejected by {{ .Item.ReviewedBy }} on {{ .Item.ReviewedAt }}
+                    {{ end }}
+                </p>
+                <p class="text-xs mt-0.5 opacity-90 font-medium">
+                    {{ if .Item.ReviewComment }}&ldquo;{{ .Item.ReviewComment }}&rdquo;{{ else }}No specific comment provided.{{ end }}
+                </p>
+            </div>
+        </div>
+        {{ if eq .Item.Status "APPROVED" }}
+        <a href="https://automation.oona-insurance.com/job/AWS%20Lambda%20Projects/job/{{ .Item.PipelineName }}" target="_blank" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm transition-all whitespace-nowrap">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+            Open in Jenkins
+        </a>
+        {{ end }}
+    </div>
+    {{ end }}
+
+    <!-- Key Metadata Strip (4 Cards) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-xs">
+            <p class="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Service Name</p>
+            <p class="text-sm font-extrabold text-slate-900 dark:text-white mt-1 break-all">{{ .Item.ServiceName }}</p>
+            <p class="text-xs text-slate-600 dark:text-slate-400 mt-1 font-medium">{{ .Item.Domain }} &middot; {{ .Item.Country }}</p>
+        </div>
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-xs">
+            <p class="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Jenkins Item Name</p>
+            <p class="font-mono text-xs font-bold text-indigo-700 dark:text-indigo-400 mt-1 break-all bg-indigo-50 dark:bg-slate-950 px-2 py-1 rounded border border-indigo-200 dark:border-slate-800">{{ .Item.PipelineName }}</p>
+            <p class="text-xs text-slate-600 dark:text-slate-400 mt-1 font-medium">AWS Lambda Projects</p>
+        </div>
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-xs">
+            <p class="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Requestor / Ownership</p>
+            <p class="text-xs font-bold text-slate-900 dark:text-slate-100 mt-1 truncate">{{ .Item.RequestorEmail }}</p>
+            <p class="text-xs text-slate-600 dark:text-slate-400 mt-1 font-medium">Jira: <span class="font-mono font-bold text-blue-600 dark:text-blue-400">{{ .Item.JiraID }}</span></p>
+        </div>
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-xs">
+            <p class="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Terraform Verification</p>
+            <div class="mt-1 flex items-center gap-2">
+                {{ if .Item.TerraformExists }}
+                <span id="detail-top-tf-badge" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-300 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1"></span>
+                    Verified on {{ .Item.TargetBranch }}
+                </span>
+                {{ else }}
+                <span id="detail-top-tf-badge" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-amber-50 text-amber-800 border border-amber-300 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20">
+                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500 mr-1"></span>
+                    Pending Push
+                </span>
+                {{ end }}
+            </div>
+            <p id="detail-top-tf-path" class="text-[10.5px] font-mono text-slate-600 dark:text-slate-400 mt-1 truncate font-medium" title="{{ .Item.TerraformPath }}">{{ .Item.TerraformPath }}</p>
+        </div>
+    </div>
+
+    <!-- MAIN 2-COLUMN REVIEW WORKSPACE -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- LEFT COLUMN: Terraform IaC Inspector & Code Viewer (7 Cols) -->
+        <div class="lg:col-span-7 space-y-5">
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden">
+                <div class="px-5 py-4 border-b border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-slate-50 dark:bg-slate-950/70">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-xl bg-purple-50 text-purple-700 border border-purple-200 dark:bg-purple-500/10 dark:text-purple-400 dark:border-purple-500/20 flex items-center justify-center">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-900 dark:text-white">Terraform IaC Configuration</h3>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Inspect terraform.tfvars declared in monorepo</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Branch Selector -->
+                    <div class="flex items-center gap-2">
+                        <label for="detail-branch-select" class="text-xs font-bold text-slate-700 dark:text-slate-300">Branch:</label>
+                        <select id="detail-branch-select" onchange="onDetailBranchChange(this.value)" class="text-xs font-mono rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-200 py-1.5 pl-2.5 pr-7 focus:ring-indigo-500 shadow-2xs font-semibold">
+                            {{ range .AvailableBranches }}
+                            <option value="{{ . }}" {{ if eq . $.Item.TargetBranch }}selected{{ end }}>{{ . }}</option>
+                            {{ end }}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Path & File Status Bar (Responsive Multi-line Layout with No Truncation) -->
+                <div class="px-5 py-3 bg-slate-100 dark:bg-slate-950/40 border-b border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-mono">
+                    <div class="flex items-center gap-2 min-w-0 flex-1 text-slate-900 dark:text-slate-100 font-bold">
+                        <svg class="w-4 h-4 text-purple-600 dark:text-purple-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
+                        <span id="detail-tfpath-label" class="break-all select-all font-mono leading-relaxed">{{ .Item.TerraformPath }}/terraform.tfvars</span>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <span id="detail-tf-badge" class="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-bold whitespace-nowrap shadow-2xs {{ if .Item.TerraformExists }}bg-emerald-100 text-emerald-800 border border-emerald-300 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20{{ else }}bg-amber-100 text-amber-900 border border-amber-300 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20{{ end }}">
+                            {{ if .Item.TerraformExists }}200 OK &middot; Verified{{ else }}404 Not Found{{ end }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Live TFVars Raw Code Viewer -->
+                <div class="p-4 bg-slate-900 dark:bg-slate-950 overflow-hidden">
+                    <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-800 text-[11px] text-slate-300 dark:text-slate-400 font-mono">
+                        <span class="font-semibold">terraform.tfvars (HCL Raw Content)</span>
+                        <span class="text-teal-400 font-bold">Read-Only View</span>
+                    </div>
+                    <pre id="detail-tfvars-content" class="text-xs font-mono text-emerald-400 whitespace-pre-wrap overflow-x-auto max-h-[380px] overflow-y-auto leading-relaxed p-1 bg-transparent">{{ .TFVarsContent }}</pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT COLUMN: Security Scan & Jenkins Pipeline Spec (5 Cols) -->
+        <div class="lg:col-span-5 space-y-5">
+            
+            <!-- Real Security Scan & Trivy Findings Card -->
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden">
+                <div class="px-5 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-950/70">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-xl bg-teal-50 text-teal-700 border border-teal-200 dark:bg-teal-500/10 dark:text-teal-400 dark:border-teal-500/20 flex items-center justify-center">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-900 dark:text-white">Security Vulnerability Scan</h3>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Real-time scan powered by Aqua Trivy Engine</p>
+                        </div>
+                    </div>
+                    <button type="button" onclick="triggerTrivyRescan()" class="p-1.5 rounded-lg text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors cursor-pointer" title="Rescan Security">
+                        <svg id="trivy-spinner" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    </button>
+                </div>
+
+                <div class="p-4 space-y-3">
+                    <!-- Vuln Summary Badges -->
+                    <div class="grid grid-cols-4 gap-2 text-center">
+                        <div class="p-2 rounded-xl bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20">
+                            <p class="text-[10px] font-bold uppercase text-rose-700 dark:text-rose-400">Critical</p>
+                            <p id="vuln-critical-count" class="text-lg font-extrabold text-rose-900 dark:text-rose-300">{{ .VulnSummary.Critical }}</p>
+                        </div>
+                        <div class="p-2 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20">
+                            <p class="text-[10px] font-bold uppercase text-amber-800 dark:text-amber-400">High</p>
+                            <p id="vuln-high-count" class="text-lg font-extrabold text-amber-950 dark:text-amber-300">{{ .VulnSummary.High }}</p>
+                        </div>
+                        <div class="p-2 rounded-xl bg-yellow-50 dark:bg-yellow-500/10 border border-yellow-200 dark:border-yellow-500/20">
+                            <p class="text-[10px] font-bold uppercase text-yellow-800 dark:text-yellow-400">Medium</p>
+                            <p id="vuln-medium-count" class="text-lg font-extrabold text-yellow-950 dark:text-yellow-300">{{ .VulnSummary.Medium }}</p>
+                        </div>
+                        <div class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                            <p class="text-[10px] font-bold uppercase text-slate-700 dark:text-slate-400">Low</p>
+                            <p id="vuln-low-count" class="text-lg font-extrabold text-slate-900 dark:text-slate-200">{{ .VulnSummary.Low }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Vulnerabilities List -->
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between text-[11px] text-slate-600 dark:text-slate-400 font-bold px-1">
+                            <span>Detected Vulnerabilities</span>
+                            <span>{{ len .VulnList }} Found</span>
+                        </div>
+                        
+                        <div id="vuln-items-container" class="space-y-2 max-h-56 overflow-y-auto pr-1">
+                            {{ range .VulnList }}
+                            <div class="p-2.5 rounded-xl border {{ if eq .Severity "CRITICAL" }}bg-rose-50 border-rose-200 text-rose-950 dark:bg-rose-500/10 dark:border-rose-500/20 dark:text-rose-200{{ else if eq .Severity "HIGH" }}bg-amber-50 border-amber-200 text-amber-950 dark:bg-amber-500/10 dark:border-amber-500/20 dark:text-amber-200{{ else }}bg-yellow-50 border-yellow-200 text-yellow-950 dark:bg-yellow-500/10 dark:border-yellow-500/20 dark:text-yellow-200{{ end }} text-xs">
+                                <div class="flex items-center justify-between gap-2">
+                                    <div class="flex items-center gap-2 min-w-0">
+                                        <a href="{{ .OfficialURL }}" target="_blank" rel="noopener noreferrer" class="font-mono font-bold hover:underline inline-flex items-center gap-1 text-blue-600 dark:text-blue-400 truncate" title="View official CVE security advisory">
+                                            {{ .VulnerabilityID }}
+                                            <svg class="w-3 h-3 opacity-75 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                                        </a>
+                                        {{ if .TargetFile }}
+                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-slate-200/80 text-slate-800 dark:bg-slate-800 dark:text-slate-300">
+                                            📄 {{ .TargetFile }}
+                                        </span>
+                                        {{ end }}
+                                    </div>
+                                    <span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold uppercase flex-shrink-0 {{ if eq .Severity "CRITICAL" }}bg-rose-600 text-white{{ else if eq .Severity "HIGH" }}bg-amber-600 text-white{{ else }}bg-yellow-600 text-white{{ end }}">{{ .Severity }}</span>
+                                </div>
+                                <p class="mt-1 font-mono text-[11px] opacity-95"><span class="font-bold">{{ .PkgName }}</span> ({{ .InstalledVersion }}) &rarr; Fixed in <span class="font-bold underline">{{ if .FixedVersion }}{{ .FixedVersion }}{{ else }}N/A{{ end }}</span></p>
+                            </div>
+                            {{ else }}
+                            <div class="p-4 text-center rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-800 dark:text-emerald-300 text-xs font-semibold">
+                                <svg class="w-5 h-5 mx-auto mb-1 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                0 Vulnerabilities Detected &middot; Clean Repository
+                            </div>
+                            {{ end }}
+                        </div>
+
+                        <!-- GEMINI AI SECURITY ADVISOR TRIGGER (BELOW VULN LIST) -->
+                        {{ if gt (len .VulnList) 0 }}
+                        <div class="mt-3 pt-3 border-t border-slate-200 dark:border-slate-800 space-y-2">
+                            {{ if .Item.HasAIAnalysis }}
+                            <!-- Stored In Database State: Permanent View Report (1x Ask AI Enforced) -->
+                            <div id="ai-ready-badge" class="flex items-center justify-between p-2.5 rounded-xl bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800 animate-fadeIn">
+                                <div class="flex items-center gap-1.5 text-xs font-bold text-purple-700 dark:text-purple-300">
+                                    <svg class="w-4 h-4 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    <span>AI Advisory Ready <span class="text-[10px] opacity-75 font-normal">(Saved in DB · {{ .Item.AIAnalyzedAt }})</span></span>
+                                </div>
+                                <button type="button" onclick="openAIDrawer()" class="text-xs font-bold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 flex items-center gap-1 cursor-pointer">
+                                    View Full Report &rarr;
+                                </button>
+                            </div>
+                            {{ else }}
+                            <!-- Initial 1-Time Ask AI State -->
+                            <button 
+                                id="btn-ai-analyze"
+                                type="button"
+                                onclick="runAIAnalyze()"
+                                class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 shadow-sm transition-all cursor-pointer">
+                                <svg class="w-4 h-4 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                ✨ Analyze Risk & Fix with Gemini AI
+                            </button>
+
+                            <!-- Ready Status Pill (Appears permanently once 1-time analysis completes) -->
+                            <div id="ai-ready-badge" class="hidden flex items-center justify-between p-2.5 rounded-xl bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800 animate-fadeIn">
+                                <div class="flex items-center gap-1.5 text-xs font-bold text-purple-700 dark:text-purple-300">
+                                    <svg class="w-4 h-4 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    <span>AI Advisory Ready <span class="text-[10px] opacity-75 font-normal">(Saved in DB)</span></span>
+                                </div>
+                                <button type="button" onclick="openAIDrawer()" class="text-xs font-bold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 flex items-center gap-1 cursor-pointer">
+                                    View Full Report &rarr;
+                                </button>
+                            </div>
+                            {{ end }}
+                        </div>
+                        {{ end }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Jenkins Pipeline Generation Spec Card -->
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden">
+                <div class="px-5 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-950/70">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-xl bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20 flex items-center justify-center">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-900 dark:text-white">Jenkins Pipeline Provisioning</h3>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Target Jenkins automation folder & payload</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-4 space-y-3 text-xs">
+                    <div>
+                        <label for="detail-jenkins-folder" class="block font-bold text-slate-800 dark:text-slate-200 mb-1">Target Jenkins Folder:</label>
+                        <select id="detail-jenkins-folder" onchange="updateJenkinsPlanSpec()" class="w-full text-xs font-mono rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-200 py-1.5 px-2.5 focus:ring-blue-500 shadow-2xs font-semibold">
+                            <option value="AWS Lambda Projects" selected>AWS Lambda Projects (Default for Microservices)</option>
+                            <option value="AWS FE S3 Projects">AWS FE S3 Projects (Frontend Apps)</option>
+                            <option value="AWS AEM Projects">AWS AEM Projects (Adobe Experience Manager)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <p class="font-bold text-slate-800 dark:text-slate-200 mb-1">Target Pipeline URL:</p>
+                        <div id="detail-jenkins-url-preview" class="p-2.5 rounded-lg bg-slate-900 dark:bg-slate-950 text-blue-300 font-mono text-[11px] break-all border border-slate-800 font-semibold">
+                            https://automation.oona-insurance.com/job/AWS%20Lambda%20Projects/job/{{ .Item.PipelineName }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- BOTTOM SECTION: DEVOPS DECISION BAR -->
+    {{ if ne .Item.Status "APPROVED" }}
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+        <h3 class="text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+            <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            DevOps Approval Decision & Security Sign-Off
+        </h3>
+
+        <!-- Dynamic Security Gate Checkbox -->
+        <div id="security-gate-container" class="p-4 rounded-xl {{ if gt .VulnSummary.Total 0 }}bg-amber-50 border border-amber-200 dark:bg-amber-500/10 dark:border-amber-500/20 text-amber-950 dark:text-amber-200{{ else }}bg-emerald-50 border border-emerald-200 dark:bg-emerald-500/10 dark:border-emerald-500/20 text-emerald-950 dark:text-emerald-200{{ end }}">
+            <label class="flex items-start gap-3 cursor-pointer">
+                <input type="checkbox" id="detail-security-ack" onchange="toggleDetailApprovalGate()" class="mt-0.5 rounded {{ if gt .VulnSummary.Total 0 }}border-amber-400 text-amber-600 focus:ring-amber-500{{ else }}border-emerald-400 text-emerald-600 focus:ring-emerald-500{{ end }} h-4.5 w-4.5">
+                <div>
+                    <span class="text-xs font-bold leading-snug">
+                        {{ if gt .VulnSummary.Total 0 }}
+                        I acknowledge the security scan findings and verify that Terraform IaC and pipeline parameters meet DevOps standards.
+                        {{ else }}
+                        I verify that the codebase is clean of vulnerabilities and that Terraform IaC and pipeline parameters meet DevOps standards.
+                        {{ end }}
+                    </span>
+                    <p class="text-[11px] opacity-90 mt-0.5 font-medium">
+                        {{ if gt .VulnSummary.Total 0 }}
+                        ⚠️ {{ .VulnSummary.Total }} vulnerability findings recorded. Approving acknowledges these risks for this microservice.
+                        {{ else }}
+                        🛡️ 0 vulnerability findings detected. Codebase is verified clean and ready for automated pipeline deployment.
+                        {{ end }}
+                    </p>
+                </div>
+            </label>
+            <div class="mt-3 pt-2.5 border-t {{ if gt .VulnSummary.Total 0 }}border-amber-200/80 dark:border-amber-500/20{{ else }}border-emerald-200/80 dark:border-emerald-500/20{{ end }}">
+                <input type="text" id="detail-security-notes" placeholder="{{ if gt .VulnSummary.Total 0 }}Optional security notes or exception rationale...{{ else }}Optional DevOps notes or approval remarks...{{ end }}" class="w-full text-xs rounded-lg border {{ if gt .VulnSummary.Total 0 }}border-amber-300 dark:border-amber-700/50{{ else }}border-emerald-300 dark:border-emerald-700/50{{ end }} bg-white dark:bg-slate-950 text-slate-900 dark:text-white py-1.5 px-3">
+            </div>
+        </div>
+
+        <!-- Review Comment / Rejection Reason -->
+        <div>
+            <label for="detail-review-comment" class="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1">
+                DevOps Review Comment / Reason <span class="text-rose-500 font-normal">*Required if rejecting</span>
+            </label>
+            <textarea id="detail-review-comment" rows="2" class="w-full text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white p-3 focus:ring-indigo-500 placeholder:text-slate-400 font-medium" placeholder="Enter approval feedback or clear rejection reasons for developer action..."></textarea>
+        </div>
+
+        <!-- Decision Buttons -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-2">
+            <button type="button" onclick="submitDetailRejection()" class="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold bg-rose-50 border border-rose-200 text-rose-700 hover:bg-rose-100 dark:bg-rose-500/10 dark:border-rose-500/20 dark:text-rose-400 dark:hover:bg-rose-500/20 transition-all cursor-pointer">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                Reject Request
+            </button>
+
+            <div class="flex items-center gap-3">
+                <a href="/approvals" class="inline-flex items-center justify-center px-4 py-2.5 rounded-xl text-xs font-bold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 dark:hover:bg-slate-700 transition-all">
+                    Cancel & Back
+                </a>
+                <button type="button" id="btn-detail-approve" onclick="submitDetailApproval()" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs font-extrabold text-white shadow-lg transition-all cursor-pointer bg-teal-600 hover:bg-teal-500 shadow-teal-500/25">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    Approve & Provision Jenkins Pipeline
+                </button>
+            </div>
+        </div>
+    </div>
+    {{ end }}
+
+</div>
+
+<!-- SLIDE-OVER AI ADVISOR RIGHT DRAWER -->
+<div id="ai-advisor-drawer" class="fixed inset-0 z-[9999] hidden overflow-hidden" aria-labelledby="slide-over-title" role="dialog" aria-modal="true">
+    <!-- Backdrop overlay with explicit dark semi-transparent tint for both light and dark modes -->
+    <div 
+        id="ai-drawer-backdrop" 
+        onclick="closeAIDrawer()" 
+        class="fixed inset-0 transition-opacity duration-300 opacity-0 cursor-pointer"
+        style="background-color: rgba(15, 23, 42, 0.6) !important; backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);">
+    </div>
+
+    <div class="fixed inset-y-0 right-0 max-w-full flex pl-10 pointer-events-none">
+        <div id="ai-drawer-panel" class="pointer-events-auto w-screen max-w-xl bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col transform translate-x-full transition-transform duration-300 ease-in-out">
+            
+            <!-- Drawer Header -->
+            <div class="px-6 py-4 bg-slate-50 dark:bg-slate-950/80 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between flex-shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-2xl bg-purple-50 text-purple-600 border border-purple-200 dark:bg-purple-950/60 dark:text-purple-400 dark:border-purple-800/80 flex items-center justify-center shadow-xs">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-extrabold text-slate-900 dark:text-white" id="slide-over-title">Gemini AI Security & Remediation Advisor</h3>
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Automated DevSecOps triage & blast radius analysis</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeAIDrawer()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white p-2 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-800 transition-all cursor-pointer">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <!-- Drawer Content (Scrollable) -->
+            <div id="ai-drawer-body" class="flex-1 overflow-y-auto p-6 space-y-6">
+                {{ if .Item.HasAIAnalysis }}
+                    {{ .Item.AIAnalysisHTML }}
+                {{ else }}
+                <!-- Skeleton Loader placeholder -->
+                <div id="ai-drawer-skeleton" class="space-y-4 animate-pulse">
+                    <div class="h-16 bg-slate-100 dark:bg-slate-800 rounded-2xl"></div>
+                    <div class="h-28 bg-slate-100 dark:bg-slate-800 rounded-2xl"></div>
+                    <div class="h-20 bg-slate-100 dark:bg-slate-800 rounded-2xl"></div>
+                    <div class="h-24 bg-slate-100 dark:bg-slate-800 rounded-2xl"></div>
+                </div>
+                {{ end }}
+            </div>
+
+            <!-- Drawer Footer -->
+            <div class="px-6 py-4 bg-slate-50 dark:bg-slate-950/80 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between flex-shrink-0">
+                <span class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Oona DevSecOps Copilot &middot; Gemini AI</span>
+                <button type="button" onclick="closeAIDrawer()" class="px-4 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-xl transition-all cursor-pointer">
+                    Close Panel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Client-side Logic for Dedicated Review Page -->
+<script>
+    const currentTicketId = "{{ .Item.ID }}";
+    const currentServiceName = "{{ .Item.ServiceName }}";
+
+    function getCSRFToken() {
+        const match = document.cookie.match(new RegExp('(^| )oona_csrf=([^;]+)'));
+        if (match) return match[2];
+        const tokenMeta = document.querySelector('meta[name="csrf-token"]');
+        return tokenMeta ? tokenMeta.getAttribute('content') : '';
+    }
+
+    function onDetailBranchChange(branch) {
+        fetch('/api/v1/tickets/check-tfvars?branch=' + encodeURIComponent(branch) + '&service=' + encodeURIComponent(currentServiceName) + '&domain={{ .Item.Domain }}&country={{ .Item.Country }}')
+            .then(res => res.json())
+            .then(data => {
+                const tfBadge = document.getElementById('detail-tf-badge');
+                const tfPathLabel = document.getElementById('detail-tfpath-label');
+                const topTfBadge = document.getElementById('detail-top-tf-badge');
+                const topTfPath = document.getElementById('detail-top-tf-path');
+                const tfvarsContent = document.getElementById('detail-tfvars-content');
+
+                if (data.resolved_path) {
+                    if (tfPathLabel) tfPathLabel.textContent = data.resolved_path + '/terraform.tfvars';
+                    if (topTfPath) topTfPath.textContent = data.resolved_path;
+                }
+                
+                if (data.exists) {
+                    if (tfBadge) {
+                        tfBadge.className = "inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-bold whitespace-nowrap shadow-2xs bg-emerald-100 text-emerald-800 border border-emerald-300 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20";
+                        tfBadge.textContent = "200 OK · Verified";
+                    }
+                    if (topTfBadge) {
+                        topTfBadge.className = "inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-300 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20";
+                        topTfBadge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1"></span> Verified on ' + branch;
+                    }
+                } else {
+                    if (tfBadge) {
+                        tfBadge.className = "inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-bold whitespace-nowrap shadow-2xs bg-amber-100 text-amber-900 border border-amber-300 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20";
+                        tfBadge.textContent = "404 Not Found";
+                    }
+                    if (topTfBadge) {
+                        topTfBadge.className = "inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-rose-50 text-rose-800 border border-rose-300 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20";
+                        topTfBadge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-rose-500 mr-1"></span> Missing on ' + branch;
+                    }
+                }
+
+                if (tfvarsContent && data.tfvars_content) {
+                    tfvarsContent.textContent = data.tfvars_content;
+                    if (!data.exists) {
+                        tfvarsContent.className = "text-xs font-mono text-amber-400/90 whitespace-pre-wrap overflow-x-auto max-h-[380px] overflow-y-auto leading-relaxed p-1 bg-transparent";
+                    } else {
+                        tfvarsContent.className = "text-xs font-mono text-emerald-400 whitespace-pre-wrap overflow-x-auto max-h-[380px] overflow-y-auto leading-relaxed p-1 bg-transparent";
+                    }
+                }
+            })
+            .catch(err => console.error("Error checking branch tfvars:", err));
+    }
+
+    function toggleDetailApprovalGate() {
+        const isAck = document.getElementById('detail-security-ack').checked;
+        const btn = document.getElementById('btn-detail-approve');
+        if (!btn) return;
+        if (isAck) {
+            btn.disabled = false;
+            btn.className = "inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs font-extrabold text-white shadow-lg transition-all cursor-pointer bg-teal-600 hover:bg-teal-500 shadow-teal-500/25";
+            btn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Approve & Provision Jenkins Pipeline';
+        } else {
+            btn.disabled = true;
+            btn.className = "inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs font-extrabold text-white shadow-none transition-all cursor-not-allowed bg-slate-400 opacity-60";
+            btn.innerHTML = '🔒 Acknowledge Security & IaC First';
+        }
+    }
+
+    function submitDetailApproval() {
+        const isAck = document.getElementById('detail-security-ack').checked;
+        if (!isAck) {
+            alert("Security & DevOps Acknowledgement is required prior to approval.");
+            return;
+        }
+        const comment = document.getElementById('detail-review-comment').value;
+        const folder = document.getElementById('detail-jenkins-folder').value;
+        const secNotes = document.getElementById('detail-security-notes').value;
+
+        htmx.ajax('POST', '/api/v1/tickets/' + currentTicketId + '/approve', {
+            values: { comment: comment, jenkins_folder: folder, security_ack: "true", security_notes: secNotes },
+            headers: { 'X-CSRF-Token': getCSRFToken() }
+        });
+    }
+
+    function submitDetailRejection() {
+        const comment = document.getElementById('detail-review-comment').value.trim();
+        if (!comment) {
+            alert("Please provide a reason for rejection in the comment box.");
+            document.getElementById('detail-review-comment').focus();
+            return;
+        }
+        htmx.ajax('POST', '/api/v1/tickets/' + currentTicketId + '/reject', {
+            values: { comment: comment },
+            headers: { 'X-CSRF-Token': getCSRFToken() }
+        });
+    }
+
+    function openAIDrawer() {
+        const drawer = document.getElementById('ai-advisor-drawer');
+        const backdrop = document.getElementById('ai-drawer-backdrop');
+        const panel = document.getElementById('ai-drawer-panel');
+        
+        if (drawer && backdrop && panel) {
+            drawer.classList.remove('hidden');
+            setTimeout(() => {
+                backdrop.classList.remove('opacity-0');
+                backdrop.classList.add('opacity-100');
+                panel.classList.remove('translate-x-full');
+                panel.classList.add('translate-x-0');
+            }, 20);
+        }
+    }
+
+    function closeAIDrawer() {
+        const drawer = document.getElementById('ai-advisor-drawer');
+        const backdrop = document.getElementById('ai-drawer-backdrop');
+        const panel = document.getElementById('ai-drawer-panel');
+
+        if (drawer && backdrop && panel) {
+            backdrop.classList.remove('opacity-100');
+            backdrop.classList.add('opacity-0');
+            panel.classList.remove('translate-x-0');
+            panel.classList.add('translate-x-full');
+
+            setTimeout(() => {
+                drawer.classList.add('hidden');
+            }, 300);
+        }
+    }
+
+    // Close on ESC key
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            closeAIDrawer();
+        }
+    });
+
+    function runAIAnalyze() {
+        openAIDrawer();
+
+        const body = document.getElementById('ai-drawer-body');
+        const hasStored = {{ if .Item.HasAIAnalysis }}true{{ else }}false{{ end }};
+
+        if (hasStored) {
+            // Already rendered permanently from PostgreSQL database
+            return;
+        }
+
+        if (body) {
+            body.innerHTML = `
+                <div class="p-8 text-center space-y-4">
+                    <div class="inline-flex p-3 rounded-2xl bg-purple-50 text-purple-600 dark:bg-purple-950/60 dark:text-purple-400">
+                        <svg class="animate-spin h-8 w-8 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-bold text-slate-900 dark:text-white">Gemini AI is analyzing risk & exploitability...</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Evaluating blast radius, remediation commands, and compatibility risks.</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        const url = '/api/v1/security/ai-analyze?service=' + encodeURIComponent(currentServiceName) + '&ticket=' + encodeURIComponent(currentTicketId);
+        fetch(url)
+            .then(res => res.text())
+            .then(html => {
+                if (body) body.innerHTML = html;
+                const readyBadge = document.getElementById('ai-ready-badge');
+                if (readyBadge) readyBadge.classList.remove('hidden');
+                const btn = document.getElementById('btn-ai-analyze');
+                if (btn) btn.remove();
+            })
+            .catch(err => {
+                if (body) body.innerHTML = `<div class="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 dark:bg-rose-950/40 dark:border-rose-800 dark:text-rose-300 text-xs">Analysis request failed: ${err}</div>`;
+            });
+    }
+
+    function updateJenkinsPlanSpec() {
+        const folder = document.getElementById('detail-jenkins-folder').value;
+        const pipelineName = "{{ .Item.PipelineName }}";
+        const preview = document.getElementById('detail-jenkins-url-preview');
+        if (preview) {
+            preview.innerText = 'https://automation.oona-insurance.com/job/' + encodeURIComponent(folder) + '/job/' + pipelineName;
+        }
+    }
+
+    function triggerTrivyRescan() {
+        const spinner = document.getElementById('trivy-spinner');
+        if (spinner) spinner.classList.add('animate-spin');
+        fetch('/api/v1/catalog/' + encodeURIComponent(currentServiceName) + '/trivy?refresh=true')
+            .then(() => {
+                if (spinner) spinner.classList.remove('animate-spin');
+                window.location.reload();
+            })
+            .catch(() => {
+                if (spinner) spinner.classList.remove('animate-spin');
+            });
+    }
+</script>
+{{ end }}

@@ -1,0 +1,146 @@
+{{ define "content" }}
+<div class="max-w-4xl mx-auto">
+    <div class="mb-8">
+        <h2 class="text-2xl font-bold text-gray-900">Onboard New Lambda Service</h2>
+        <p class="text-sm text-gray-500 mt-1">Register a new serverless function. This will automatically set up Jenkins CI/CD pipelines once the infrastructure is deployed.</p>
+    </div>
+
+    <div id="form-result" class="mt-4"></div>
+
+    <form hx-post="/api/v1/tickets" hx-target="#form-result" class="bg-white shadow-sm ring-1 ring-gray-900/5 rounded-xl overflow-hidden">
+        <div class="px-4 py-6 sm:p-8 space-y-8">
+            
+            <!-- Service Details Section -->
+            <div>
+                <h3 class="text-base font-semibold leading-7 text-gray-900 border-b pb-2 mb-4">1. Service Coordinates</h3>
+                
+                <div class="grid grid-cols-1 gap-x-6 gap-y-6 sm:grid-cols-6">
+                    <div class="sm:col-span-2">
+                        <label for="country" class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">1. Country Scope</label>
+                        <div class="mt-1.5">
+                            <select id="country" name="country" hx-post="/tickets/preview" hx-trigger="change" hx-target="#pipeline-preview" class="block w-full rounded-xl border-0 py-2.5 text-slate-900 dark:text-white shadow-sm ring-1 ring-inset ring-slate-300 dark:ring-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-indigo-600 sm:text-xs px-3 font-semibold">
+                                {{ range .Countries }}
+                                    <option value="{{ .Code }}">{{ .Name }}</option>
+                                {{ end }}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="sm:col-span-2">
+                        <label for="shelf_code" class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">2. Target Shelf (Product Suite)</label>
+                        <div class="mt-1.5">
+                            <select id="shelf_code" name="shelf_code" class="block w-full rounded-xl border-0 py-2.5 text-slate-900 dark:text-white shadow-sm ring-1 ring-inset ring-slate-300 dark:ring-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-indigo-600 sm:text-xs px-3 font-semibold">
+                                {{ range .Shelves }}
+                                    <option value="{{ .Code }}">{{ .Name }} ({{ .Code }})</option>
+                                {{ end }}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="sm:col-span-2">
+                        <label for="domain" class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">3. Functional Domain</label>
+                        <div class="mt-1.5">
+                            <select id="domain" name="domain" hx-post="/tickets/preview" hx-trigger="change" hx-target="#pipeline-preview" class="block w-full rounded-xl border-0 py-2.5 text-slate-900 dark:text-white shadow-sm ring-1 ring-inset ring-slate-300 dark:ring-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-indigo-600 sm:text-xs px-3 font-semibold">
+                                {{ range .Domains }}
+                                    <option value="{{ .Code }}">{{ .Name }}</option>
+                                {{ end }}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="sm:col-span-6">
+                        <label for="service_name" class="block text-sm font-medium leading-6 text-gray-900">Lambda Name (Folder Name)</label>
+                        <div class="mt-2">
+                            <input type="text" name="service_name" id="service_name" hx-post="/tickets/preview" hx-trigger="keyup changed delay:500ms" hx-target="#pipeline-preview" placeholder="e.g. health-renewal-svc" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-teal-600 sm:text-sm sm:leading-6 px-3">
+                        </div>
+                        <p class="mt-1 text-xs text-gray-500">This must match exactly with the folder name you intend to use in the Terraform IaC repository.</p>
+                    </div>
+
+                    <!-- Environment Checkboxes (Dynamic Backend Data) -->
+                    <div class="sm:col-span-6">
+                        <label class="block text-sm font-medium leading-6 text-gray-900 mb-2">Target Environments</label>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-gray-50 p-3.5 rounded-md border border-gray-200">
+                            {{ range .Environments }}
+                            <div class="relative flex items-start">
+                                <div class="flex h-6 items-center">
+                                    <input id="env-{{ .Code }}" name="environments" value="{{ .Code }}" type="checkbox" {{ if or (eq .Code "dev") (eq .Code "uat") }}checked{{ end }} class="h-4 w-4 rounded border-gray-300 text-teal-600 focus:ring-teal-600">
+                                </div>
+                                <div class="ml-3 text-sm leading-6">
+                                    <label for="env-{{ .Code }}" class="font-medium text-gray-900 cursor-pointer">{{ .Name }}</label>
+                                </div>
+                            </div>
+                            {{ else }}
+                            <p class="text-xs text-gray-500 italic col-span-4">No target environments configured.</p>
+                            {{ end }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- HTMX Dynamic Preview Box -->
+                <div class="mt-6 rounded-md bg-blue-50 p-4">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clip-rule="evenodd" /></svg>
+                        </div>
+                        <div class="ml-3 flex-1 md:flex md:justify-between">
+                            <p class="text-sm text-blue-700" id="pipeline-preview">
+                                Jenkins Pipeline Name: <strong class="font-mono">lmd-oona-id-integration-...</strong>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Repository & Tracking Section -->
+            <div>
+                <h3 class="text-base font-semibold leading-7 text-gray-900 border-b pb-2 mb-4">2. Source Code & Issue Tracking</h3>
+                <div class="grid grid-cols-1 gap-x-6 gap-y-6 sm:grid-cols-6">
+                    <div class="sm:col-span-6">
+                        <label for="repo_url" class="block text-sm font-medium leading-6 text-gray-900">GitHub Repository HTTPS URL <span class="text-rose-500">*</span></label>
+                        <div class="mt-2">
+                            <input type="url" name="repo_url" id="repo_url" required placeholder="https://github.com/oona-insurance/lmd-..." class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-teal-600 sm:text-sm sm:leading-6 px-3 font-mono">
+                        </div>
+                    </div>
+
+                    <div class="sm:col-span-3">
+                        <label for="jira_issue_id" class="block text-sm font-medium leading-6 text-gray-900">
+                            Jira Ticket Key / ID <span class="text-xs font-normal text-gray-500">(Optional)</span>
+                        </label>
+                        <div class="mt-2">
+                            <input type="text" name="jira_issue_id" id="jira_issue_id" placeholder="e.g. OONA-1234" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-teal-600 sm:text-sm sm:leading-6 px-3 font-mono uppercase">
+                        </div>
+                        <p class="mt-1 text-[11px] text-gray-500">Service Catalog ticket <span class="font-mono text-indigo-600 font-semibold">SC-DDMMYY-XXX</span> is always generated automatically.</p>
+                    </div>
+
+                    <div class="sm:col-span-3">
+                        <label for="jira_url" class="block text-sm font-medium leading-6 text-gray-900">
+                            Jira Ticket URL <span class="text-xs font-normal text-gray-500">(Optional)</span>
+                        </label>
+                        <div class="mt-2">
+                            <input type="url" name="jira_url" id="jira_url" placeholder="https://oona-insurance.atlassian.net/browse/OONA-..." class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-teal-600 sm:text-sm sm:leading-6 px-3 font-mono text-xs">
+                        </div>
+                        <p class="mt-1 text-[11px] text-gray-500">Direct link to Jira board / ticket.</p>
+                    </div>
+
+                    <div class="sm:col-span-6">
+                        <label for="description" class="block text-sm font-medium leading-6 text-gray-900">
+                            Service Description <span class="text-xs font-normal text-gray-500">(Optional)</span>
+                        </label>
+                        <div class="mt-2">
+                            <textarea name="description" id="description" rows="2" placeholder="Brief overview of what this microservice does..." class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-teal-600 sm:text-sm sm:leading-6 px-3"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        
+        <div class="flex items-center justify-end gap-x-6 border-t border-gray-900/10 px-4 py-4 sm:px-8 bg-gray-50">
+            <button type="button" onclick="window.history.back()" class="text-sm font-semibold leading-6 text-gray-900">Cancel</button>
+            <button type="submit" class="rounded-md bg-teal-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-teal-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600">
+                Submit Request
+            </button>
+        </div>
+    </form>
+</div>
+{{ end }}

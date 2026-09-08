@@ -1,0 +1,131 @@
+{{ define "content" }}
+<div class="max-w-6xl mx-auto space-y-6">
+    <!-- Header & Action Bar -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-800 pb-5">
+        <div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
+                User & Access Management
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-400 mt-1">Manage portal access, assign roles (Developer, DevOps, Admin), and configure credentials.</p>
+        </div>
+        <button 
+            onclick="document.getElementById('user-form').classList.toggle('hidden')"
+            class="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-2 text-xs font-bold text-white shadow-lg shadow-indigo-600/25 hover:from-indigo-500 hover:to-violet-500 transition-all cursor-pointer">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
+            + Add New User
+        </button>
+    </div>
+
+    <!-- User Creation Form Container (Hidden by default) -->
+    <div id="user-form" class="hidden bg-slate-900/90 border border-slate-800/80 shadow-xl shadow-black/30 rounded-2xl p-6 backdrop-blur-xl transition-all">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-5">
+            <h3 class="text-sm font-bold text-white uppercase tracking-wider">Register New Access Credentials</h3>
+            <button type="button" onclick="document.getElementById('user-form').classList.add('hidden')" class="text-slate-400 hover:text-white p-1 rounded-lg">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <form hx-post="/api/v1/admin/users" class="space-y-4">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1.5">Full Name</label>
+                    <input type="text" name="full_name" placeholder="John Doe" required class="block w-full rounded-xl bg-slate-950 border-0 py-2.5 text-white ring-1 ring-inset ring-slate-800 placeholder:text-slate-500 focus:ring-2 focus:ring-inset focus:ring-indigo-500 text-xs px-3.5"/>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1.5">Corporate Email</label>
+                    <input type="email" name="email" placeholder="john.doe@oona-insurance.com" required class="block w-full rounded-xl bg-slate-950 border-0 py-2.5 text-white ring-1 ring-inset ring-slate-800 placeholder:text-slate-500 focus:ring-2 focus:ring-inset focus:ring-indigo-500 text-xs px-3.5"/>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1.5">Role / Access Scope</label>
+                    <select name="role" class="block w-full rounded-xl bg-slate-950 border-0 py-2.5 text-white ring-1 ring-inset ring-slate-800 focus:ring-2 focus:ring-inset focus:ring-indigo-500 text-xs px-3.5">
+                        <option value="developer">Developer (Submit tickets, View catalog)</option>
+                        <option value="devops">DevOps (Approve Infra & Jenkins)</option>
+                        <option value="admin">Admin (Full Access & Integrations)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1.5">Temporary Password</label>
+                    <input type="password" name="password" required class="block w-full rounded-xl bg-slate-950 border-0 py-2.5 text-white ring-1 ring-inset ring-slate-800 placeholder:text-slate-500 focus:ring-2 focus:ring-inset focus:ring-indigo-500 text-xs px-3.5"/>
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-800 flex items-center justify-end gap-3">
+                <button type="button" onclick="document.getElementById('user-form').classList.add('hidden')" class="rounded-xl bg-slate-800 hover:bg-slate-700 px-4 py-2 text-xs font-semibold text-slate-300 hover:text-white transition-colors">Cancel</button>
+                <button type="submit" class="rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-2 text-xs font-bold text-white shadow-lg shadow-indigo-600/30 hover:from-indigo-500 hover:to-violet-500 transition-all">
+                    Create User Account
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Users Table Container -->
+    <div class="overflow-hidden bg-slate-900/90 border border-slate-800/80 rounded-2xl shadow-xl shadow-black/30 backdrop-blur-xl">
+        <div class="overflow-x-auto p-1 sm:p-2">
+            <table class="min-w-full divide-y divide-slate-800 text-left text-xs">
+                <thead>
+                    <tr class="text-slate-400 font-semibold uppercase tracking-wider bg-slate-950/60">
+                        <th class="py-3.5 pl-4 pr-3 sm:pl-4">User & Identity</th>
+                        <th class="px-3 py-3.5">Assigned Role</th>
+                        <th class="px-3 py-3.5">Account Status</th>
+                        <th class="px-3 py-3.5 text-right pr-4 sm:pr-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-800/60">
+                    <tr class="hover:bg-slate-800/40 transition-colors">
+                        <td class="py-4 pl-4 pr-3 sm:pl-4">
+                            <div class="flex items-center gap-3">
+                                <div class="h-9 w-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-600 flex items-center justify-center text-white font-bold text-xs shadow-md shadow-indigo-600/20">
+                                    SA
+                                </div>
+                                <div>
+                                    <div class="font-bold text-white">System Administrator</div>
+                                    <div class="text-slate-400 font-mono text-[11px]">admin@oona-insurance.com</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-3 py-4">
+                            <span class="inline-flex items-center rounded-lg bg-indigo-500/10 px-2.5 py-1 text-[11px] font-bold text-indigo-400 border border-indigo-500/20">ADMINISTRATOR</span>
+                        </td>
+                        <td class="px-3 py-4">
+                            <span class="inline-flex items-center gap-1.5 text-emerald-400 font-semibold">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                Active
+                            </span>
+                        </td>
+                        <td class="px-3 py-4 text-right pr-4 sm:pr-4 space-x-2">
+                            <span class="text-slate-500 text-[11px] font-mono">System Root</span>
+                        </td>
+                    </tr>
+                    <tr class="hover:bg-slate-800/40 transition-colors">
+                        <td class="py-4 pl-4 pr-3 sm:pl-4">
+                            <div class="flex items-center gap-3">
+                                <div class="h-9 w-9 rounded-xl bg-gradient-to-tr from-blue-600 to-cyan-600 flex items-center justify-center text-white font-bold text-xs shadow-md shadow-blue-600/20">
+                                    DV
+                                </div>
+                                <div>
+                                    <div class="font-bold text-white">Developer Account</div>
+                                    <div class="text-slate-400 font-mono text-[11px]">dev@oona-insurance.com</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-3 py-4">
+                            <span class="inline-flex items-center rounded-lg bg-blue-500/10 px-2.5 py-1 text-[11px] font-bold text-blue-400 border border-blue-500/20">DEVELOPER</span>
+                        </td>
+                        <td class="px-3 py-4">
+                            <span class="inline-flex items-center gap-1.5 text-emerald-400 font-semibold">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                Active
+                            </span>
+                        </td>
+                        <td class="px-3 py-4 text-right pr-4 sm:pr-4 space-x-2">
+                            <button class="text-indigo-400 hover:text-indigo-300 font-semibold">Edit</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{{ end }}

@@ -1,0 +1,369 @@
+{{ define "content" }}
+<style>
+    .catalog-page { max-width: 1120px; }
+    .catalog-kicker {
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #8a8f98;
+    }
+    html.light-mode .catalog-kicker { color: #64748b; }
+    .catalog-seg {
+        display: inline-flex;
+        align-items: stretch;
+        padding: 2px;
+        border-radius: 7px;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.08);
+    }
+    html.light-mode .catalog-seg {
+        background: #ffffff;
+        border-color: #e2e8f0;
+    }
+    .catalog-seg-btn {
+        appearance: none;
+        border: 0;
+        background: transparent;
+        color: #8a8f98;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 6px 11px;
+        border-radius: 5px;
+        cursor: pointer;
+        line-height: 1.2;
+    }
+    .catalog-seg-btn:hover { color: #f7f8f8; background: rgba(255,255,255,0.04); }
+    html.light-mode .catalog-seg-btn { color: #64748b; }
+    html.light-mode .catalog-seg-btn:hover { color: #0f172a; background: #f1f5f9; }
+    .catalog-seg-btn.is-active { background: #5e6ad2; color: #ffffff; }
+    html.light-mode .catalog-seg-btn.is-active { background: #4f46e5; color: #ffffff; }
+    .catalog-search {
+        height: 32px;
+        width: 220px;
+        border-radius: 6px;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.08);
+        color: #f7f8f8;
+        font-size: 13px;
+        padding: 0 10px 0 30px;
+        outline: none;
+    }
+    .catalog-search:focus {
+        border-color: rgba(94,106,210,0.7);
+        box-shadow: 0 0 0 3px rgba(94,106,210,0.18);
+    }
+    html.light-mode .catalog-search {
+        background: #ffffff;
+        border-color: #e2e8f0;
+        color: #0f172a;
+    }
+    .catalog-shelf { margin-top: 1.35rem; }
+    .catalog-shelf:first-child { margin-top: 0; }
+    .shelf-block[data-empty="true"] { display: none; }
+    .catalog-shelf-head {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0 2px 8px;
+    }
+    .catalog-list {
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 8px;
+        overflow: hidden;
+        background: rgba(255,255,255,0.02);
+    }
+    html.light-mode .catalog-list {
+        background: #ffffff;
+        border-color: #e2e8f0;
+        box-shadow: 0 1px 2px rgb(15 23 42 / 0.04);
+    }
+    .catalog-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1.7fr) minmax(140px, 0.7fr) minmax(0, 1.1fr) 108px;
+        gap: 12px;
+        align-items: center;
+        padding: 10px 14px;
+        text-decoration: none;
+        color: inherit;
+        border-top: 1px solid rgba(255,255,255,0.05);
+        min-height: 48px;
+    }
+    .catalog-row:first-child { border-top: 0; }
+    .catalog-row:hover { background: rgba(255,255,255,0.035); }
+    html.light-mode .catalog-row { border-top-color: #f1f5f9; }
+    html.light-mode .catalog-row:hover { background: #f8fafc; }
+    .catalog-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: #8a8f98;
+        white-space: nowrap;
+    }
+    .catalog-status-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #8a8f98;
+        flex-shrink: 0;
+    }
+    .catalog-status.is-live { color: #34d399; }
+    .catalog-status.is-live .catalog-status-dot { background: #34d399; }
+    .catalog-status.is-pending { color: #fbbf24; }
+    .catalog-status.is-pending .catalog-status-dot { background: #fbbf24; }
+    html.light-mode .catalog-status.is-pending { color: #b45309; }
+    .catalog-empty-summary {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 1.25rem;
+        padding: 9px 12px;
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 8px;
+        background: transparent;
+        color: #d0d6e0;
+        font-size: 12px;
+        font-weight: 500;
+        cursor: pointer;
+        width: 100%;
+        text-align: left;
+    }
+    .catalog-empty-summary:hover { background: rgba(255,255,255,0.03); }
+    html.light-mode .catalog-empty-summary {
+        border-color: #e2e8f0;
+        color: #334155;
+    }
+    .catalog-empty-line {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 12px;
+        padding: 8px 12px;
+        border-top: 1px solid rgba(255,255,255,0.05);
+        font-size: 12px;
+    }
+    html.light-mode .catalog-empty-line { border-top-color: #f1f5f9; }
+    @media (max-width: 860px) {
+        .catalog-row {
+            grid-template-columns: 1fr auto;
+            grid-template-areas:
+                "id status"
+                "meta meta"
+                "pipe pipe";
+        }
+        .catalog-row-id { grid-area: id; }
+        .catalog-row-meta { grid-area: meta; }
+        .catalog-row-pipe { grid-area: pipe; }
+        .catalog-row-status { grid-area: status; justify-self: end; }
+        .catalog-search { width: 100%; max-width: none; }
+    }
+</style>
+
+<div class="catalog-page mx-auto">
+    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+        <div class="min-w-0">
+            <p class="catalog-kicker">Inventory</p>
+            <div class="mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                <h2 class="text-[22px] font-semibold tracking-tight text-white" style="letter-spacing:-0.03em;">Service catalog</h2>
+                <p class="text-[13px] text-slate-400">
+                    {{ .TotalServices }} {{ if eq .TotalServices 1 }}service{{ else }}services{{ end }}
+                    · {{ len .Shelves }} shelves
+                </p>
+            </div>
+        </div>
+        <div class="flex flex-col sm:flex-row sm:items-center gap-2.5">
+            <div class="catalog-seg" role="tablist" aria-label="Filter by region">
+                <button type="button" role="tab" onclick="filterCountry('all')" id="tab-country-all" class="catalog-seg-btn is-active" aria-selected="true">All</button>
+                <button type="button" role="tab" onclick="filterCountry('ph')" id="tab-country-ph" class="catalog-seg-btn" aria-selected="false">PH</button>
+                <button type="button" role="tab" onclick="filterCountry('id')" id="tab-country-id" class="catalog-seg-btn" aria-selected="false">ID</button>
+                <button type="button" role="tab" onclick="filterCountry('shared')" id="tab-country-shared" class="catalog-seg-btn" aria-selected="false">Shared</button>
+            </div>
+            <div class="relative">
+                <i data-lucide="search" class="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-500"></i>
+                <input type="search" id="shelf-search" oninput="applyCatalogFilters()" class="catalog-search" placeholder="Filter…" autocomplete="off">
+            </div>
+            <a href="/tickets/new" class="inline-flex items-center justify-center gap-1.5 h-8 px-3 rounded-md bg-[#5e6ad2] hover:bg-[#7170ff] text-[12px] font-semibold text-white whitespace-nowrap">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                Onboard
+            </a>
+        </div>
+    </div>
+
+    <div id="shelves-container" class="mt-5">
+        {{ range .Shelves }}
+        <section class="catalog-shelf shelf-block" data-shelf="{{ .Code }}" data-country="{{ .CountryCode }}" data-empty="{{ if .Services }}false{{ else }}true{{ end }}">
+            <div class="catalog-shelf-head">
+                <div class="min-w-0">
+                    <h3 class="text-[14px] font-semibold text-white tracking-tight">{{ .Name }}</h3>
+                    <p class="mt-0.5 text-[12px] text-slate-400">
+                        {{ if eq .CountryCode "ph" }}Philippines{{ else if eq .CountryCode "id" }}Indonesia{{ else }}Global / shared{{ end }}
+                        <span class="text-slate-600">·</span>
+                        <span class="font-mono text-slate-400">{{ .Code }}</span>
+                    </p>
+                </div>
+                <p class="text-[12px] font-medium text-slate-400 tabular-nums whitespace-nowrap shelf-count">
+                    {{ len .Services }} {{ if eq (len .Services) 1 }}service{{ else }}services{{ end }}
+                </p>
+            </div>
+
+            {{ if .Services }}
+            <div class="catalog-list">
+                {{ range .Services }}
+                <a href="/catalog/{{ .Name }}" class="catalog-row service-item-card" data-name="{{ .Name }}" data-status="{{ .Status }}" data-domain="{{ .Domain }}">
+                    <div class="catalog-row-id min-w-0">
+                        <p class="text-[13px] font-semibold text-white truncate" title="{{ .Name }}">{{ .Name }}</p>
+                        {{ if .Description }}
+                        <p class="mt-0.5 text-[12px] text-slate-400 line-clamp-1" title="{{ .Description }}">{{ .Description }}</p>
+                        {{ end }}
+                    </div>
+                    <div class="catalog-row-meta min-w-0 text-[12px] text-slate-400">
+                        {{ if .Domain }}{{ .Domain }}{{ else }}—{{ end }}
+                        {{ if .Country }}<span class="text-slate-600">·</span> {{ .Country }}{{ end }}
+                        {{ if .JiraID }}<span class="text-slate-600">·</span> <span class="font-mono">{{ .JiraID }}</span>{{ end }}
+                    </div>
+                    <div class="catalog-row-pipe min-w-0 font-mono text-[11px] text-slate-400 truncate" title="{{ .PipelineName }}">
+                        {{ if .PipelineName }}{{ .PipelineName }}{{ else }}—{{ end }}
+                    </div>
+                    <div class="catalog-row-status justify-self-end">
+                        {{ if eq .Status "LIVE" }}
+                        <span class="catalog-status is-live"><span class="catalog-status-dot"></span>Live</span>
+                        {{ else if eq .Status "PENDING_INFRA" }}
+                        <span class="catalog-status is-pending"><span class="catalog-status-dot"></span>Pending</span>
+                        {{ else }}
+                        <span class="catalog-status"><span class="catalog-status-dot"></span>{{ if .Status }}{{ .Status }}{{ else }}Unknown{{ end }}</span>
+                        {{ end }}
+                    </div>
+                </a>
+                {{ end }}
+            </div>
+            {{ end }}
+        </section>
+        {{ else }}
+        <div class="rounded-lg border border-slate-800 px-4 py-12 text-center">
+            <p class="text-[14px] font-semibold text-white">Catalog is empty</p>
+            <p class="mt-1 text-[13px] text-slate-400">Onboard the first microservice to populate shelves.</p>
+        </div>
+        {{ end }}
+    </div>
+
+    <button type="button" id="catalog-empty-summary" class="catalog-empty-summary hidden" onclick="toggleEmptyShelves()">
+        <span id="catalog-empty-label">Empty shelves hidden</span>
+        <span id="catalog-empty-action" class="text-[12px] font-semibold text-indigo-400">Show</span>
+    </button>
+
+    <div id="empty-shelves-list" class="catalog-list mt-2 hidden"></div>
+
+    <p id="catalog-empty-filter" class="hidden mt-6 text-[13px] text-slate-400">No shelves match this filter.</p>
+</div>
+
+<script>
+    (function () {
+        let activeCountry = 'all';
+        let showEmpty = false;
+
+        function setActiveTab(country) {
+            document.querySelectorAll('.catalog-seg-btn').forEach(function (btn) {
+                const on = btn.id === 'tab-country-' + country;
+                btn.classList.toggle('is-active', on);
+                btn.setAttribute('aria-selected', on ? 'true' : 'false');
+            });
+        }
+
+        function countryMatch(shelfCountry, filter) {
+            if (filter === 'all') return true;
+            if (filter === 'shared') return shelfCountry === 'all';
+            return shelfCountry === filter;
+        }
+
+        window.filterCountry = function (country) {
+            activeCountry = country;
+            showEmpty = country !== 'all';
+            setActiveTab(country);
+            applyCatalogFilters();
+        };
+
+        window.searchShelves = applyCatalogFilters;
+
+        window.toggleEmptyShelves = function () {
+            showEmpty = !showEmpty;
+            applyCatalogFilters();
+        };
+
+        window.applyCatalogFilters = function () {
+            const query = (document.getElementById('shelf-search').value || '').toLowerCase().trim();
+            const emptySummary = document.getElementById('catalog-empty-summary');
+            const emptyList = document.getElementById('empty-shelves-list');
+            let visiblePopulated = 0;
+            const hiddenEmpty = [];
+
+            document.querySelectorAll('.shelf-block').forEach(function (shelf) {
+                const shelfCountry = (shelf.getAttribute('data-country') || '').toLowerCase();
+                const isEmpty = shelf.getAttribute('data-empty') === 'true';
+                const inCountry = countryMatch(shelfCountry, activeCountry);
+                let visibleServices = 0;
+
+                shelf.querySelectorAll('.service-item-card').forEach(function (row) {
+                    const hay = ((row.getAttribute('data-name') || '') + ' ' + row.innerText).toLowerCase();
+                    const show = inCountry && (!query || hay.indexOf(query) !== -1);
+                    row.style.display = show ? '' : 'none';
+                    if (show) visibleServices += 1;
+                });
+
+                const matchesQuery = !query || (shelf.innerText || '').toLowerCase().indexOf(query) !== -1 || visibleServices > 0;
+                const populatedVisible = inCountry && !isEmpty && (visibleServices > 0 || (!query && !isEmpty));
+                const emptyCandidate = inCountry && isEmpty && matchesQuery;
+
+                if (populatedVisible) {
+                    shelf.style.display = '';
+                    visiblePopulated += 1;
+                    return;
+                }
+
+                shelf.style.display = 'none';
+                if (emptyCandidate) hiddenEmpty.push(shelf);
+            });
+
+            if (emptyList) {
+                emptyList.innerHTML = '';
+                if (showEmpty && hiddenEmpty.length) {
+                    hiddenEmpty.forEach(function (shelf) {
+                        const name = (shelf.querySelector('h3') || {}).textContent || shelf.getAttribute('data-shelf');
+                        const code = shelf.getAttribute('data-shelf') || '';
+                        const line = document.createElement('div');
+                        line.className = 'catalog-empty-line';
+                        line.innerHTML = '<span class="text-slate-300">' + name + ' <span class="font-mono text-slate-500">' + code + '</span></span><span class="text-slate-500">0 services</span>';
+                        emptyList.appendChild(line);
+                    });
+                    emptyList.classList.remove('hidden');
+                } else {
+                    emptyList.classList.add('hidden');
+                }
+            }
+
+            if (emptySummary) {
+                const n = hiddenEmpty.length;
+                const showBar = n > 0 && !query;
+                emptySummary.classList.toggle('hidden', !showBar);
+                const label = document.getElementById('catalog-empty-label');
+                const action = document.getElementById('catalog-empty-action');
+                if (label) label.textContent = n + ' empty ' + (n === 1 ? 'shelf' : 'shelves') + (showEmpty ? '' : ' hidden');
+                if (action) action.textContent = showEmpty ? 'Hide' : 'Show';
+            }
+
+            const empty = document.getElementById('catalog-empty-filter');
+            if (empty) empty.classList.toggle('hidden', visiblePopulated > 0 || (showEmpty && hiddenEmpty.length > 0));
+        };
+
+        applyCatalogFilters();
+        document.addEventListener('DOMContentLoaded', function () {
+            if (window.lucide) lucide.createIcons();
+            applyCatalogFilters();
+        });
+    })();
+</script>
+{{ end }}

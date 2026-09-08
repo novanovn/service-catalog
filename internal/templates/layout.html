@@ -1,0 +1,725 @@
+{{ define "base" }}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ .Title }} - Service Catalog Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/static/js/htmx.min.js"></script>
+    <script src="/static/js/lucide.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .htmx-indicator { display: none; }
+        .htmx-request .htmx-indicator { display: inline-block; }
+        .htmx-request.htmx-indicator { display: inline-block; }
+
+        /* Light mode full styling overrides */
+        html.light-mode body {
+            background-color: #f8fafc;
+            color: #0f172a;
+        }
+        html.light-mode #sidebar {
+            background-color: #ffffff;
+            border-color: #e2e8f0;
+            color: #334155;
+        }
+        html.light-mode #sidebar .text-white {
+            color: #0f172a !important;
+        }
+        html.light-mode #sidebar .text-slate-300 {
+            color: #475569 !important;
+        }
+        html.light-mode #sidebar .text-slate-400 {
+            color: #64748b !important;
+        }
+        html.light-mode #sidebar .hover\:bg-slate-800\/80:hover {
+            background-color: #f1f5f9 !important;
+            color: #0f172a !important;
+        }
+        html.light-mode #sidebar .border-slate-800\/80 {
+            border-color: #e2e8f0 !important;
+        }
+        html.light-mode header {
+            background-color: #ffffff !important;
+            border-color: #e2e8f0 !important;
+        }
+        html.light-mode header .text-white {
+            color: #0f172a !important;
+        }
+        html.light-mode header .text-slate-400 {
+            color: #64748b !important;
+        }
+        html.light-mode header .hover\:bg-slate-800:hover {
+            background-color: #f1f5f9 !important;
+        }
+        html.light-mode header .ring-slate-800 {
+            --tw-ring-color: #e2e8f0 !important;
+        }
+        html.light-mode #main-content {
+            background-color: #f8fafc !important;
+            color: #0f172a !important;
+        }
+        html.light-mode #main-content .bg-slate-900\/90,
+        html.light-mode #main-content .bg-slate-900,
+        html.light-mode #main-content .bg-slate-900\/60,
+        html.light-mode #main-content .catalog-card,
+        html.light-mode #main-content .ticket-row,
+        html.light-mode #main-content .bg-slate-950\/70,
+        html.light-mode #main-content .bg-slate-950\/60,
+        html.light-mode #main-content .bg-slate-950\/40 {
+            background-color: #ffffff !important;
+            border-color: #e2e8f0 !important;
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.05) !important;
+        }
+        html.light-mode #main-content .text-white {
+            color: #0f172a !important;
+        }
+        html.light-mode #main-content .text-slate-400,
+        html.light-mode #main-content .text-slate-300 {
+            color: #475569 !important;
+        }
+        html.light-mode #main-content .text-slate-200 {
+            color: #1e293b !important;
+        }
+        html.light-mode #main-content .text-indigo-400 {
+            color: #4338ca !important;
+        }
+        html.light-mode #main-content .text-emerald-400 {
+            color: #047857 !important;
+        }
+        html.light-mode #main-content .text-amber-400 {
+            color: #b45309 !important;
+        }
+        html.light-mode #main-content .text-rose-400 {
+            color: #be123c !important;
+        }
+        html.light-mode #main-content .text-blue-400 {
+            color: #1d4ed8 !important;
+        }
+        html.light-mode #main-content .text-teal-400,
+        html.light-mode #main-content .text-teal-300 {
+            color: #0f766e !important;
+        }
+        html.light-mode #main-content .text-amber-300,
+        html.light-mode #main-content .text-amber-200,
+        html.light-mode #main-content .text-amber-200\/90,
+        html.light-mode #main-content .text-rose-200,
+        html.light-mode #main-content .text-rose-200\/90,
+        html.light-mode #main-content .bg-amber-50 p,
+        html.light-mode #main-content .bg-amber-500\/10 p {
+            color: #78350f !important; /* Rich readable dark amber */
+            font-weight: 500 !important;
+        }
+        html.light-mode #main-content .bg-amber-50 h4,
+        html.light-mode #main-content .bg-amber-500\/10 h4 {
+            color: #451a03 !important; /* Very dark bold amber heading */
+        }
+        html.light-mode #main-content .bg-amber-500\/10,
+        html.light-mode #main-content .bg-amber-50 {
+            background-color: #fefce8 !important;
+            border-color: #fde047 !important;
+        }
+        html.light-mode #main-content .bg-amber-500\/20,
+        html.light-mode #main-content .bg-amber-100 {
+            background-color: #fef08a !important;
+            color: #a16207 !important;
+        }
+        html.light-mode #main-content .bg-rose-500\/10,
+        html.light-mode #main-content .bg-rose-50 {
+            background-color: #fff1f2 !important;
+            border-color: #fecdd3 !important;
+        }
+        html.light-mode #main-content .bg-rose-500\/20,
+        html.light-mode #main-content .bg-rose-100 {
+            background-color: #ffe4e6 !important;
+            color: #e11d48 !important;
+        }
+        html.light-mode #main-content code.bg-slate-950,
+        html.light-mode #main-content .bg-slate-950 code {
+            background-color: transparent !important;
+            color: #34d399 !important;
+            border: none !important;
+        }
+        html.light-mode #main-content code {
+            background-color: #f1f5f9 !important;
+            color: #0f172a !important;
+            border: 1px solid #cbd5e1 !important;
+            font-weight: 600 !important;
+        }
+        html.light-mode #main-content .border-slate-800,
+        html.light-mode #main-content .border-slate-800\/80,
+        html.light-mode #main-content .border-slate-800\/60,
+        html.light-mode #main-content .divide-slate-800,
+        html.light-mode #main-content .divide-slate-800\/60,
+        html.light-mode #main-content .divide-slate-800\/80 {
+            border-color: #e2e8f0 !important;
+        }
+        html.light-mode #main-content tr:hover,
+        html.light-mode #main-content .approval-row:hover {
+            background-color: #f8fafc !important;
+        }
+        html.light-mode #main-content input,
+        html.light-mode #main-content select {
+            background-color: #ffffff !important;
+            color: #0f172a !important;
+            border-color: #cbd5e1 !important;
+            --tw-ring-color: #cbd5e1 !important;
+        }
+        html.light-mode #main-content thead.bg-slate-950\/80,
+        html.light-mode #main-content thead.bg-slate-950\/60,
+        html.light-mode #main-content tr.bg-slate-950\/60 {
+            background-color: #f1f5f9 !important;
+            color: #475569 !important;
+        }
+        html.light-mode #main-content thead th {
+            color: #475569 !important;
+            border-bottom: 1px solid #e2e8f0 !important;
+        }
+        html.light-mode #main-content .bg-slate-800 {
+            background-color: #f1f5f9 !important;
+            color: #0f172a !important;
+            border-color: #cbd5e1 !important;
+        }
+        html.light-mode #main-content .bg-slate-800:hover {
+            background-color: #e2e8f0 !important;
+        }
+        html.light-mode #main-content .topology-node {
+            background-color: #ffffff !important;
+            border-color: #e2e8f0 !important;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05) !important;
+        }
+        html.light-mode #main-content .topology-hero {
+            background: linear-gradient(180deg, #eef2ff 0%, #f8fafc 100%) !important;
+            border-color: #6366f1 !important;
+            box-shadow: 0 10px 15px -3px rgb(99 102 241 / 0.15) !important;
+        }
+        html.light-mode #main-content .topology-hero .text-indigo-300 {
+            color: #4f46e5 !important;
+        }
+        html.light-mode #main-content .topology-hero .border-indigo-500\/30 {
+            border-color: #e0e7ff !important;
+        }
+
+        /* Flow Chart Animated SVG Dashed Beams */
+        @keyframes dashMove {
+            to {
+                stroke-dashoffset: -24;
+            }
+        }
+        .animate-dash {
+            animation: dashMove 1.2s linear infinite;
+        }
+        .animate-dash-v {
+            animation: dashMove 1.2s linear infinite;
+        }
+        html.light-mode svg line[stroke="#334155"] {
+            stroke: #cbd5e1 !important;
+        }
+
+        html.light-mode #notification-menu,
+        html.light-mode #profile-menu {
+            background-color: #ffffff !important;
+            border-color: #e2e8f0 !important;
+            color: #0f172a !important;
+        }
+        html.light-mode #notification-menu .bg-slate-950,
+        html.light-mode #profile-menu .bg-slate-950 {
+            background-color: #f1f5f9 !important;
+            color: #0f172a !important;
+        }
+        html.light-mode #notification-menu .text-white,
+        html.light-mode #profile-menu .text-white {
+            color: #0f172a !important;
+        }
+        html.light-mode #notification-menu .text-slate-400,
+        html.light-mode #profile-menu .text-slate-300 {
+            color: #475569 !important;
+        }
+        html.light-mode #notification-menu a:hover,
+        html.light-mode #profile-menu a:hover {
+            background-color: #f8fafc !important;
+        }
+
+        /* Sidebar Collapsed Floating Tooltip */
+        .sidebar-tooltip {
+            display: none !important;
+        }
+
+        #sidebar.collapsed-sidebar {
+            width: 5rem !important;
+        }
+
+        #sidebar.collapsed-sidebar .sidebar-text {
+            display: none !important;
+        }
+
+        #sidebar.collapsed-sidebar nav {
+            overflow: visible !important;
+        }
+
+        #sidebar.collapsed-sidebar nav a {
+            justify-content: center !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+        }
+
+        #sidebar.collapsed-sidebar nav a .sidebar-tooltip {
+            display: none !important;
+            position: absolute;
+            left: calc(100% + 0.75rem);
+            top: 50%;
+            transform: translateY(-50%);
+            padding: 0.375rem 0.75rem;
+            background-color: #0f172a;
+            color: #ffffff;
+            font-size: 0.75rem;
+            font-weight: 700;
+            white-space: nowrap;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.6);
+            border: 1px solid #334155;
+            z-index: 99999;
+            pointer-events: none;
+        }
+
+        #sidebar.collapsed-sidebar nav a .sidebar-tooltip::before {
+            content: '';
+            position: absolute;
+            right: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            border-width: 5px;
+            border-style: solid;
+            border-color: transparent #0f172a transparent transparent;
+        }
+
+        #sidebar.collapsed-sidebar nav a:hover .sidebar-tooltip {
+            display: block !important;
+            animation: fadeInTooltip 0.15s ease-out forwards;
+        }
+
+        @keyframes fadeInTooltip {
+            from {
+                opacity: 0;
+                transform: translate(-6px, -50%);
+            }
+            to {
+                opacity: 1;
+                transform: translate(0, -50%);
+            }
+        }
+
+        html.light-mode #sidebar.collapsed-sidebar nav a .sidebar-tooltip {
+            background-color: #1e293b;
+            color: #ffffff;
+            border-color: #475569;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25);
+        }
+
+        html.light-mode #sidebar.collapsed-sidebar nav a .sidebar-tooltip::before {
+            border-color: transparent #1e293b transparent transparent;
+        }
+    </style>
+    <script>
+        // SEC-07: Auto-inject X-CSRF-Token header on all HTMX mutation requests
+        function getCSRFToken() {
+            var match = document.cookie.match(/oona_csrf=([^;]+)/);
+            return match ? match[1] : '';
+        }
+        document.addEventListener('htmx:configRequest', function(evt) {
+            evt.detail.headers['X-CSRF-Token'] = getCSRFToken();
+        });
+    </script>
+</head>
+<body class="bg-slate-950 text-slate-900 font-sans antialiased h-screen flex overflow-hidden">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="w-64 bg-slate-900 border-r border-slate-800/80 text-slate-300 flex flex-col hidden sm:flex transition-all duration-300 relative">
+        <!-- Collapse Button -->
+        <button onclick="toggleSidebar()" 
+            class="absolute -right-3 top-5 bg-slate-800 hover:bg-slate-700 rounded-full p-1 shadow-md z-10 cursor-pointer text-slate-400 hover:text-white border border-slate-700 transition-colors">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path></svg>
+        </button>
+
+        <!-- Brand Header -->
+        <div class="h-16 flex items-center px-5 border-b border-slate-800/80 gap-3">
+            <div class="h-9 w-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-md shadow-indigo-500/20 ring-1 ring-white/20 flex-shrink-0">
+                <i data-lucide="layers" class="h-5 w-5 text-white"></i>
+            </div>
+            <div class="sidebar-text overflow-hidden">
+                <h1 class="text-sm font-bold tracking-tight text-white leading-none">Service Catalog</h1>
+                <p class="text-[10px] text-indigo-400 font-semibold tracking-wider uppercase mt-1">Portal Platform</p>
+            </div>
+        </div>
+
+        <!-- Navigation Menu -->
+        <nav class="flex-1 px-3 py-5 space-y-1 overflow-y-auto" hx-boost="true">
+            <a href="/dashboard" class="relative flex items-center px-3.5 py-2.5 text-slate-300 hover:bg-slate-800/80 hover:text-white rounded-xl transition-all group {{ if eq .Title "Dashboard" }}bg-indigo-600/15 text-indigo-400 font-semibold ring-1 ring-indigo-500/30{{ end }}">
+                <i data-lucide="layout-dashboard" class="w-5 h-5 flex-shrink-0 {{ if eq .Title "Dashboard" }}text-indigo-400{{ else }}text-slate-400 group-hover:text-white{{ end }}"></i>
+                <span class="ml-3 text-xs sidebar-text">Dashboard</span>
+                <span class="sidebar-tooltip">Dashboard</span>
+            </a>
+            <a href="/catalog" class="relative flex items-center px-3.5 py-2.5 text-slate-300 hover:bg-slate-800/80 hover:text-white rounded-xl transition-all group {{ if eq .Title "Service Catalog" }}bg-indigo-600/15 text-indigo-400 font-semibold ring-1 ring-indigo-500/30{{ end }}">
+                <i data-lucide="server" class="w-5 h-5 flex-shrink-0 {{ if eq .Title "Service Catalog" }}text-indigo-400{{ else }}text-slate-400 group-hover:text-white{{ end }}"></i>
+                <span class="ml-3 text-xs sidebar-text">Service Catalog</span>
+                <span class="sidebar-tooltip">Service Catalog</span>
+            </a>
+            <a href="/tickets" class="relative flex items-center px-3.5 py-2.5 text-slate-300 hover:bg-slate-800/80 hover:text-white rounded-xl transition-all group {{ if eq .Title "Onboarding Tickets" }}bg-indigo-600/15 text-indigo-400 font-semibold ring-1 ring-indigo-500/30{{ end }}">
+                <i data-lucide="ticket" class="w-5 h-5 flex-shrink-0 {{ if eq .Title "Onboarding Tickets" }}text-indigo-400{{ else }}text-slate-400 group-hover:text-white{{ end }}"></i>
+                <span class="ml-3 text-xs sidebar-text">Ticket List</span>
+                <span class="sidebar-tooltip">Ticket List</span>
+            </a>
+            <a href="/tickets/new" class="relative flex items-center px-3.5 py-2.5 text-slate-300 hover:bg-slate-800/80 hover:text-white rounded-xl transition-all group">
+                <i data-lucide="plus-circle" class="w-5 h-5 flex-shrink-0 text-slate-400 group-hover:text-white"></i>
+                <span class="ml-3 text-xs sidebar-text">Onboard Service</span>
+                <span class="sidebar-tooltip">Onboard Service</span>
+            </a>
+            
+            {{ if or (eq .User.Role "devops") (eq .User.Role "admin") }}
+                <div class="pt-5 pb-1 px-3.5 sidebar-text">
+                    <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">DevOps Operations</p>
+                </div>
+                <a href="/approvals" class="relative flex items-center px-3.5 py-2.5 text-slate-300 hover:bg-slate-800/80 hover:text-white rounded-xl transition-all group {{ if eq .Title "Service Approvals" }}bg-indigo-600/15 text-indigo-400 font-semibold ring-1 ring-indigo-500/30{{ end }}">
+                    <i data-lucide="check-check" class="w-5 h-5 flex-shrink-0 text-slate-400 group-hover:text-white"></i>
+                    <span class="ml-3 text-xs sidebar-text">Service Approvals</span>
+                    <span class="sidebar-tooltip">Service Approvals</span>
+                </a>
+            {{ end }}
+
+            {{ if eq .User.Role "admin" }}
+                <div class="pt-5 pb-1 px-3.5 sidebar-text">
+                    <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Administration</p>
+                </div>
+                <a href="/admin/users" class="relative flex items-center px-3.5 py-2.5 text-slate-300 hover:bg-slate-800/80 hover:text-white rounded-xl transition-all group {{ if eq .Title "User Management" }}bg-indigo-600/15 text-indigo-400 font-semibold ring-1 ring-indigo-500/30{{ end }}">
+                    <i data-lucide="users" class="w-5 h-5 flex-shrink-0 text-slate-400 group-hover:text-white"></i>
+                    <span class="ml-3 text-xs sidebar-text">User Management</span>
+                    <span class="sidebar-tooltip">User Management</span>
+                </a>
+                <a href="/admin/integrations" class="relative flex items-center px-3.5 py-2.5 text-slate-300 hover:bg-slate-800/80 hover:text-white rounded-xl transition-all group {{ if eq .Title "System Integrations" }}bg-indigo-600/15 text-indigo-400 font-semibold ring-1 ring-indigo-500/30{{ end }}">
+                    <i data-lucide="blocks" class="w-5 h-5 flex-shrink-0 text-slate-400 group-hover:text-white"></i>
+                    <span class="ml-3 text-xs sidebar-text">System Integrations</span>
+                    <span class="sidebar-tooltip">System Integrations</span>
+                </a>
+                <a href="/admin/parameters" class="relative flex items-center px-3.5 py-2.5 text-slate-300 hover:bg-slate-800/80 hover:text-white rounded-xl transition-all group">
+                    <i data-lucide="sliders" class="w-5 h-5 flex-shrink-0 text-slate-400 group-hover:text-white"></i>
+                    <span class="ml-3 text-xs sidebar-text">System Parameters</span>
+                    <span class="sidebar-tooltip">System Parameters</span>
+                </a>
+                <a href="/admin/backup" class="relative flex items-center px-3.5 py-2.5 text-slate-300 hover:bg-slate-800/80 hover:text-white rounded-xl transition-all group">
+                    <i data-lucide="database-backup" class="w-5 h-5 flex-shrink-0 text-indigo-400"></i>
+                    <span class="ml-3 text-xs sidebar-text">Backup & Restore</span>
+                    <span class="sidebar-tooltip">Backup & Restore</span>
+                </a>
+                <a href="/admin/audit-logs" class="relative flex items-center px-3.5 py-2.5 text-slate-300 hover:bg-slate-800/80 hover:text-white rounded-xl transition-all group {{ if eq .Title "Audit Logs" }}bg-indigo-600/15 text-indigo-400 font-semibold ring-1 ring-indigo-500/30{{ end }}">
+                    <i data-lucide="scroll-text" class="w-5 h-5 flex-shrink-0 {{ if eq .Title "Audit Logs" }}text-indigo-400{{ else }}text-slate-400 group-hover:text-white{{ end }}"></i>
+                    <span class="ml-3 text-xs sidebar-text">Audit Logs</span>
+                    <span class="sidebar-tooltip">Audit Logs</span>
+                </a>
+            {{ end }}
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-full bg-slate-900/50 overflow-hidden" hx-history-elt>
+        
+        <!-- Toast Notification Container -->
+        <div id="toast-container" class="fixed top-5 right-8 z-[9999] flex flex-col gap-3 pointer-events-none max-w-md w-96"></div>
+
+        <!-- Top Navigation Bar (Header) -->
+        <header class="h-16 bg-slate-900 border-b border-slate-800/80 flex items-center justify-between px-4 sm:px-6 z-10">
+            <!-- Left side: Mobile menu button (visible only on mobile) & Status Badge -->
+            <div class="flex items-center gap-3">
+                <button onclick="document.getElementById('sidebar').classList.toggle('hidden')" class="sm:hidden text-slate-400 hover:text-white p-1 rounded-lg">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+                <div class="flex items-center gap-2 text-xs text-slate-400">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                        Production Ready
+                    </span>
+                </div>
+            </div>
+
+            <!-- Right side: Theme Toggle, Notifications & User Profile -->
+            <div class="flex items-center space-x-3 sm:space-x-4">
+                <!-- Theme Toggle Button (Light/Dark Mode) -->
+                <button id="theme-toggle" onclick="toggleTheme()" type="button" class="p-2 text-slate-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded-xl hover:bg-slate-800 transition-all cursor-pointer ring-1 ring-slate-800" title="Toggle Light/Dark Theme">
+                    <i id="theme-icon-sun" data-lucide="sun" class="h-5 w-5"></i>
+                    <i id="theme-icon-moon" data-lucide="moon" class="h-5 w-5 hidden"></i>
+                </button>
+
+                <!-- Notification Bell -->
+                <div class="relative inline-block text-left" id="notification-dropdown">
+                    <button onclick="toggleNotifications()" type="button" class="relative p-2 text-slate-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded-xl hover:bg-slate-800 transition-all cursor-pointer ring-1 ring-slate-800">
+                        <span class="sr-only">View notifications</span>
+                        <i data-lucide="bell" class="h-5 w-5"></i>
+                        <span id="unread-dot" class="absolute top-1.5 right-1.5 block h-2 w-2 rounded-full bg-indigo-500 ring-2 ring-slate-900"></span>
+                    </button>
+
+                    <!-- Notification Popover Menu -->
+                    <div id="notification-menu" class="hidden absolute right-0 z-50 mt-2 w-80 sm:w-96 origin-top-right rounded-2xl bg-slate-900 shadow-2xl ring-1 ring-slate-800 divide-y divide-slate-800 transition-all">
+                        <!-- Header -->
+                        <div class="px-4 py-3 flex items-center justify-between bg-slate-950 text-white rounded-t-2xl">
+                            <div class="flex items-center space-x-2">
+                                <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                                <h4 class="text-xs font-semibold uppercase tracking-wider">System Events</h4>
+                            </div>
+                            <button onclick="markNotificationsRead()" class="text-[11px] text-indigo-400 hover:text-indigo-300 font-medium">Mark all read</button>
+                        </div>
+
+                        <!-- Notification List -->
+                        <div class="max-h-80 overflow-y-auto divide-y divide-slate-800/60">
+                            <a href="/catalog" class="block p-3.5 hover:bg-slate-800/50 transition-colors">
+                                <div class="flex items-start space-x-3">
+                                    <div class="flex-shrink-0 p-1.5 bg-emerald-500/10 rounded-lg text-emerald-400 mt-0.5 ring-1 ring-emerald-500/20">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-xs font-semibold text-white">Service Onboarded & LIVE</p>
+                                        <p class="text-xs text-slate-400 truncate">Service Catalog updated & active</p>
+                                        <p class="text-[10px] text-slate-500 mt-1">2 mins ago</p>
+                                    </div>
+                                </div>
+                            </a>
+                            <a href="/approvals" class="block p-3.5 hover:bg-slate-800/50 transition-colors">
+                                <div class="flex items-start space-x-3">
+                                    <div class="flex-shrink-0 p-1.5 bg-indigo-500/10 rounded-lg text-indigo-400 mt-0.5 ring-1 ring-indigo-500/20">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-xs font-semibold text-white">Jenkins Pipeline Created</p>
+                                        <p class="text-xs text-slate-400 truncate">Job triggered on infrastructure cluster</p>
+                                        <p class="text-[10px] text-slate-500 mt-1">15 mins ago</p>
+                                    </div>
+                                </div>
+                            </a>
+                            <a href="/tickets" class="block p-3.5 hover:bg-slate-800/50 transition-colors">
+                                <div class="flex items-start space-x-3">
+                                    <div class="flex-shrink-0 p-1.5 bg-violet-500/10 rounded-lg text-violet-400 mt-0.5 ring-1 ring-violet-500/20">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-xs font-semibold text-white">Trivy Security Scan Passed</p>
+                                        <p class="text-xs text-slate-400 truncate">0 critical vulnerabilities found</p>
+                                        <p class="text-[10px] text-slate-500 mt-1">1 hour ago</p>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="px-4 py-2.5 bg-slate-950 text-center rounded-b-2xl">
+                            <a href="/tickets" class="text-xs font-medium text-indigo-400 hover:text-indigo-300">View all activity logs →</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile Dropdown (Click-based) -->
+                {{ if .User }}
+                <div class="relative inline-block text-left" id="profile-dropdown">
+                    <button onclick="toggleProfileMenu()" type="button" class="flex items-center space-x-3 p-1.5 rounded-xl hover:bg-slate-800 transition-all focus:outline-none ring-1 ring-slate-800 cursor-pointer">
+                        <div class="h-8 w-8 rounded-lg bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white font-bold text-xs shadow-md shadow-indigo-500/20">
+                            {{ printf "%.1s" .User.Email }}
+                        </div>
+                        <div class="hidden md:block text-left mr-1">
+                            <p class="text-xs font-semibold text-white leading-none">{{ .User.Email }}</p>
+                            <p class="text-[10px] text-slate-400 mt-1 uppercase tracking-wider font-semibold">{{ .User.Role }}</p>
+                        </div>
+                        <svg class="h-4 w-4 text-slate-400 hidden md:block" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+                    </button>
+                    <!-- Dropdown Menu -->
+                    <div id="profile-menu" class="hidden absolute right-0 z-50 mt-2 w-48 origin-top-right rounded-xl bg-slate-900 py-1.5 shadow-2xl ring-1 ring-slate-800 transition-all">
+                        <div class="px-4 py-2 border-b border-slate-800">
+                            <p class="text-[11px] text-slate-400 truncate">Signed in as</p>
+                            <p class="text-xs font-bold text-white truncate">{{ .User.Email }}</p>
+                        </div>
+                        <a href="/catalog" class="block px-4 py-2 text-xs text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">Catalog Overview</a>
+                        <a href="/tickets" class="block px-4 py-2 text-xs text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">Your Tickets</a>
+                        <div class="border-t border-slate-800 my-1"></div>
+                        <form method="POST" action="/logout" class="block w-full m-0 p-0">
+                            <button type="submit" class="w-full text-left px-4 py-2.5 text-xs text-rose-400 hover:bg-rose-500/10 font-bold transition-colors cursor-pointer flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                                Sign out
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {{ end }}
+            </div>
+        </header>
+
+        <!-- Page Content -->
+        <div id="main-content" class="flex-1 overflow-y-auto p-6 sm:p-8 bg-slate-950 text-slate-100">
+            {{ template "content" . }}
+        </div>
+    </main>
+
+    <script>
+        // Light / Dark Theme Support
+        function applyTheme(theme) {
+            const html = document.documentElement;
+            const sunIcon = document.getElementById('theme-icon-sun');
+            const moonIcon = document.getElementById('theme-icon-moon');
+            const mainContent = document.getElementById('main-content');
+            
+            if (theme === 'light') {
+                html.classList.add('light-mode');
+                if (sunIcon) sunIcon.classList.add('hidden');
+                if (moonIcon) moonIcon.classList.remove('hidden');
+                if (mainContent) {
+                    mainContent.classList.remove('bg-slate-950', 'text-slate-100');
+                    mainContent.classList.add('bg-slate-50', 'text-slate-900');
+                }
+            } else {
+                html.classList.remove('light-mode');
+                if (sunIcon) sunIcon.classList.remove('hidden');
+                if (moonIcon) moonIcon.classList.add('hidden');
+                if (mainContent) {
+                    mainContent.classList.remove('bg-slate-50', 'text-slate-900');
+                    mainContent.classList.add('bg-slate-950', 'text-slate-100');
+                }
+            }
+            localStorage.setItem('theme', theme);
+        }
+
+        function toggleTheme() {
+            const current = localStorage.getItem('theme') || 'dark';
+            applyTheme(current === 'dark' ? 'light' : 'dark');
+        }
+
+        // Initialize Theme on load
+        (function() {
+            const saved = localStorage.getItem('theme') || 'dark';
+            applyTheme(saved);
+        })();
+    </script>
+
+    <!-- Global Scripts -->
+    <script>
+        document.body.addEventListener("showToast", function(evt) {
+            const data = evt.detail;
+            const container = document.getElementById("toast-container");
+            if (!container) return;
+
+            const toast = document.createElement("div");
+            
+            // Set base styling: scale animation instead of horizontal overflow translation
+            toast.className = "pointer-events-auto rounded-xl p-4 bg-white shadow-2xl ring-1 ring-slate-900/10 flex items-start w-full transform transition-all duration-300 ease-out opacity-0 -translate-y-2 scale-95";
+            
+            if (data.type === "error") {
+                toast.classList.add("border-l-4", "border-red-500");
+                toast.innerHTML = `
+                    <div class="flex-shrink-0 mt-0.5"><svg class="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd" /></svg></div>
+                    <div class="ml-3 flex-1 pr-2"><p class="text-xs font-semibold text-slate-900 leading-snug">${data.message}</p></div>
+                    <button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-600 focus:outline-none"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                `;
+            } else {
+                toast.classList.add("border-l-4", "border-teal-500");
+                toast.innerHTML = `
+                    <div class="flex-shrink-0 mt-0.5"><svg class="h-5 w-5 text-teal-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" /></svg></div>
+                    <div class="ml-3 flex-1 pr-2"><p class="text-xs font-semibold text-slate-900 leading-snug">${data.message}</p></div>
+                    <button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-600 focus:outline-none"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                `;
+            }
+
+            container.appendChild(toast);
+
+            // Animate in smoothly
+            setTimeout(() => {
+                toast.classList.remove("-translate-y-2", "opacity-0", "scale-95");
+                toast.classList.add("translate-y-0", "opacity-100", "scale-100");
+            }, 10);
+
+            // Auto dismiss after 6 seconds
+            setTimeout(() => {
+                if (toast.parentElement) {
+                    toast.classList.remove("translate-y-0", "opacity-100", "scale-100");
+                    toast.classList.add("-translate-y-2", "opacity-0", "scale-95");
+                    setTimeout(() => toast.remove(), 300);
+                }
+            }, 6000);
+        });
+
+        // Auto trigger toast if redirect query parameter exists (e.g. ?toast=approved)
+        window.addEventListener("DOMContentLoaded", function() {
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+            const urlParams = new URLSearchParams(window.location.search);
+            const toastType = urlParams.get("toast");
+            if (toastType) {
+                let msg = "";
+                let type = "success";
+                if (toastType === "approved") {
+                    msg = "Approval submitted successfully! Pipeline creation triggered.";
+                } else if (toastType === "rejected") {
+                    msg = "Onboarding ticket rejected.";
+                    type = "error";
+                } else if (toastType === "updated") {
+                    msg = "Service catalog updated successfully!";
+                } else if (toastType === "created") {
+                    msg = "Onboarding ticket created successfully and queued for provisioning!";
+                } else if (toastType === "deleted") {
+                    msg = "Onboarding ticket deleted successfully!";
+                }
+                if (msg) {
+                    document.body.dispatchEvent(new CustomEvent("showToast", { detail: { message: msg, type: type } }));
+                    // Clean URL param without reload
+                    const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + window.location.hash;
+                    window.history.replaceState({ path: cleanUrl }, "", cleanUrl);
+                }
+            }
+        });
+
+        function toggleNotifications() {
+            const notifMenu = document.getElementById('notification-menu');
+            const profileMenu = document.getElementById('profile-menu');
+            if (profileMenu) profileMenu.classList.add('hidden');
+            if (notifMenu) notifMenu.classList.toggle('hidden');
+        }
+
+        function toggleProfileMenu() {
+            const profileMenu = document.getElementById('profile-menu');
+            const notifMenu = document.getElementById('notification-menu');
+            if (notifMenu) notifMenu.classList.add('hidden');
+            if (profileMenu) profileMenu.classList.toggle('hidden');
+        }
+
+        function markNotificationsRead() {
+            const dot = document.getElementById('unread-dot');
+            if (dot) dot.remove();
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            if (!sidebar) return;
+            sidebar.classList.toggle('collapsed-sidebar');
+            sidebar.classList.toggle('w-64');
+        }
+
+        document.addEventListener('click', function(event) {
+            const notifDropdown = document.getElementById('notification-dropdown');
+            if (notifDropdown && !notifDropdown.contains(event.target)) {
+                const notifMenu = document.getElementById('notification-menu');
+                if (notifMenu) notifMenu.classList.add('hidden');
+            }
+
+            const profileDropdown = document.getElementById('profile-dropdown');
+            if (profileDropdown && !profileDropdown.contains(event.target)) {
+                const profileMenu = document.getElementById('profile-menu');
+                if (profileMenu) profileMenu.classList.add('hidden');
+            }
+        });
+        // Ensure Lucide icons are initialized on HTMX content swaps
+        document.body.addEventListener('htmx:afterSwap', function() {
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+        });
+    </script>
+</body>
+</html>
+{{ end }}

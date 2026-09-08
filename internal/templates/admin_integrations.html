@@ -1,0 +1,513 @@
+{{ define "content" }}
+<div class="max-w-6xl mx-auto space-y-6">
+    <!-- Header Section -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-800 pb-5">
+        <div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
+                System Integrations
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-400 mt-1">Manage global connections to CI/CD, Issue Trackers, and Infrastructure Repositories.</p>
+        </div>
+        <button 
+            onclick="document.getElementById('integration-form').classList.toggle('hidden')"
+            class="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-2 text-xs font-bold text-white shadow-lg shadow-indigo-600/25 hover:from-indigo-500 hover:to-violet-500 transition-all cursor-pointer">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+            + Add Integration
+        </button>
+    </div>
+
+    <!-- Form Container -->
+    <div id="integration-form" class="hidden bg-slate-900/90 border border-slate-800/80 shadow-xl shadow-black/30 rounded-2xl p-6 backdrop-blur-xl transition-all">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-5">
+            <h3 class="text-sm font-bold text-white uppercase tracking-wider">Add New Integration Connection</h3>
+            <button type="button" onclick="document.getElementById('integration-form').classList.add('hidden')" class="text-slate-400 hover:text-white p-1 rounded-lg">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <form hx-post="/api/v1/admin/integrations" class="space-y-4">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1.5">Connection Name</label>
+                    <input type="text" name="name" placeholder="e.g. Oona Terraform Repo" required class="block w-full rounded-xl bg-slate-950 border-0 py-2.5 text-white ring-1 ring-inset ring-slate-800 placeholder:text-slate-500 focus:ring-2 focus:ring-inset focus:ring-indigo-500 text-xs px-3.5"/>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1.5">Platform / Provider</label>
+                    <select id="provider_select" name="provider" onchange="updateFormFields()" class="block w-full rounded-xl bg-slate-950 border-0 py-2.5 text-white ring-1 ring-inset ring-slate-800 focus:ring-2 focus:ring-inset focus:ring-indigo-500 text-xs px-3.5">
+                        <option value="jenkins">Jenkins Automation Engine</option>
+                        <option value="gitlab">GitLab CI</option>
+                        <option value="github_actions">GitHub Actions / GitHub API</option>
+                        <option value="jira">Jira Software</option>
+                        <option value="terraform_repo">Terraform IaC Repository</option>
+                        <option value="gemini">Google Gemini AI / AI Studio</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div>
+                <label id="url_label" class="block text-xs font-semibold text-slate-300 mb-1.5">Base URL</label>
+                <input type="url" id="base_url" name="base_url" placeholder="e.g. https://automation.oona-insurance.com" required class="block w-full rounded-xl bg-slate-950 border-0 py-2.5 text-white ring-1 ring-inset ring-slate-800 placeholder:text-slate-500 focus:ring-2 focus:ring-inset focus:ring-indigo-500 text-xs px-3.5"/>
+            </div>
+
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div id="username_container">
+                    <label class="block text-xs font-semibold text-slate-300 mb-1.5">Username (Optional)</label>
+                    <input type="text" name="auth_user" placeholder="svc_oona_portal" class="block w-full rounded-xl bg-slate-950 border-0 py-2.5 text-white ring-1 ring-inset ring-slate-800 placeholder:text-slate-500 focus:ring-2 focus:ring-inset focus:ring-indigo-500 text-xs px-3.5"/>
+                </div>
+                <div>
+                    <label id="token_label" class="block text-xs font-semibold text-slate-300 mb-1.5">API Token / Secret</label>
+                    <input type="password" name="auth_token" required class="block w-full rounded-xl bg-slate-950 border-0 py-2.5 text-white ring-1 ring-inset ring-slate-800 placeholder:text-slate-500 focus:ring-2 focus:ring-inset focus:ring-indigo-500 text-xs px-3.5"/>
+                    <p id="token_helper" class="mt-1 text-[11px] text-slate-500">Encrypted via AES-256 in PostgreSQL.</p>
+                </div>
+            </div>
+
+            <!-- AI SPECIFIC CONFIGURATION CONTAINER -->
+            <div id="ai_config_container" class="hidden p-3.5 rounded-xl bg-purple-950/30 border border-purple-500/30 space-y-2">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h4 class="text-xs font-bold text-purple-300">Global AI Analysis Scope Policy</h4>
+                        <p class="text-[11px] text-slate-400">Default vulnerability severity evaluated across all tickets and approvals.</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" name="ai_include_high" value="true" checked class="sr-only peer">
+                        <div class="w-9 h-5 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-600"></div>
+                        <span class="ml-2 text-xs font-bold text-purple-300">Include HIGH Severity</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- BUTTONS -->
+            <div class="mt-6 flex items-center justify-end gap-x-4">
+                <button type="button" onclick="document.getElementById('integration-form').classList.add('hidden')" class="text-sm font-semibold leading-6 text-gray-900">Cancel</button>
+                <button 
+                    type="button" 
+                    hx-post="/admin/integrations/test-live"
+                    hx-target="#live-test-result"
+                    hx-include="closest form"
+                    class="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 flex items-center">
+                    Test Connection
+                    <span class="htmx-indicator ml-2">
+                        <svg class="animate-spin h-4 w-4 text-teal-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    </span>
+                </button>
+                <button type="submit" class="rounded-md bg-teal-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-teal-500">
+                    Save Connection
+                </button>
+            </div>
+            
+            <!-- Result Area -->
+            <div id="live-test-result" class="mt-4 flex justify-end text-sm"></div>
+        </form>
+    </div>
+
+    <!-- Integrations Table (Dynamic) -->
+    <div class="space-y-8">
+        
+        <!-- CATEGORY: DEPLOYMENT (CI/CD) -->
+        <div class="bg-white shadow-sm ring-1 ring-gray-900/5 rounded-xl overflow-hidden">
+            <div class="bg-slate-50 border-b border-gray-200 px-4 py-3 sm:px-6 flex items-center">
+                <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                <h3 class="text-sm font-semibold leading-6 text-gray-900">Deployment & CI/CD Pipelines</h3>
+            </div>
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-white">
+                    <tr>
+                        <th class="py-3.5 pl-4 pr-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Name</th>
+                        <th class="px-3 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Provider</th>
+                        <th class="px-3 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-3 py-3.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200 bg-white">
+                    {{ $hasDeployment := false }}
+                    {{ range .Integrations }}
+                        {{ if or (eq .Provider "jenkins") (eq .Provider "gitlab") (eq .Provider "github_actions") }}
+                            {{ $hasDeployment = true }}
+                            <tr>
+                                <td class="py-4 pl-4 pr-3 text-sm font-medium text-gray-900">{{ .Name }}</td>
+                                <td class="px-3 py-4 text-sm text-gray-500">
+                                    {{ if eq .Provider "jenkins" }}
+                                        <span class="bg-blue-50 text-blue-700 px-2 py-1 rounded-md text-xs font-medium border border-blue-200">Jenkins</span>
+                                    {{ else if eq .Provider "gitlab" }}
+                                        <span class="bg-orange-50 text-orange-700 px-2 py-1 rounded-md text-xs font-medium border border-orange-200">GitLab</span>
+                                    {{ else }}
+                                        <span class="bg-gray-100 text-gray-700 px-2 py-1 rounded-md text-xs font-medium border border-gray-300">{{ .Provider }}</span>
+                                    {{ end }}
+                                </td>
+                                <td class="px-3 py-4 text-sm text-gray-500" id="status-{{ .ID }}">
+                                    {{ if .IsActive }}
+                                        <span class="text-green-600 font-medium flex items-center">
+                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                            Active
+                                        </span>
+                                    {{ else }}
+                                        <span class="text-gray-400 font-medium">Inactive</span>
+                                    {{ end }}
+                                </td>
+                                <td class="px-3 py-4 text-right text-sm font-medium space-x-3">
+                                    <button hx-post="/admin/integrations/{{ .ID }}/test" hx-target="#status-{{ .ID }}" hx-swap="innerHTML" class="text-teal-600 hover:text-teal-900 focus:outline-none">Test</button>
+                                    <button type="button" onclick="openEditModal('{{ .ID }}', '{{ .Name }}', '{{ .Provider }}', '{{ .BaseURL }}', '{{ .AuthUser }}', '{{ .MaskedToken }}')" class="text-indigo-600 hover:text-indigo-900 focus:outline-none">Edit</button>
+                                    <button hx-delete="/api/v1/admin/integrations/{{ .ID }}" hx-confirm="Are you sure you want to delete this integration?" hx-target="closest tr" hx-swap="outerHTML" class="text-red-600 hover:text-red-900 focus:outline-none">Delete</button>
+                                </td>
+                            </tr>
+                        {{ end }}
+                    {{ end }}
+                    {{ if not $hasDeployment }}
+                        <tr><td colspan="4" class="py-6 text-center text-sm text-gray-500">No Deployment integrations found.</td></tr>
+                    {{ end }}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- CATEGORY: REPOSITORY (IaC & Source Code) -->
+        <div class="bg-white shadow-sm ring-1 ring-gray-900/5 rounded-xl overflow-hidden">
+            <div class="bg-slate-50 border-b border-gray-200 px-4 py-3 sm:px-6 flex items-center">
+                <svg class="w-5 h-5 mr-2 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M4 17h16a1 1 0 001-1V8a1 1 0 00-1-1H4a1 1 0 00-1 1v8a1 1 0 001 1z"></path></svg>
+                <h3 class="text-sm font-semibold leading-6 text-gray-900">Source Code & IaC Repositories</h3>
+            </div>
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-white">
+                    <tr>
+                        <th class="py-3.5 pl-4 pr-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Name</th>
+                        <th class="px-3 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Provider</th>
+                        <th class="px-3 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-3 py-3.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200 bg-white">
+                    {{ $hasRepo := false }}
+                    {{ range .Integrations }}
+                        {{ if eq .Provider "terraform_repo" }}
+                            {{ $hasRepo = true }}
+                            <tr>
+                                <td class="py-4 pl-4 pr-3 text-sm font-medium text-gray-900">{{ .Name }}</td>
+                                <td class="px-3 py-4 text-sm text-gray-500">
+                                    <span class="bg-purple-50 text-purple-700 px-2 py-1 rounded-md text-xs font-medium border border-purple-200">Terraform Repo</span>
+                                </td>
+                                <td class="px-3 py-4 text-sm text-gray-500" id="status-{{ .ID }}">
+                                    {{ if .IsActive }}
+                                        <span class="text-green-600 font-medium flex items-center">
+                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                             Active
+                                        </span>
+                                    {{ else }}
+                                        <span class="text-gray-400 font-medium">Inactive</span>
+                                    {{ end }}
+                                </td>
+                                <td class="px-3 py-4 text-right text-sm font-medium space-x-3">
+                                    <button hx-post="/admin/integrations/{{ .ID }}/test" hx-target="#status-{{ .ID }}" hx-swap="innerHTML" class="text-teal-600 hover:text-teal-900 focus:outline-none">Test</button>
+                                    <button type="button" onclick="openEditModal('{{ .ID }}', '{{ .Name }}', '{{ .Provider }}', '{{ .BaseURL }}', '{{ .AuthUser }}', '{{ .MaskedToken }}')" class="text-indigo-600 hover:text-indigo-900 focus:outline-none">Edit</button>
+                                    <button hx-delete="/api/v1/admin/integrations/{{ .ID }}" hx-confirm="Are you sure you want to delete this integration?" hx-target="closest tr" hx-swap="outerHTML" class="text-red-600 hover:text-red-900 focus:outline-none">Delete</button>
+                                </td>
+                            </tr>
+                        {{ end }}
+                    {{ end }}
+                    {{ if not $hasRepo }}
+                        <tr><td colspan="4" class="py-6 text-center text-sm text-gray-500">No Repository integrations found.</td></tr>
+                    {{ end }}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- CATEGORY: ISSUE TRACKER (Jira, Linear) -->
+        <div class="bg-white shadow-sm ring-1 ring-gray-900/5 rounded-xl overflow-hidden">
+            <div class="bg-slate-50 border-b border-gray-200 px-4 py-3 sm:px-6 flex items-center">
+                <svg class="w-5 h-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                <h3 class="text-sm font-semibold leading-6 text-gray-900">Issue Trackers</h3>
+            </div>
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-white">
+                    <tr>
+                        <th class="py-3.5 pl-4 pr-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Name</th>
+                        <th class="px-3 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Provider</th>
+                        <th class="px-3 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-3 py-3.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200 bg-white">
+                    {{ $hasTracker := false }}
+                    {{ range .Integrations }}
+                        {{ if eq .Provider "jira" }}
+                            {{ $hasTracker = true }}
+                            <tr>
+                                <td class="py-4 pl-4 pr-3 text-sm font-medium text-gray-900">{{ .Name }}</td>
+                                <td class="px-3 py-4 text-sm text-gray-500">
+                                    <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-md text-xs font-medium border border-blue-300">Jira</span>
+                                </td>
+                                <td class="px-3 py-4 text-sm text-gray-500" id="status-{{ .ID }}">
+                                    {{ if .IsActive }}
+                                        <span class="text-green-600 font-medium flex items-center">
+                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                            Active
+                                        </span>
+                                    {{ else }}
+                                        <span class="text-gray-400 font-medium">Inactive</span>
+                                    {{ end }}
+                                </td>
+                                <td class="px-3 py-4 text-right text-sm font-medium space-x-3">
+                                    <button hx-post="/admin/integrations/{{ .ID }}/test" hx-target="#status-{{ .ID }}" hx-swap="innerHTML" class="text-teal-600 hover:text-teal-900 focus:outline-none">Test</button>
+                                    <button type="button" onclick="openEditModal('{{ .ID }}', '{{ .Name }}', '{{ .Provider }}', '{{ .BaseURL }}', '{{ .AuthUser }}', '{{ .MaskedToken }}')" class="text-indigo-600 hover:text-indigo-900 focus:outline-none">Edit</button>
+                                    <button hx-delete="/api/v1/admin/integrations/{{ .ID }}" hx-confirm="Are you sure you want to delete this integration?" hx-target="closest tr" hx-swap="outerHTML" class="text-red-600 hover:text-red-900 focus:outline-none">Delete</button>
+                                </td>
+                            </tr>
+                        {{ end }}
+                    {{ end }}
+                    {{ if not $hasTracker }}
+                        <tr><td colspan="4" class="py-6 text-center text-sm text-gray-500">No Issue Tracker integrations found.</td></tr>
+                    {{ end }}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- CATEGORY: AI & SECURITY COPILOT -->
+        <div class="bg-white shadow-sm ring-1 ring-gray-900/5 rounded-xl overflow-hidden">
+            <div class="bg-slate-50 border-b border-gray-200 px-4 py-3 sm:px-6 flex items-center">
+                <svg class="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                <h3 class="text-sm font-semibold leading-6 text-gray-900">AI Intelligence & DevSecOps Copilot</h3>
+            </div>
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-white">
+                    <tr>
+                        <th class="py-3.5 pl-4 pr-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Name</th>
+                        <th class="px-3 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Provider / Model</th>
+                        <th class="px-3 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-3 py-3.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200 bg-white">
+                    {{ $hasAI := false }}
+                    {{ range .Integrations }}
+                        {{ if or (eq .Provider "gemini") (eq .Provider "ai_copilot") (eq .Provider "google_gemini") }}
+                            {{ $hasAI = true }}
+                            <tr>
+                                <td class="py-4 pl-4 pr-3 text-sm font-medium text-gray-900">{{ .Name }}</td>
+                                <td class="px-3 py-4 text-sm text-gray-500">
+                                    <span class="bg-purple-50 text-purple-700 px-2 py-1 rounded-md text-xs font-medium border border-purple-200">Google Gemini AI</span>
+                                    <span class="ml-1 text-xs font-mono text-slate-500">({{ .BaseURL }})</span>
+                                </td>
+                                <td class="px-3 py-4 text-sm text-gray-500" id="status-{{ .ID }}">
+                                    {{ if .IsActive }}
+                                        <span class="text-green-600 font-medium flex items-center">
+                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                            Active
+                                        </span>
+                                    {{ else }}
+                                        <span class="text-gray-400 font-medium">Inactive</span>
+                                    {{ end }}
+                                </td>
+                                <td class="px-3 py-4 text-right text-sm font-medium space-x-3">
+                                    <button hx-post="/admin/integrations/{{ .ID }}/test" hx-target="#status-{{ .ID }}" hx-swap="innerHTML" class="text-teal-600 hover:text-teal-900 focus:outline-none">Test</button>
+                                    <button type="button" onclick="openEditModal('{{ .ID }}', '{{ .Name }}', '{{ .Provider }}', '{{ .BaseURL }}', '{{ .AuthUser }}', '{{ .MaskedToken }}')" class="text-indigo-600 hover:text-indigo-900 focus:outline-none">Edit</button>
+                                    <button hx-delete="/api/v1/admin/integrations/{{ .ID }}" hx-confirm="Are you sure you want to delete this AI integration?" hx-target="closest tr" hx-swap="outerHTML" class="text-red-600 hover:text-red-900 focus:outline-none">Delete</button>
+                                </td>
+                            </tr>
+                        {{ end }}
+                    {{ end }}
+                    {{ if not $hasAI }}
+                        <tr>
+                            <td class="py-4 pl-4 pr-3 text-sm font-medium text-gray-900">Google Gemini Flash AI (Default Env)</td>
+                            <td class="px-3 py-4 text-sm text-gray-500">
+                                <span class="bg-purple-50 text-purple-700 px-2 py-1 rounded-md text-xs font-medium border border-purple-200">Google Gemini AI</span>
+                                <span class="ml-1 text-xs font-mono text-slate-500">(gemini-3-flash-preview)</span>
+                            </td>
+                            <td class="px-3 py-4 text-sm text-gray-500">
+                                <span class="text-green-600 font-medium flex items-center">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                    Active via .env
+                                </span>
+                            </td>
+                            <td class="px-3 py-4 text-right text-sm font-medium space-x-3">
+                                <button 
+                                    type="button" 
+                                    hx-post="/admin/integrations/test-live"
+                                    hx-vals='{"provider": "gemini", "base_url": "gemini-3-flash-preview"}'
+                                    hx-target="#default-ai-status"
+                                    class="text-teal-600 hover:text-teal-900 focus:outline-none cursor-pointer">
+                                    Test
+                                </button>
+                                <span id="default-ai-status" class="text-xs"></span>
+                            </td>
+                        </tr>
+                    {{ end }}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- EDIT INTEGRATION MODAL -->
+    <div id="edit-integration-modal" class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-5 animate-fadeIn text-left">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 flex items-center justify-center">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-white">Edit Integration Connection</h3>
+                        <p class="text-[11px] text-slate-400">Update endpoint URL, authentication, and credentials</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeEditModal()" class="text-slate-400 hover:text-white p-1 rounded-lg text-lg leading-none">&times;</button>
+            </div>
+
+            <form id="edit-integration-form" method="POST" hx-post="/api/v1/admin/integrations/edit" hx-swap="none" class="space-y-4">
+                <input type="hidden" id="edit_id" name="id">
+                <input type="hidden" id="edit_provider_hidden" name="provider">
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Connection Name</label>
+                    <input type="text" id="edit_name" name="name" required class="block w-full rounded-xl bg-slate-950 border-0 py-2 text-white ring-1 ring-inset ring-slate-800 text-xs px-3 focus:ring-2 focus:ring-indigo-500">
+                </div>
+
+                <div>
+                    <label id="edit_url_label" class="block text-xs font-semibold text-slate-300 mb-1">Endpoint / Base URL / Model</label>
+                    <input type="text" id="edit_base_url" name="base_url" required class="block w-full rounded-xl bg-slate-950 border-0 py-2 text-white ring-1 ring-inset ring-slate-800 text-xs px-3 focus:ring-2 focus:ring-indigo-500">
+                </div>
+
+                <div id="edit_user_container">
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Username (Optional)</label>
+                    <input type="text" id="edit_auth_user" name="auth_user" class="block w-full rounded-xl bg-slate-950 border-0 py-2 text-white ring-1 ring-inset ring-slate-800 text-xs px-3 focus:ring-2 focus:ring-indigo-500">
+                </div>
+
+                <div>
+                    <label id="edit_token_label" class="block text-xs font-semibold text-slate-300 mb-1">API Token / Secret Key</label>
+                    <input type="password" id="edit_auth_token" name="auth_token" placeholder="Leave blank to keep current saved key" class="block w-full rounded-xl bg-slate-950 border-0 py-2 text-white ring-1 ring-inset ring-slate-800 text-xs px-3 focus:ring-2 focus:ring-indigo-500">
+                    
+                    <!-- Masked Existing Token Preview -->
+                    <div id="edit_token_preview_container" class="mt-2 flex items-center justify-between p-2.5 rounded-xl bg-slate-950/80 border border-slate-800 text-[11px]">
+                        <div class="flex items-center gap-1.5 text-slate-400">
+                            <svg class="w-3.5 h-3.5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                            <span>Current Saved Key in DB:</span>
+                        </div>
+                        <code id="edit_token_preview" class="font-mono text-purple-300 font-bold bg-purple-950/40 px-2 py-0.5 rounded border border-purple-800/40 select-all">••••••••</code>
+                    </div>
+                    <p class="mt-1 text-[11px] text-slate-500">Encrypted via AES-256 in PostgreSQL. Leave blank to keep existing key unchanged.</p>
+                </div>
+
+                <!-- AI SPECIFIC SCOPE IN EDIT MODAL -->
+                <div id="edit_ai_config_container" class="hidden p-3 rounded-xl bg-purple-950/30 border border-purple-500/30">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h5 class="text-xs font-bold text-purple-300">Global AI Severity Policy</h5>
+                            <p class="text-[11px] text-slate-400">Evaluate High & Medium findings in all approval scans.</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="edit_ai_include_high" name="ai_include_high" value="true" class="sr-only peer">
+                            <div class="w-8 h-4 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-purple-600"></div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
+                    <button type="button" onclick="closeEditModal()" class="px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800">Cancel</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 shadow">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Force reset form UI state when the page is loaded (fixes HTMX history cache issues)
+    document.addEventListener("DOMContentLoaded", function() {
+        var form = document.getElementById('integration-form');
+        if (form) {
+            form.classList.add('hidden');
+        }
+    });
+    
+    // Also attach to HTMX load event
+    document.body.addEventListener('htmx:afterSettle', function(evt) {
+        if (evt.target.id === 'main-content') {
+            var form = document.getElementById('integration-form');
+            if (form) {
+                form.classList.add('hidden');
+            }
+        }
+    });
+
+    function openEditModal(id, name, provider, baseUrl, authUser, maskedToken) {
+        document.getElementById('edit_id').value = id;
+        document.getElementById('edit_name').value = name;
+        document.getElementById('edit_provider_hidden').value = provider;
+        document.getElementById('edit_base_url').value = baseUrl;
+        document.getElementById('edit_auth_user').value = authUser || '';
+        document.getElementById('edit_auth_token').value = '';
+
+        const tokenPreview = document.getElementById('edit_token_preview');
+        if (tokenPreview) {
+            tokenPreview.textContent = maskedToken || '(Not configured / using .env)';
+        }
+
+        const form = document.getElementById('edit-integration-form');
+        form.setAttribute('hx-post', '/api/v1/admin/integrations/' + id + '/edit');
+        if (window.htmx) {
+            htmx.process(form);
+        }
+
+        const userContainer = document.getElementById('edit_user_container');
+        const urlLabel = document.getElementById('edit_url_label');
+        const tokenLabel = document.getElementById('edit_token_label');
+        const aiContainer = document.getElementById('edit_ai_config_container');
+        const aiToggle = document.getElementById('edit_ai_include_high');
+
+        if (provider === 'gemini') {
+            urlLabel.innerText = 'Model Name';
+            userContainer.style.display = 'none';
+            tokenLabel.innerText = 'Google AI Studio API Key';
+            if (aiContainer) aiContainer.classList.remove('hidden');
+            if (aiToggle) aiToggle.checked = !authUser.includes('include_high=false');
+        } else if (provider === 'terraform_repo') {
+            urlLabel.innerText = 'Git Repository URL (.git)';
+            userContainer.style.display = 'none';
+            tokenLabel.innerText = 'Personal Access Token (PAT)';
+            if (aiContainer) aiContainer.classList.add('hidden');
+        } else {
+            urlLabel.innerText = 'Base URL';
+            userContainer.style.display = 'block';
+            tokenLabel.innerText = 'API Token / Password';
+            if (aiContainer) aiContainer.classList.add('hidden');
+        }
+
+        document.getElementById('edit-integration-modal').classList.remove('hidden');
+    }
+
+    function closeEditModal() {
+        document.getElementById('edit-integration-modal').classList.add('hidden');
+    }
+
+    function updateFormFields() {
+        var provider = document.getElementById("provider_select").value;
+        var urlLabel = document.getElementById("url_label");
+        var baseUrl = document.getElementById("base_url");
+        var userContainer = document.getElementById("username_container");
+        var tokenLabel = document.getElementById("token_label");
+        var tokenHelper = document.getElementById("token_helper");
+
+        var aiConfigContainer = document.getElementById("ai_config_container");
+
+        if (provider === "terraform_repo") {
+            urlLabel.innerText = "Git Repository URL (.git)";
+            baseUrl.placeholder = "e.g. https://github.com/oona-insurance/oona-dtc-country-terraform-iac.git";
+            userContainer.style.display = "none";
+            tokenLabel.innerText = "Personal Access Token (PAT)";
+            tokenHelper.innerText = "AES-encrypted. Used by the worker to git clone/pull private repositories.";
+            if (aiConfigContainer) aiConfigContainer.classList.add("hidden");
+        } else if (provider === "gemini") {
+            urlLabel.innerText = "Model Name (Endpoint Identifier)";
+            baseUrl.value = "gemini-3-flash-preview";
+            baseUrl.placeholder = "e.g. gemini-3-flash-preview or gemini-1.5-pro";
+            userContainer.style.display = "none";
+            tokenLabel.innerText = "Google AI Studio API Key";
+            tokenHelper.innerText = "AES-256 encrypted. Used for real-time DevSecOps AI vulnerability impact analysis.";
+            if (aiConfigContainer) aiConfigContainer.classList.remove("hidden");
+        } else {
+            urlLabel.innerText = "Base URL";
+            baseUrl.placeholder = "e.g. https://automation.oona-insurance.com";
+            userContainer.style.display = "block";
+            tokenLabel.innerText = "API Token / Password";
+            tokenHelper.innerText = "AES-encrypted in database.";
+            if (aiConfigContainer) aiConfigContainer.classList.add("hidden");
+        }
+    }
+</script>
+{{ end }}

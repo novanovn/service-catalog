@@ -1,0 +1,191 @@
+{{ define "content" }}
+<div class="max-w-7xl mx-auto space-y-6">
+    <!-- Header & Action Bar -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-slate-800 pb-5">
+        <div>
+            <div class="flex items-center gap-2">
+                <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
+                    Audit Trail & Compliance
+                </h2>
+                <span class="inline-flex items-center rounded-md bg-indigo-500/10 px-2.5 py-1 text-xs font-bold text-indigo-400 border border-indigo-500/20">
+                    Immutable Log
+                </span>
+            </div>
+            <p class="text-xs sm:text-sm text-slate-400 mt-1">Full historical audit record of mutations, approvals, logins, and service configuration changes.</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-3">
+            <!-- Search Filter -->
+            <div class="relative rounded-xl shadow-sm">
+                <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                    <svg class="h-4 w-4 text-slate-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd" /></svg>
+                </div>
+                <input type="text" id="audit-search" oninput="filterAuditLogs()" class="block w-full rounded-xl bg-slate-900 border-0 py-2 pl-9 pr-3 text-white ring-1 ring-inset ring-slate-800 placeholder:text-slate-500 focus:ring-2 focus:ring-inset focus:ring-indigo-500 text-xs" placeholder="Filter by user or action...">
+            </div>
+
+            <!-- CSV Export Button -->
+            <a href="/api/v1/admin/audit-logs/export" class="inline-flex items-center gap-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 px-3.5 py-2 text-xs font-semibold text-slate-200 hover:text-white border border-slate-700/80 transition-all shadow-sm">
+                <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                Export CSV
+            </a>
+        </div>
+    </div>
+
+    <!-- Action Filter Pills -->
+    <div class="flex flex-wrap items-center gap-2">
+        <button onclick="filterAction('ALL')" class="audit-pill active px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-indigo-600 text-white">All Events</button>
+        <button onclick="filterAction('CREATE')" class="audit-pill px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 bg-slate-900 border border-slate-800 hover:text-white transition-all">Create</button>
+        <button onclick="filterAction('APPROVE')" class="audit-pill px-3 py-1.5 rounded-lg text-xs font-semibold text-emerald-400 bg-slate-900 border border-slate-800 hover:bg-emerald-500/10 transition-all">Approve</button>
+        <button onclick="filterAction('REJECT')" class="audit-pill px-3 py-1.5 rounded-lg text-xs font-semibold text-rose-400 bg-slate-900 border border-slate-800 hover:bg-rose-500/10 transition-all">Reject</button>
+        <button onclick="filterAction('UPDATE')" class="audit-pill px-3 py-1.5 rounded-lg text-xs font-semibold text-blue-400 bg-slate-900 border border-slate-800 hover:bg-blue-500/10 transition-all">Update</button>
+        <button onclick="filterAction('DELETE')" class="audit-pill px-3 py-1.5 rounded-lg text-xs font-semibold text-amber-400 bg-slate-900 border border-slate-800 hover:bg-amber-500/10 transition-all">Delete</button>
+    </div>
+
+    <!-- Audit Logs Table -->
+    <div class="overflow-hidden bg-slate-900/90 border border-slate-800/80 rounded-2xl shadow-xl shadow-black/30 backdrop-blur-xl">
+        <div class="overflow-x-auto p-1 sm:p-2">
+            <table class="min-w-full divide-y divide-slate-800 text-left">
+                <thead>
+                    <tr class="text-slate-400 text-xs font-semibold uppercase tracking-wider bg-slate-950/60">
+                        <th scope="col" class="py-3.5 pl-4 pr-3 sm:pl-4">Timestamp</th>
+                        <th scope="col" class="px-3 py-3.5">Action</th>
+                        <th scope="col" class="px-3 py-3.5">Target Entity</th>
+                        <th scope="col" class="px-3 py-3.5">Actor (Email)</th>
+                        <th scope="col" class="px-3 py-3.5">IP Address</th>
+                        <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-4 text-right">Details</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-800/60 text-xs" id="audit-table-body">
+                    {{ if .Logs }}
+                    {{ range .Logs }}
+                    <tr class="audit-row hover:bg-slate-800/40 transition-colors" data-action="{{ .Action }}" data-email="{{ .UserEmail }}" data-entity="{{ .EntityType }}">
+                        <td class="whitespace-nowrap py-4 pl-4 pr-3 text-slate-400 font-mono sm:pl-4">
+                            {{ .CreatedAt }}
+                        </td>
+                        <td class="whitespace-nowrap px-3 py-4">
+                            {{ if eq .Action "APPROVE" }}
+                                <span class="inline-flex items-center rounded-lg bg-emerald-500/10 px-2.5 py-1 text-[11px] font-bold text-emerald-400 border border-emerald-500/20">APPROVE</span>
+                            {{ else if eq .Action "REJECT" }}
+                                <span class="inline-flex items-center rounded-lg bg-rose-500/10 px-2.5 py-1 text-[11px] font-bold text-rose-400 border border-rose-500/20">REJECT</span>
+                            {{ else if eq .Action "CREATE" }}
+                                <span class="inline-flex items-center rounded-lg bg-indigo-500/10 px-2.5 py-1 text-[11px] font-bold text-indigo-400 border border-indigo-500/20">CREATE</span>
+                            {{ else if eq .Action "DELETE" }}
+                                <span class="inline-flex items-center rounded-lg bg-amber-500/10 px-2.5 py-1 text-[11px] font-bold text-amber-400 border border-amber-500/20">DELETE</span>
+                            {{ else }}
+                                <span class="inline-flex items-center rounded-lg bg-blue-500/10 px-2.5 py-1 text-[11px] font-bold text-blue-400 border border-blue-500/20">{{ .Action }}</span>
+                            {{ end }}
+                        </td>
+                        <td class="whitespace-nowrap px-3 py-4 font-semibold text-white">
+                            <span class="text-slate-400 uppercase text-[10px] font-mono block">{{ .EntityType }}</span>
+                            <span>{{ .EntityID }}</span>
+                        </td>
+                        <td class="whitespace-nowrap px-3 py-4 text-slate-300 font-medium">
+                            {{ if .UserEmail }}{{ .UserEmail }}{{ else }}system{{ end }}
+                        </td>
+                        <td class="whitespace-nowrap px-3 py-4 font-mono text-slate-400">
+                            {{ if .IPAddress }}{{ .IPAddress }}{{ else }}127.0.0.1{{ end }}
+                        </td>
+                        <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right font-semibold sm:pr-4">
+                            <button type="button" onclick="showAuditDetails('{{ .Action }}', '{{ .EntityType }}: {{ .EntityID }}', '{{ .UserEmail }}', '{{ .CreatedAt }}', {{ .Details }})" class="text-indigo-400 hover:text-indigo-300 transition-colors cursor-pointer inline-flex items-center gap-1">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                View Payload
+                            </button>
+                        </td>
+                    </tr>
+                    {{ end }}
+                    {{ else }}
+                    <tr>
+                        <td colspan="6" class="text-center py-12 text-slate-400">
+                            No audit logs found.
+                        </td>
+                    </tr>
+                    {{ end }}
+                </tbody>
+            </table>
+        </div>
+        {{ template "pagination" .Pagination }}
+    </div>
+
+    <!-- Audit Payload Modal -->
+    <div id="audit-modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="relative w-full max-w-2xl rounded-2xl bg-slate-900 border border-slate-800 shadow-2xl p-6 text-white space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <div>
+                    <h3 id="modal-title" class="text-base font-bold text-white">Event Payload Details</h3>
+                    <p id="modal-subtitle" class="text-xs text-slate-400 mt-0.5"></p>
+                </div>
+                <button type="button" onclick="closeAuditModal()" class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Structured Metadata (JSON)</label>
+                <pre id="modal-payload" class="rounded-xl bg-slate-950 p-4 font-mono text-xs text-indigo-300 border border-slate-800/80 overflow-x-auto max-h-80"></pre>
+            </div>
+            <div class="flex justify-end pt-2 border-t border-slate-800">
+                <button type="button" onclick="closeAuditModal()" class="rounded-xl bg-slate-800 hover:bg-slate-700 px-4 py-2 text-xs font-bold text-white transition-colors">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentActionFilter = 'ALL';
+
+    function filterAction(action) {
+        currentActionFilter = action;
+        document.querySelectorAll('.audit-pill').forEach(btn => {
+            if (btn.textContent.trim().toUpperCase().includes(action)) {
+                btn.className = 'audit-pill active px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-indigo-600 text-white';
+            } else {
+                btn.className = 'audit-pill px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 bg-slate-900 border border-slate-800 hover:text-white transition-all';
+            }
+        });
+        filterAuditLogs();
+    }
+
+    function filterAuditLogs() {
+        const query = document.getElementById('audit-search').value.toLowerCase();
+        const rows = document.querySelectorAll('.audit-row');
+
+        rows.forEach(row => {
+            const action = row.getAttribute('data-action') || '';
+            const email = (row.getAttribute('data-email') || '').toLowerCase();
+            const entity = (row.getAttribute('data-entity') || '').toLowerCase();
+            const text = row.textContent.toLowerCase();
+
+            const matchesAction = (currentActionFilter === 'ALL') || (action.toUpperCase() === currentActionFilter);
+            const matchesQuery = !query || text.includes(query) || email.includes(query) || entity.includes(query);
+
+            if (matchesAction && matchesQuery) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
+    function showAuditDetails(action, entity, email, time, details) {
+        document.getElementById('modal-title').textContent = `${action} on ${entity}`;
+        document.getElementById('modal-subtitle').textContent = `Triggered by ${email || 'system'} at ${time}`;
+        
+        let formatted = "{}";
+        try {
+            if (typeof details === 'object') {
+                formatted = JSON.stringify(details, null, 2);
+            } else if (typeof details === 'string' && details.trim() !== '') {
+                formatted = JSON.stringify(JSON.parse(details), null, 2);
+            }
+        } catch(e) {
+            formatted = String(details);
+        }
+        document.getElementById('modal-payload').textContent = formatted;
+        document.getElementById('audit-modal').classList.remove('hidden');
+    }
+
+    function closeAuditModal() {
+        document.getElementById('audit-modal').classList.add('hidden');
+    }
+</script>
+{{ end }}

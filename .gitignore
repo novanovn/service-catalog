@@ -1,0 +1,15 @@
+# Binaries & Executables
+server
+devportal
+*.exe
+*.out
+
+# Environment variables & local secrets
+.env
+.env.local
+
+# Dependencies
+vendor/
+
+# Operating System files
+.DS_Store

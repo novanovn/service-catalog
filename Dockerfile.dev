@@ -1,0 +1,20 @@
+FROM golang:1.24-alpine
+RUN apk update && apk add --no-cache git ca-certificates tzdata
+
+# Create non-root user for development consistency
+RUN adduser -D -g '' appuser
+WORKDIR /app
+
+COPY go.mod ./
+COPY internal ./internal
+COPY cmd ./cmd
+COPY static ./static
+
+RUN go mod tidy
+RUN go build -o devportal ./cmd/server
+
+# Set ownership and switch to non-root appuser
+RUN chown -R appuser:appuser /app
+USER appuser
+
+CMD ["./devportal", "api"]

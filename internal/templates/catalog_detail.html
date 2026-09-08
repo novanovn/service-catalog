@@ -1,0 +1,1113 @@
+{{ define "content" }}
+<style>
+  .techdocs-content {
+    font-size: 0.875rem;
+    line-height: 1.75;
+    color: #334155;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  .techdocs-content h1 {
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-top: 1.75rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 2px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    letter-spacing: -0.02em;
+  }
+  .techdocs-content h1::before {
+    content: "";
+    display: inline-block;
+    width: 5px;
+    height: 1.2rem;
+    background: linear-gradient(135deg, #0d9488, #0284c7);
+    border-radius: 3px;
+  }
+  .techdocs-content h2 {
+    font-size: 1.18rem;
+    font-weight: 600;
+    color: #0f172a;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.35rem;
+    border-bottom: 1px solid #f1f5f9;
+    letter-spacing: -0.01em;
+  }
+  .techdocs-content h3 {
+    font-size: 1.02rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-top: 1.25rem;
+    margin-bottom: 0.5rem;
+  }
+  .techdocs-content p {
+    margin-bottom: 1rem;
+    color: #334155;
+    line-height: 1.75;
+  }
+  .techdocs-content table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: 1.25rem;
+    margin-bottom: 1.25rem;
+    font-size: 0.8125rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04);
+  }
+  .techdocs-content th {
+    background-color: #f8fafc;
+    border-bottom: 1px solid #cbd5e1;
+    padding: 10px 14px;
+    text-align: left;
+    font-weight: 600;
+    color: #0f172a;
+    white-space: nowrap;
+  }
+  .techdocs-content td {
+    border-bottom: 1px solid #f1f5f9;
+    padding: 10px 14px;
+    vertical-align: top;
+    color: #334155;
+  }
+  .techdocs-content tr:last-child td {
+    border-bottom: none;
+  }
+  .techdocs-content code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.785rem;
+    background-color: #f1f5f9;
+    color: #0f172a;
+    padding: 2px 6px;
+    border-radius: 5px;
+    border: 1px solid #e2e8f0;
+    font-weight: 500;
+  }
+  .techdocs-content pre {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.8125rem;
+    background-color: #0b1329;
+    color: #e2e8f0;
+    padding: 1.25rem;
+    border-radius: 0.75rem;
+    overflow-x: auto;
+    margin-top: 1.25rem;
+    margin-bottom: 1.25rem;
+    border: 1px solid #1e293b;
+    box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.2);
+  }
+  .techdocs-content pre code {
+    background-color: transparent;
+    border: none;
+    padding: 0;
+    color: inherit;
+  }
+  .techdocs-content ul {
+    list-style-type: none;
+    padding-left: 0;
+    margin-bottom: 1rem;
+  }
+  .techdocs-content ul li {
+    position: relative;
+    padding-left: 1.25rem;
+    margin-bottom: 0.35rem;
+  }
+  .techdocs-content ul li::before {
+    content: "•";
+    position: absolute;
+    left: 0.25rem;
+    color: #0d9488;
+    font-weight: bold;
+  }
+  .techdocs-content ol {
+    list-style-type: decimal;
+    padding-left: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  .techdocs-content li {
+    margin-bottom: 0.35rem;
+  }
+  .techdocs-content blockquote {
+    border-left: 4px solid #0d9488;
+    background: linear-gradient(to right, #f0fdf4, #ffffff);
+    padding: 0.875rem 1.25rem;
+    margin: 1.25rem 0;
+    color: #134e4a;
+    border-radius: 0 0.5rem 0.5rem 0;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.02);
+  }
+  .techdocs-content blockquote p {
+    margin-bottom: 0;
+    font-weight: 500;
+  }
+  .techdocs-content a {
+    color: #0284c7;
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .techdocs-content a:hover {
+    text-decoration: underline;
+    color: #0369a1;
+  }
+  .brand-icon {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    object-fit: contain;
+    vertical-align: middle;
+  }
+  .brand-icon-sm { width: 12px; height: 12px; }
+  .brand-icon-lg { width: 20px; height: 20px; }
+</style>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    
+    <!-- Header -->
+    <div class="md:flex md:items-center md:justify-between mb-6 border-b border-slate-800 pb-4">
+        <div class="min-w-0 flex-1">
+            <h2 class="text-2xl font-bold leading-7 text-white sm:truncate sm:text-3xl sm:tracking-tight">
+                {{ .ServiceName }}
+            </h2>
+            {{ if .Description }}
+            <p class="mt-1 text-sm text-slate-400">{{ .Description }}</p>
+            {{ end }}
+            <div class="mt-1 flex flex-col sm:mt-0 sm:flex-row sm:flex-wrap sm:space-x-6">
+                <div class="mt-2 flex items-center text-sm text-slate-400 font-medium">
+                    <svg class="mr-1.5 h-4 w-4 flex-shrink-0 text-slate-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM6.75 9.25a.75.75 0 000 1.5h6.5a.75.75 0 000-1.5h-6.5z" clip-rule="evenodd" /></svg>
+                    {{ .Domain }} / {{ .Country }}
+                </div>
+                {{ if eq .Status "LIVE" }}
+                <div class="mt-2 flex items-center text-sm text-emerald-400 font-semibold">
+                    <span class="relative flex h-2.5 w-2.5 mr-2">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                    </span>
+                    LIVE in Prod
+                </div>
+                {{ else if eq .Status "REJECTED_SECURITY" }}
+                <div class="mt-2 flex items-center text-sm text-rose-400 font-semibold">
+                    <span class="relative flex h-2.5 w-2.5 mr-2">
+                      <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500"></span>
+                    </span>
+                    Rejected by DevOps
+                </div>
+                {{ else }}
+                <div class="mt-2 flex items-center text-sm text-amber-400 font-semibold">
+                    <span class="relative flex h-2.5 w-2.5 mr-2">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
+                    </span>
+                    Pending Infrastructure Approval
+                </div>
+                {{ end }}
+            </div>
+        </div>
+        <div class="mt-4 flex flex-wrap items-center md:ml-4 md:mt-0 gap-2.5">
+            <a href="{{ .RepoURL }}" target="_blank" class="inline-flex items-center gap-1.5 rounded-xl bg-white dark:bg-slate-900 px-3.5 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-sm ring-1 ring-inset ring-slate-300 dark:ring-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
+                <svg class="w-4 h-4 text-slate-500 dark:text-slate-400" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+                View in GitHub
+            </a>
+            
+            {{ if or (eq .User.Role "admin") (eq .User.Role "devops") }}
+            <button type="button" onclick="openEditModal('{{ .ServiceID }}', '{{ .ServiceName }}', '{{ .Description }}', '{{ .Domain }}', '{{ .Country }}', 'LIVE', '{{ .RepoURL }}', '{{ .RequestorEmail }}', '{{ .JiraID }}')" class="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 px-3.5 py-2 text-xs font-bold text-white shadow-sm transition-all cursor-pointer">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                Edit Service
+            </button>
+            {{ end }}
+
+            <button 
+                onclick="switchTab('vulnerabilities')"
+                type="button" 
+                class="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 px-3.5 py-2 text-xs font-bold text-white shadow-sm transition-all cursor-pointer">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                Run Security Scan
+            </button>
+
+            <button 
+                hx-get="/api/v1/catalog/{{ .ServiceName }}/logs"
+                hx-target="#logs-container"
+                type="button" 
+                class="inline-flex items-center gap-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white px-3.5 py-2 text-xs font-bold shadow-sm transition-all cursor-pointer border border-slate-700/80">
+                <img src="/static/img/brands/jenkins.svg" alt="" class="brand-icon" width="16" height="16">
+                View CI Logs
+            </button>
+        </div>
+    </div>
+
+    <!-- Jenkins Logs Container (Injected via HTMX) -->
+    <div id="logs-container" class="mb-8"></div>
+
+    <!-- Tabs Navigation -->
+    <div class="border-b border-slate-800 mb-6">
+        <nav class="-mb-px flex space-x-6 sm:space-x-8 overflow-x-auto" aria-label="Tabs">
+            <button onclick="switchTab('overview')" id="tab-overview" class="border-indigo-500 text-indigo-400 whitespace-nowrap border-b-2 py-3 px-1 text-xs sm:text-sm font-bold" aria-current="page">Overview & Testing</button>
+            <button onclick="switchTab('topology')" id="tab-topology" class="border-transparent text-slate-400 hover:border-slate-700 hover:text-white whitespace-nowrap border-b-2 py-3 px-1 text-xs sm:text-sm font-semibold flex items-center gap-1.5">
+                <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg>
+                Architecture & Topology
+            </button>
+            <button onclick="switchTab('vulnerabilities')" id="tab-vulnerabilities" class="border-transparent text-slate-400 hover:border-slate-700 hover:text-white whitespace-nowrap border-b-2 py-3 px-1 text-xs sm:text-sm font-semibold flex items-center gap-1.5">
+                <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                Vulnerability Management
+            </button>
+            <button onclick="switchTab('docs')" id="tab-docs" class="border-transparent text-slate-400 hover:border-slate-700 hover:text-white whitespace-nowrap border-b-2 py-3 px-1 text-xs sm:text-sm font-semibold">TechDocs</button>
+            <button onclick="switchTab('envs')" id="tab-envs" class="border-transparent text-slate-400 hover:border-slate-700 hover:text-white whitespace-nowrap border-b-2 py-3 px-1 text-xs sm:text-sm font-semibold">Environments (Diff)</button>
+        </nav>
+    </div>
+
+    <!-- PANEL 0: ARCHITECTURE & TOPOLOGY GRAPH -->
+    <div id="panel-topology" class="hidden space-y-6">
+        <div class="bg-slate-900/90 border border-slate-800/80 rounded-2xl shadow-xl shadow-black/30 p-6 backdrop-blur-xl">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-800 pb-4 mb-6">
+                <div>
+                    <h3 class="text-base font-bold text-white flex items-center gap-2">
+                        <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/></svg>
+                        Service Topology & Dependency Graph
+                    </h3>
+                    <p class="text-xs text-slate-400 mt-0.5">End-to-end trace from upstream clients, microservice runtime, data stores, to third-party integrations.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 text-xs font-semibold border border-emerald-500/20">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                        All Upstreams Operational
+                    </span>
+                </div>
+            </div>
+
+            <!-- Interactive Flow Chart with Animated Moving Beams -->
+            <div class="relative py-4 px-2">
+                <!-- Flex Container for Nodes & Connecting Animated Arrows -->
+                <div class="flex flex-col lg:flex-row items-center justify-between gap-3 relative">
+                    
+                    <!-- Node 1: Ingress / Client Gateway (100% Parsed from Terraform) -->
+                    <div class="topology-node w-full lg:w-72 rounded-2xl bg-slate-950/70 border border-slate-800 p-4 text-center shadow-lg relative group hover:border-blue-500/50 transition-all z-10">
+                        <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 mx-auto flex items-center justify-center ring-1 ring-blue-500/20 group-hover:scale-105 transition-transform mb-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
+                        </div>
+                        <span class="inline-block px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20 uppercase tracking-wider mb-1">
+                            {{ .Topology.Ingress.Category }} Trigger
+                        </span>
+                        <h4 class="text-xs font-bold text-white group-hover:text-blue-400 transition-colors">{{ .Topology.Ingress.Name }}</h4>
+                        <p class="text-[11px] text-slate-400 mt-0.5">{{ .Topology.Ingress.Description }}</p>
+                        <div class="mt-3 pt-2.5 border-t border-slate-800/80">
+                            <code class="text-[10px] font-mono text-blue-300 break-all">{{ .Topology.Ingress.Detail }}</code>
+                        </div>
+                    </div>
+
+                    <!-- Connector 1: Ingress -> Microservice (SVG Flow Arrow with Moving Stream) -->
+                    <div class="flex flex-col items-center justify-center w-full lg:w-28 py-2 lg:py-0 px-2">
+                        <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 shadow-sm mb-1.5 whitespace-nowrap">
+                            HTTPS sync
+                        </span>
+                        <div class="w-full flex items-center justify-center text-indigo-400">
+                            <!-- Horizontal SVG Arrow for Desktop with Animated Dash Stream -->
+                            <svg class="w-full h-8 hidden lg:block" viewBox="0 0 100 24" fill="none">
+                                <defs>
+                                    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" stop-color="#3b82f6" />
+                                        <stop offset="100%" stop-color="#6366f1" />
+                                    </linearGradient>
+                                </defs>
+                                <!-- Static Line Base -->
+                                <line x1="4" y1="12" x2="88" y2="12" stroke="#334155" stroke-width="3" stroke-linecap="round" />
+                                <!-- Animated Moving Dash -->
+                                <line x1="4" y1="12" x2="88" y2="12" stroke="url(#grad1)" stroke-width="3" stroke-linecap="round" stroke-dasharray="6,6" class="animate-dash" />
+                                <!-- Arrowhead -->
+                                <polygon points="86,6 98,12 86,18" fill="#6366f1" />
+                            </svg>
+                            <!-- Vertical SVG Arrow for Mobile -->
+                            <svg class="w-8 h-10 lg:hidden" viewBox="0 0 24 40" fill="none">
+                                <line x1="12" y1="2" x2="12" y2="30" stroke="#6366f1" stroke-width="3" stroke-dasharray="4,4" class="animate-dash-v" />
+                                <polygon points="6,28 12,38 18,28" fill="#6366f1" />
+                            </svg>
+                        </div>
+                    </div>
+
+                    <!-- Node 2: Target Microservice (Hero Center Runtime from Terraform) -->
+                    <div class="topology-hero w-full lg:w-72 rounded-2xl bg-gradient-to-b from-indigo-950/90 via-slate-900/90 to-slate-950 border-2 border-indigo-500 p-5 text-center shadow-xl shadow-indigo-950/60 relative group z-10">
+                        <span class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-gradient-to-r from-indigo-600 to-violet-600 text-[10px] font-black text-white uppercase tracking-wider shadow-md shadow-indigo-600/40">
+                            Core Runtime
+                        </span>
+                        <div class="w-11 h-11 rounded-xl bg-[#FF9900]/15 mx-auto flex items-center justify-center ring-1 ring-[#FF9900]/40 mt-1 mb-2">
+                            <img src="/static/img/brands/lambda.svg" alt="AWS Lambda" class="brand-icon-lg" width="20" height="20">
+                        </div>
+                        <h4 class="text-xs font-black text-white truncate">{{ .ServiceName }}</h4>
+                        <p class="text-[11px] text-indigo-300 mt-0.5">{{ .Topology.Runtime.Description }}</p>
+                        <div class="mt-3 pt-2.5 border-t border-indigo-500/30">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                {{ .Topology.Runtime.Detail }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Connector 2: Microservice -> Event Bus (Only if Event Bus Exists in Terraform) -->
+                    {{ if .Topology.EventBuses }}
+                    {{ range .Topology.EventBuses }}
+                    <div class="flex flex-col items-center justify-center w-full lg:w-28 py-2 lg:py-0 px-2">
+                        <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 shadow-sm mb-1.5 whitespace-nowrap">
+                            PutEvents
+                        </span>
+                        <div class="w-full flex items-center justify-center text-amber-400">
+                            <svg class="w-full h-8 hidden lg:block" viewBox="0 0 100 24" fill="none">
+                                <defs>
+                                    <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" stop-color="#6366f1" />
+                                        <stop offset="100%" stop-color="#f59e0b" />
+                                    </linearGradient>
+                                </defs>
+                                <line x1="4" y1="12" x2="88" y2="12" stroke="#334155" stroke-width="3" stroke-linecap="round" />
+                                <line x1="4" y1="12" x2="88" y2="12" stroke="url(#grad2)" stroke-width="3" stroke-linecap="round" stroke-dasharray="6,6" class="animate-dash" />
+                                <polygon points="86,6 98,12 86,18" fill="#f59e0b" />
+                            </svg>
+                            <svg class="w-8 h-10 lg:hidden" viewBox="0 0 24 40" fill="none">
+                                <line x1="12" y1="2" x2="12" y2="30" stroke="#f59e0b" stroke-width="3" stroke-dasharray="4,4" class="animate-dash-v" />
+                                <polygon points="6,28 12,38 18,28" fill="#f59e0b" />
+                            </svg>
+                        </div>
+                    </div>
+
+                    <!-- Node 3: Event Bus & Messaging -->
+                    <div class="topology-node w-full lg:w-64 rounded-2xl bg-slate-950/70 border border-slate-800 p-4 text-center shadow-lg relative group hover:border-amber-500/50 transition-all z-10">
+                        <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 mx-auto flex items-center justify-center ring-1 ring-amber-500/20 group-hover:scale-105 transition-transform mb-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        </div>
+                        <span class="inline-block px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 uppercase tracking-wider mb-1">
+                            Async Event Bus
+                        </span>
+                        <h4 class="text-xs font-bold text-white group-hover:text-amber-400 transition-colors">{{ .Name }}</h4>
+                        <p class="text-[11px] text-slate-400 mt-0.5">{{ .Description }}</p>
+                        <div class="mt-3 pt-2.5 border-t border-slate-800/80">
+                            <code class="text-[10px] font-mono text-amber-300">{{ .ConfigKey }}</code>
+                        </div>
+                    </div>
+                    {{ end }}
+                    {{ end }}
+
+                    <!-- Connector: Microservice -> DB / APIs (SVG Flow Arrow with Moving Stream) -->
+                    <div class="flex flex-col items-center justify-center w-full lg:w-28 py-2 lg:py-0 px-2">
+                        <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-sm mb-1.5 whitespace-nowrap">
+                            VPC / REST
+                        </span>
+                        <div class="w-full flex items-center justify-center text-emerald-400">
+                            <svg class="w-full h-8 hidden lg:block" viewBox="0 0 100 24" fill="none">
+                                <defs>
+                                    <linearGradient id="grad3" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" stop-color="#6366f1" />
+                                        <stop offset="100%" stop-color="#10b981" />
+                                    </linearGradient>
+                                </defs>
+                                <line x1="4" y1="12" x2="88" y2="12" stroke="#334155" stroke-width="3" stroke-linecap="round" />
+                                <line x1="4" y1="12" x2="88" y2="12" stroke="url(#grad3)" stroke-width="3" stroke-linecap="round" stroke-dasharray="6,6" class="animate-dash" />
+                                <polygon points="86,6 98,12 86,18" fill="#10b981" />
+                            </svg>
+                            <svg class="w-8 h-10 lg:hidden" viewBox="0 0 24 40" fill="none">
+                                <line x1="12" y1="2" x2="12" y2="30" stroke="#10b981" stroke-width="3" stroke-dasharray="4,4" class="animate-dash-v" />
+                                <polygon points="6,28 12,38 18,28" fill="#10b981" />
+                            </svg>
+                        </div>
+                    </div>
+
+                    <!-- Node 4: Downstream Database & Third-Party APIs (Parsed from Terraform) -->
+                    <div class="topology-node w-full lg:w-72 rounded-2xl bg-slate-950/70 border border-slate-800 p-4 text-center shadow-lg relative group hover:border-emerald-500/50 transition-all z-10">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 mx-auto flex items-center justify-center ring-1 ring-emerald-500/20 group-hover:scale-105 transition-transform mb-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/></svg>
+                        </div>
+                        <span class="inline-block px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase tracking-wider mb-1">
+                            Persistence & Core
+                        </span>
+                        <h4 class="text-xs font-bold text-white group-hover:text-emerald-400 transition-colors">Data Stores & APIs</h4>
+                        <p class="text-[11px] text-slate-400 mt-0.5">{{ range .Topology.Databases }}{{ .Name }}{{ end }}</p>
+                        <div class="mt-3 pt-2.5 border-t border-slate-800/80">
+                            <code class="text-[10px] font-mono text-emerald-300 break-all">{{ range .Topology.Databases }}{{ .Detail }}{{ end }}</code>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Detailed Dependency Breakdown Table -->
+            <div class="mt-8 border-t border-slate-800 pt-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Downstream Integration & Config Matrix</h4>
+                        <p class="text-[11px] text-slate-400 mt-0.5">Environment variable bindings and authentication protocols configured in IaC</p>
+                    </div>
+                    <span class="text-[11px] font-mono text-slate-400 bg-slate-800/60 px-2.5 py-1 rounded-md border border-slate-700/60 inline-flex items-center gap-1.5">
+                        <img src="/static/img/brands/terraform.svg" alt="" class="brand-icon-sm" width="12" height="12">
+                        Terraform IaC Bound
+                    </span>
+                </div>
+                
+                <div class="overflow-x-auto rounded-xl border border-slate-800/80">
+                    <table class="min-w-full divide-y divide-slate-800 text-left text-xs">
+                        <thead class="bg-slate-950/80 text-slate-400 uppercase font-semibold text-[11px]">
+                            <tr>
+                                <th class="py-3 px-4">Dependency Target</th>
+                                <th class="py-3 px-4">Integration Type</th>
+                                <th class="py-3 px-4">Protocol</th>
+                                <th class="py-3 px-4">Auth / Security Scheme</th>
+                                <th class="py-3 px-4">Config / SSM Parameter Binding</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800/60 text-slate-300">
+                            {{ range .Topology.ExternalAPIs }}
+                            <tr class="hover:bg-slate-800/30 transition-colors">
+                                <td class="py-3 px-4 font-semibold text-white">{{ .Name }}</td>
+                                <td class="py-3 px-4 text-slate-400">{{ .Description }}</td>
+                                <td class="py-3 px-4 font-mono text-slate-400">{{ .Protocol }}</td>
+                                <td class="py-3 px-4"><span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-mono bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">{{ .AuthScheme }}</span></td>
+                                <td class="py-3 px-4 font-mono text-slate-300 text-[11px]"><code>{{ .ConfigKey }}</code></td>
+                            </tr>
+                            {{ end }}
+                            {{ range .Topology.Databases }}
+                            <tr class="hover:bg-slate-800/30 transition-colors">
+                                <td class="py-3 px-4 font-semibold text-white">{{ .Name }}</td>
+                                <td class="py-3 px-4 text-slate-400">{{ .Description }}</td>
+                                <td class="py-3 px-4 font-mono text-slate-400">{{ .Protocol }}</td>
+                                <td class="py-3 px-4"><span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">{{ .AuthScheme }}</span></td>
+                                <td class="py-3 px-4 font-mono text-slate-300 text-[11px]"><code>{{ .ConfigKey }}</code></td>
+                            </tr>
+                            {{ end }}
+                            {{ range .Topology.EventBuses }}
+                            <tr class="hover:bg-slate-800/30 transition-colors">
+                                <td class="py-3 px-4 font-semibold text-white">{{ .Name }}</td>
+                                <td class="py-3 px-4 text-slate-400">{{ .Description }}</td>
+                                <td class="py-3 px-4 font-mono text-slate-400">{{ .Protocol }}</td>
+                                <td class="py-3 px-4"><span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-mono bg-amber-500/10 text-amber-300 border border-amber-500/20">{{ .AuthScheme }}</span></td>
+                                <td class="py-3 px-4 font-mono text-slate-300 text-[11px]"><code>{{ .ConfigKey }}</code></td>
+                            </tr>
+                            {{ end }}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PANEL 1: OVERVIEW & TESTING (Modern Full-Width Layout: Metric Grid + Console) -->
+    <div id="panel-overview" class="block space-y-6">
+        
+        <!-- TOP SECTION: AWS & Infrastructure Telemetry Cards Grid (4 Columns) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            
+            <!-- Card 1: CI/CD Pipeline & Repo -->
+            <div class="bg-slate-900/90 border border-slate-800/80 rounded-2xl p-4 shadow-xl shadow-black/20 backdrop-blur-xl relative overflow-hidden group hover:border-indigo-500/50 transition-all">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400 inline-flex items-center gap-1.5">
+                        <img src="/static/img/brands/jenkins.svg" alt="" class="brand-icon" width="16" height="16">
+                        CI/CD Pipeline
+                    </span>
+                    {{ if not .JenkinsKnown }}
+                    <span class="inline-flex items-center gap-1 rounded-md bg-slate-800 px-1.5 py-0.5 text-[10px] font-semibold text-slate-300 ring-1 ring-slate-700">Unknown</span>
+                    {{ else if .JenkinsExists }}
+                    <span class="inline-flex items-center gap-1 rounded-md bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-400 ring-1 ring-emerald-500/30">In Jenkins</span>
+                    {{ else }}
+                    <span class="inline-flex items-center gap-1 rounded-md bg-rose-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-rose-400 ring-1 ring-rose-500/30">Missing</span>
+                    {{ end }}
+                </div>
+                <div class="mt-1">
+                    {{ if and .JenkinsKnown .JenkinsExists }}
+                    <a href="{{ .JenkinsURL }}" target="_blank" rel="noopener" class="font-mono text-xs font-bold text-indigo-400 break-all leading-snug hover:underline" title="{{ .PipelineName }}">{{ .PipelineName }}</a>
+                    {{ else }}
+                    <p class="font-mono text-xs font-bold text-indigo-400 break-all leading-snug" title="{{ .PipelineName }}">{{ .PipelineName }}</p>
+                    {{ end }}
+                </div>
+                <div class="mt-3 pt-2.5 border-t border-slate-800/80 flex items-center justify-between gap-2 text-[11px]">
+                    <span class="text-slate-400">Domain / Country</span>
+                    <span class="font-semibold text-slate-200">{{ .Domain }} &middot; {{ .Country }}</span>
+                </div>
+                {{ if and (eq .User.Role "admin") .JenkinsKnown (not .JenkinsExists) }}
+                <button
+                    type="button"
+                    hx-post="/api/v1/catalog/{{ .ServiceName }}/recreate-pipeline"
+                    hx-confirm="Recreate Jenkins job {{ .PipelineName }} from terraform.tfvars existing_github_repo_id? This does not provision the Lambda."
+                    class="mt-3 w-full inline-flex items-center justify-center gap-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 px-3 py-1.5 text-[11px] font-bold text-white shadow-sm cursor-pointer">
+                    <img src="/static/img/brands/jenkins.svg" alt="" class="brand-icon" width="16" height="16">
+                    Recreate pipeline
+                </button>
+                {{ else if and (eq .User.Role "admin") (not .JenkinsKnown) }}
+                <p class="mt-3 text-[10px] text-slate-500">Jenkins unreachable — Recreate disabled until probe succeeds.</p>
+                {{ end }}
+            </div>
+
+            <!-- Card 2: AWS Deployment & Region -->
+            <div class="bg-slate-900/90 border border-slate-800/80 rounded-2xl p-4 shadow-xl shadow-black/20 backdrop-blur-xl relative overflow-hidden group hover:border-amber-500/50 transition-all">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">AWS Deployment</span>
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-amber-500/10 text-amber-300 border border-amber-500/20">
+                        {{ .AWSRegion }}
+                    </span>
+                </div>
+                <div class="mt-1">
+                    <p class="text-xs font-semibold">
+                        {{ if eq .Status "LIVE" }}
+                        <span class="text-emerald-400 font-bold">Active in Production</span>
+                        {{ else if eq .Status "REJECTED_SECURITY" }}
+                        <span class="text-rose-400 font-bold">Review Rejected</span>
+                        {{ else }}
+                        <span class="text-amber-400 font-bold">Pending Infrastructure</span>
+                        {{ end }}
+                    </p>
+                </div>
+                <div class="mt-3 pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-[11px]">
+                    <span class="text-slate-400">Last Modified</span>
+                    <span class="font-mono text-slate-300 text-[10px]">{{ .AWSLastModified }}</span>
+                </div>
+            </div>
+
+            <!-- Card 3: Runtime & Memory Config -->
+            <div class="bg-slate-900/90 border border-slate-800/80 rounded-2xl p-4 shadow-xl shadow-black/20 backdrop-blur-xl relative overflow-hidden group hover:border-emerald-500/50 transition-all">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400 inline-flex items-center gap-1.5">
+                        <img src="/static/img/brands/lambda.svg" alt="" class="brand-icon" width="16" height="16">
+                        Runtime & Memory
+                    </span>
+                </div>
+                <div class="mt-1 flex items-center gap-2">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-mono font-bold bg-slate-800 text-slate-200 border border-slate-700">
+                        {{ .AWSRuntime }}
+                    </span>
+                    <span class="text-xs font-mono text-slate-300 font-medium">{{ .AWSMemory }}</span>
+                </div>
+                <div class="mt-3 pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-[11px]">
+                    <span class="text-slate-400">Last Invocation</span>
+                    {{ if eq .Status "LIVE" }}
+                    <span class="font-mono text-emerald-400 text-[10px] font-semibold flex items-center gap-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                        {{ .AWSLastInvoked }}
+                    </span>
+                    {{ else }}
+                    <span class="font-mono text-slate-400 text-[10px]">Never (New Resource)</span>
+                    {{ end }}
+                </div>
+            </div>
+
+            <!-- Card 4: Service Ownership & Jira -->
+            <div class="bg-slate-900/90 border border-slate-800/80 rounded-2xl p-4 shadow-xl shadow-black/20 backdrop-blur-xl relative overflow-hidden group hover:border-blue-500/50 transition-all">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Ownership & Tracking</span>
+                    {{ if .JiraID }}
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                        {{ .JiraID }}
+                    </span>
+                    {{ end }}
+                </div>
+                <div class="mt-1">
+                    <p class="text-xs font-semibold text-white truncate" title="{{ .RequestorEmail }}">
+                        {{ .RequestorEmail }}
+                    </p>
+                </div>
+                <div class="mt-3 pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-[11px]">
+                    <span class="text-slate-400 inline-flex items-center gap-1">
+                        <img src="/static/img/brands/terraform.svg" alt="" class="brand-icon-sm" width="12" height="12">
+                        Terraform IaC
+                    </span>
+                    {{ if .TerraformExists }}
+                    <span class="text-emerald-400 font-semibold text-[10px] flex items-center gap-1">
+                        <img src="/static/img/brands/terraform.svg" alt="" class="brand-icon-sm" width="12" height="12">
+                        Declared
+                    </span>
+                    {{ else }}
+                    <span class="text-amber-400 text-[10px] font-medium">Not in main</span>
+                    {{ end }}
+                </div>
+            </div>
+
+        </div>
+
+        {{ if ne .Status "LIVE" }}
+        <!-- DevOps Action Required Alert Banner -->
+        <div class="rounded-2xl {{ if eq .Status "REJECTED_SECURITY" }}bg-rose-50 border border-rose-200 text-rose-900 shadow-sm dark:bg-rose-500/10 dark:border-rose-500/30 dark:text-rose-200 dark:shadow-xl{{ else }}bg-amber-50 border border-amber-200 text-amber-950 shadow-sm dark:bg-amber-500/10 dark:border-amber-500/30 dark:text-amber-200 dark:shadow-xl{{ end }} p-5">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div class="flex items-start gap-3">
+                    <div class="p-2.5 rounded-xl {{ if eq .Status "REJECTED_SECURITY" }}bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-400{{ else }}bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-400{{ end }} flex-shrink-0">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-extrabold text-slate-900 dark:text-white">
+                            {{ if eq .Status "REJECTED_SECURITY" }}
+                            Onboarding Rejected by DevOps Team
+                            {{ else }}
+                            Action Required: Waiting for Infrastructure Provisioning & Approval
+                            {{ end }}
+                        </h4>
+                        <p class="text-xs mt-1 {{ if eq .Status "REJECTED_SECURITY" }}text-rose-800 dark:text-rose-200{{ else }}text-amber-900 dark:text-amber-200/90{{ end }} leading-relaxed font-medium">
+                            {{ if eq .Status "REJECTED_SECURITY" }}
+                            This microservice request was rejected during review. Check the approvals dashboard for feedback.
+                            {{ else }}
+                            This microservice onboarding ticket is currently awaiting DevOps review of <code class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 font-mono text-[11px] border border-amber-300 font-bold dark:bg-slate-950 dark:text-amber-300 dark:border-amber-500/30">terraform.tfvars</code> before the AWS Lambda function and Jenkins CI job are created.
+                            {{ end }}
+                        </p>
+                    </div>
+                </div>
+                <div class="flex-shrink-0">
+                    <a href="/approvals" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-white shadow-md transition-all {{ if eq .Status "REJECTED_SECURITY" }}bg-rose-600 hover:bg-rose-500 shadow-rose-600/30{{ else }}bg-amber-600 hover:bg-amber-500 shadow-amber-600/30{{ end }}">
+                        <span>Open Approvals Dashboard</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+        {{ end }}
+
+        <!-- BOTTOM SECTION: Lambda Testing Console (Clean Dark Card Layout) -->
+        <div class="bg-slate-900/90 border border-slate-800/80 rounded-2xl shadow-xl shadow-black/30 overflow-hidden backdrop-blur-xl">
+            <div class="px-6 py-4 bg-slate-950/70 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                    <h3 class="text-base font-bold text-white flex items-center gap-2">
+                        <div class="w-7 h-7 rounded-lg bg-[#FF9900]/10 border border-[#FF9900]/30 flex items-center justify-center">
+                            <img src="/static/img/brands/lambda.svg" alt="" class="brand-icon" width="16" height="16">
+                        </div>
+                        Lambda Testing Console
+                    </h3>
+                    <p class="text-xs text-slate-400 mt-0.5">Invoke and verify your AWS Lambda execution directly from the developer portal.</p>
+                </div>
+                <div>
+                    {{ if eq .Status "LIVE" }}
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                        Ready to Invoke
+                    </span>
+                    {{ else }}
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-300 border border-slate-700">
+                        <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                        Resource Not Provisioned
+                    </span>
+                    {{ end }}
+                </div>
+            </div>
+
+            <div class="p-6 space-y-4">
+                <form hx-post="/api/v1/catalog/{{ .ServiceName }}/test" hx-target="#test-results" class="space-y-4">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <label for="payload" class="block text-xs font-bold uppercase tracking-wider text-slate-300">
+                                JSON Payload (Event)
+                            </label>
+                            <span class="text-[11px] font-mono text-slate-400">application/json</span>
+                        </div>
+                        <textarea 
+                            id="payload" 
+                            name="payload" 
+                            rows="5" 
+                            {{ if ne .Status "LIVE" }}readonly{{ end }}
+                            class="block w-full rounded-xl border border-slate-800 bg-slate-950 py-3 text-emerald-400 font-mono text-xs shadow-inner ring-1 ring-inset ring-slate-800 focus:ring-2 focus:ring-inset focus:ring-indigo-500 px-4 leading-relaxed {{ if ne .Status "LIVE" }}opacity-80 cursor-not-allowed{{ end }}" 
+                            placeholder='{
+  "key1": "value1",
+  "key2": "value2"
+}'>{{ if ne .Status "LIVE" }}{
+  "note": "AWS Lambda testing is disabled until the resource is approved and deployed by DevOps."
+}{{ end }}</textarea>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
+                        <div class="text-xs text-slate-400">
+                            {{ if eq .Status "LIVE" }}
+                            <span class="text-emerald-400 font-medium">● Connected to AWS {{ .AWSRegion }} Lambda runtime</span>
+                            {{ else }}
+                            <span class="text-amber-400 font-medium">⚠️ Function endpoint is not reachable until status transitions to <strong>LIVE</strong></span>
+                            {{ end }}
+                        </div>
+
+                        <div>
+                            {{ if eq .Status "LIVE" }}
+                            <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-400 hover:to-emerald-500 px-5 py-2.5 text-xs font-bold text-white shadow-lg shadow-teal-500/25 transition-all cursor-pointer">
+                                <img src="/static/img/brands/lambda.svg" alt="" class="brand-icon" width="16" height="16">
+                                <span>Test Lambda (Live)</span>
+                            </button>
+                            {{ else }}
+                            <button type="button" disabled class="inline-flex items-center gap-2 rounded-xl bg-slate-800 border border-slate-700 px-5 py-2.5 text-xs font-bold text-slate-400 shadow-sm opacity-80 cursor-not-allowed">
+                                <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                                <span>Resource Not Ready</span>
+                            </button>
+                            {{ end }}
+                        </div>
+                    </div>
+                </form>
+
+                <div id="test-results"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- PANEL 2: DOCUMENTATION (Full Width 5-Column Grid: 1 Col Sidebar + 4 Col Full Width Viewer) -->
+    <div id="panel-docs" class="hidden">
+        <div id="docs-content-container" class="grid grid-cols-1 lg:grid-cols-5 gap-6 w-full">
+            <!-- Left Sidebar: Navigation Tree & Table of Contents (1 Column) -->
+            <div class="lg:col-span-1 space-y-6">
+                <!-- Navigation Tree -->
+                <div class="bg-white p-4 rounded-xl shadow-sm ring-1 ring-gray-900/5">
+                    <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3">Documentation Files</h4>
+                    <nav class="space-y-1">
+                        <button 
+                            hx-get="/api/v1/catalog/{{ .ServiceName }}/docs?doc=README.md" 
+                            hx-target="#docs-content-container" 
+                            hx-swap="outerHTML" 
+                            class="w-full text-left px-3 py-2 text-sm font-medium rounded-md transition-colors {{ if eq .CurrentDoc "README.md" }}bg-teal-50 text-teal-700 font-semibold{{ else }}text-slate-700 hover:bg-slate-50 hover:text-slate-900{{ end }}">
+                            <svg class="w-4 h-4 mr-1.5 inline text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>README.md
+                        </button>
+                        <button 
+                            hx-get="/api/v1/catalog/{{ .ServiceName }}/docs?doc=docs/architecture.md" 
+                            hx-target="#docs-content-container" 
+                            hx-swap="outerHTML" 
+                            class="w-full text-left px-3 py-2 text-sm font-medium rounded-md transition-colors {{ if eq .CurrentDoc "docs/architecture.md" }}bg-teal-50 text-teal-700 font-semibold{{ else }}text-slate-700 hover:bg-slate-50 hover:text-slate-900{{ end }}">
+                            <svg class="w-4 h-4 mr-1.5 inline text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>Architecture
+                        </button>
+                        <button 
+                            hx-get="/api/v1/catalog/{{ .ServiceName }}/docs?doc=docs/api-spec.md" 
+                            hx-target="#docs-content-container" 
+                            hx-swap="outerHTML" 
+                            class="w-full text-left px-3 py-2 text-sm font-medium rounded-md transition-colors {{ if eq .CurrentDoc "docs/api-spec.md" }}bg-teal-50 text-teal-700 font-semibold{{ else }}text-slate-700 hover:bg-slate-50 hover:text-slate-900{{ end }}">
+                            <svg class="w-4 h-4 mr-1.5 inline text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>API Specification
+                        </button>
+                    </nav>
+                </div>
+
+                <!-- Table of Contents -->
+                <div class="bg-white p-4 rounded-xl shadow-sm ring-1 ring-gray-900/5 sticky top-4">
+                    <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3">Table of Contents</h4>
+                    {{ if .TOCItems }}
+                    <ul class="space-y-1.5 text-xs">
+                        {{ range .TOCItems }}
+                        <li class="{{ if eq .Level 1 }}font-medium text-slate-800{{ else if eq .Level 2 }}pl-2 text-slate-600{{ else }}pl-4 text-slate-500 text-[11px]{{ end }}">
+                            <a href="#{{ .ID }}" class="hover:text-teal-600 hover:underline block truncate">{{ .Title }}</a>
+                        </li>
+                        {{ end }}
+                    </ul>
+                    {{ else }}
+                    <p class="text-slate-400 text-xs italic">No headings found</p>
+                    {{ end }}
+                </div>
+            </div>
+
+            <!-- Main Body: Markdown Content + Edit Link (4 Columns) -->
+            <div class="lg:col-span-4">
+                <div class="bg-white shadow-sm ring-1 ring-gray-900/5 rounded-xl overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200 bg-slate-50 flex items-center justify-between">
+                        <div class="flex items-center space-x-2 text-sm text-slate-600">
+                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            <span class="font-mono text-xs font-semibold text-slate-700">{{ .CurrentDoc }}</span>
+                        </div>
+                        <a href="{{ .RepoURL }}/blob/main/{{ .CurrentDoc }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center text-xs text-blue-600 hover:text-blue-800 font-medium">
+                            <svg class="w-3.5 h-3.5 mr-1" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                            Edit this page on GitHub
+                        </a>
+                    </div>
+                    <div class="px-6 py-6 techdocs-content overflow-x-auto">
+                        {{ .MarkdownHTML }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PANEL 3: ENVIRONMENTS DIFF -->
+    <div id="panel-envs" class="hidden">
+        <div class="bg-white shadow-sm ring-1 ring-gray-900/5 rounded-xl overflow-hidden">
+            <div class="px-4 py-5 sm:px-6 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
+                <div>
+                    <h3 class="text-base font-semibold leading-6 text-gray-900">Environment Variables & Secrets</h3>
+                    <p class="mt-1 text-sm text-gray-500">Compare secrets and configs between environments across Terraform IaC paths.</p>
+                </div>
+                <span class="inline-flex items-center gap-x-1.5 rounded-md bg-purple-50 px-2 py-1 text-xs font-medium text-purple-700 ring-1 ring-inset ring-purple-700/10">
+                    <img src="/static/img/brands/terraform.svg" alt="" class="brand-icon-sm" width="12" height="12">
+                    Parsed from terraform.tfvars
+                </span>
+            </div>
+            <div class="p-6">
+                <div class="mb-4 text-xs text-slate-500 bg-slate-50 border border-slate-200 p-3 rounded-lg flex items-start gap-2">
+                    <svg class="w-4 h-4 text-slate-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span><strong>Source of Truth:</strong> These configurations are dynamically retrieved from the `terraform.tfvars` file under the respective path (e.g. <code>02-app-setup/integration/ph/{env}/services/{service}/terraform.tfvars</code>) inside the Infrastructure IaC Repository, not from the developer's application code.</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 text-xs">
+                        <thead class="bg-slate-50">
+                            <tr>
+                                <th class="px-3 py-2 text-left font-semibold text-slate-700">Environment Variable / Key</th>
+                                <th class="px-3 py-2 text-left font-semibold text-slate-700">UAT (Staging)</th>
+                                <th class="px-3 py-2 text-left font-semibold text-slate-700">PreProd</th>
+                                <th class="px-3 py-2 text-left font-semibold text-slate-700">Prod (Live)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200 font-mono">
+                            {{ range .EnvVars }}
+                            <tr>
+                                <td class="px-3 py-2.5 font-bold text-slate-800">{{ .Key }}</td>
+                                <td class="px-3 py-2.5">
+                                    {{ if eq .UAT "Configured in SSM" }}
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-100 text-emerald-800 font-sans">Configured in SSM</span>
+                                    {{ else if .UAT }}
+                                    <span class="text-teal-700 font-semibold">{{ .UAT }}</span>
+                                    {{ else }}
+                                    <span class="text-gray-400 italic">N/A</span>
+                                    {{ end }}
+                                </td>
+                                <td class="px-3 py-2.5">
+                                    {{ if eq .PreProd "Configured in SSM" }}
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-100 text-emerald-800 font-sans">Configured in SSM</span>
+                                    {{ else if .PreProd }}
+                                    <span class="text-teal-700 font-semibold">{{ .PreProd }}</span>
+                                    {{ else }}
+                                    <span class="text-gray-400 italic">N/A</span>
+                                    {{ end }}
+                                </td>
+                                <td class="px-3 py-2.5">
+                                    {{ if eq .Prod "Configured in SSM" }}
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-amber-100 text-amber-800 font-sans">⚠️ Configured in SSM</span>
+                                    {{ else if .Prod }}
+                                    <span class="text-teal-700 font-semibold">{{ .Prod }}</span>
+                                    {{ else }}
+                                    <span class="text-gray-400 italic">N/A</span>
+                                    {{ end }}
+                                </td>
+                            </tr>
+                            {{ end }}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PANEL 4: VULNERABILITY MANAGEMENT & TRIVY SCAN -->
+    <div id="panel-vulnerabilities" class="hidden">
+        <div class="bg-white shadow-sm ring-1 ring-gray-900/5 rounded-xl overflow-hidden p-6 mb-8">
+            <div class="sm:flex sm:items-center sm:justify-between border-b border-gray-100 pb-4 mb-6 gap-4">
+                <div>
+                    <h3 class="text-base font-bold leading-6 text-gray-900 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                        Vulnerability & Security Management
+                    </h3>
+                    <p class="mt-1 text-xs text-gray-500">Perform Trivy security audits per Git branch, inspect detected CVE vulnerabilities, and accept security risk before deployment.</p>
+                </div>
+                
+                <form id="trivy-scan-form" class="mt-4 sm:mt-0 flex flex-wrap items-center gap-3">
+                    <div class="flex items-center gap-2">
+                        <label for="vuln-branch-select" class="text-xs font-semibold text-gray-700">Target Branch:</label>
+                        <select id="vuln-branch-select" name="branch" class="rounded-md border-gray-300 shadow-sm ring-1 ring-gray-300 focus:ring-2 focus:ring-emerald-600 text-xs py-1.5 px-3 font-mono font-bold text-gray-800 bg-gray-50">
+                            <option value="main" selected>main</option>
+                            <option value="uat">uat</option>
+                            <option value="dev">dev</option>
+                            <option value="staging">staging</option>
+                            <option value="release/v1.0.0">release/v1.0.0</option>
+                        </select>
+                    </div>
+                    <button 
+                        hx-get="/api/v1/catalog/{{ .ServiceName }}/trivy?refresh=true"
+                        hx-include="#vuln-branch-select"
+                        hx-target="#vulnerability-results"
+                        hx-indicator="#vuln-spinner"
+                        type="button" 
+                        class="inline-flex items-center rounded-md bg-emerald-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-emerald-500 transition-colors">
+                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                        Run Branch Security Scan
+                    </button>
+                </form>
+            </div>
+
+            <div id="vuln-spinner" class="htmx-indicator hidden my-6 bg-slate-900 border border-slate-800 text-teal-400 p-5 rounded-xl text-center text-xs font-mono">
+                <span class="inline-block animate-spin mr-2">⟳</span> Running Trivy security audit on selected branch...
+            </div>
+
+            <!-- Vulnerability Results Container (Auto-loads on page render) -->
+            <div id="vulnerability-results" 
+                 hx-get="/api/v1/catalog/{{ .ServiceName }}/trivy?branch=main" 
+                 hx-trigger="load" 
+                 hx-indicator="#vuln-spinner">
+            </div>
+
+            <!-- Per-Service Automated Scan Scheduler Card -->
+            <div class="mt-8 pt-6 border-t border-slate-800">
+                <div class="flex items-center gap-2 mb-3">
+                    <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <h4 class="text-sm font-bold text-white uppercase tracking-wider">Per-Service Scan Schedule & Queue Policy</h4>
+                </div>
+                <p class="text-xs text-slate-400 mb-4">Configure background Trivy scan execution times. All queued scans run sequentially in the <code>trivy_scan</code> queue (FIFO) to prevent resource contention.</p>
+                <div id="scan-schedule-container" 
+                     hx-get="/api/v1/catalog/{{ .ServiceName }}/scan-schedule" 
+                     hx-trigger="load" 
+                     class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-inner">
+                    <div class="text-xs text-slate-400 font-mono animate-pulse">Loading schedule settings...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Edit Service Modal -->
+<div id="edit-modal" class="hidden relative z-50" aria-labelledby="modal-edit-title" role="dialog" aria-modal="true">
+    <div class="fixed inset-0 bg-gray-500/75 transition-opacity"></div>
+    <div class="fixed inset-0 z-50 w-screen overflow-y-auto">
+        <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+            <div class="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
+                <div class="flex items-center justify-between border-b pb-3 mb-4">
+                    <h3 class="text-base font-semibold leading-6 text-gray-900" id="modal-edit-title">Edit Service Catalog</h3>
+                    <button type="button" onclick="closeEditModal()" class="text-gray-400 hover:text-gray-500">
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                </div>
+                
+                <form id="edit-catalog-form" hx-post="" hx-swap="none" class="space-y-4">
+                    <div>
+                        <label for="edit-name" class="block text-xs font-semibold text-gray-700">Service Name</label>
+                        <input type="text" id="edit-name" name="name" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-teal-600 sm:text-sm py-1.5 px-3">
+                    </div>
+
+                    <div>
+                        <label for="edit-description" class="block text-xs font-semibold text-gray-700">Description</label>
+                        <textarea id="edit-description" name="description" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-teal-600 sm:text-sm py-1.5 px-3"></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="edit-requestor" class="block text-xs font-semibold text-gray-700">Requestor / Owner Email</label>
+                            <input type="email" id="edit-requestor" name="requestor_email" placeholder="admin@oona-insurance.com" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-teal-600 sm:text-sm py-1.5 px-3">
+                        </div>
+                        <div>
+                            <label for="edit-jira" class="block text-xs font-semibold text-gray-700">Jira Ticket ID</label>
+                            <input type="text" id="edit-jira" name="jira_id" placeholder="e.g. OONA-1001" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-teal-600 sm:text-sm py-1.5 px-3 font-mono">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="edit-domain" class="block text-xs font-semibold text-gray-700">Product / Domain</label>
+                            <input type="text" id="edit-domain" name="domain" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-teal-600 sm:text-sm py-1.5 px-3">
+                        </div>
+                        <div>
+                            <label for="edit-country" class="block text-xs font-semibold text-gray-700">Country</label>
+                            <input type="text" id="edit-country" name="country" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-teal-600 sm:text-sm py-1.5 px-3">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="edit-status" class="block text-xs font-semibold text-gray-700">Status</label>
+                            <select id="edit-status" name="status" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-teal-600 sm:text-sm py-1.5 px-3">
+                                <option value="LIVE">LIVE</option>
+                                <option value="PENDING_INFRA">PENDING_INFRA</option>
+                                <option value="BUILDING">BUILDING</option>
+                                <option value="MAINTENANCE">MAINTENANCE</option>
+                                <option value="DEPRECATED">DEPRECATED</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="edit-repourl" class="block text-xs font-semibold text-gray-700">Repository URL</label>
+                            <input type="url" id="edit-repourl" name="repo_url" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-teal-600 sm:text-sm py-1.5 px-3">
+                        </div>
+                    </div>
+
+                    <div class="mt-5 sm:flex sm:flex-row-reverse gap-3 pt-3 border-t">
+                        <button type="submit" class="inline-flex w-full justify-center rounded-md bg-teal-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-teal-500 sm:w-auto">Save Changes</button>
+                        <button type="button" onclick="closeEditModal()" class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function openEditModal(id, name, desc, domain, country, status, repoUrl, requestor, jiraId) {
+    document.getElementById('edit-name').value = name;
+    document.getElementById('edit-description').value = desc;
+    document.getElementById('edit-domain').value = domain;
+    document.getElementById('edit-country').value = country;
+    document.getElementById('edit-status').value = status;
+    document.getElementById('edit-repourl').value = repoUrl;
+    document.getElementById('edit-requestor').value = requestor || 'admin@oona-insurance.com';
+    document.getElementById('edit-jira').value = jiraId || 'OONA-1001';
+    
+    const form = document.getElementById('edit-catalog-form');
+    form.setAttribute('hx-post', '/api/v1/catalog/' + id + '/edit');
+    htmx.process(form);
+    
+    document.getElementById('edit-modal').classList.remove('hidden');
+}
+
+function closeEditModal() {
+    document.getElementById('edit-modal').classList.add('hidden');
+}
+
+function switchTab(tabId) {
+    // Hide all panels
+    const overviewPanel = document.getElementById('panel-overview');
+    const topologyPanel = document.getElementById('panel-topology');
+    const vulnPanel = document.getElementById('panel-vulnerabilities');
+    const docsPanel = document.getElementById('panel-docs');
+    const envsPanel = document.getElementById('panel-envs');
+
+    if (overviewPanel) overviewPanel.classList.add('hidden');
+    if (topologyPanel) topologyPanel.classList.add('hidden');
+    if (vulnPanel) vulnPanel.classList.add('hidden');
+    if (docsPanel) docsPanel.classList.add('hidden');
+    if (envsPanel) envsPanel.classList.add('hidden');
+    
+    // Reset all tabs to inactive state
+    const tabs = ['tab-overview', 'tab-topology', 'tab-vulnerabilities', 'tab-docs', 'tab-envs'];
+    tabs.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.className = "border-transparent text-slate-400 hover:border-slate-700 hover:text-white whitespace-nowrap border-b-2 py-3 px-1 text-xs sm:text-sm font-semibold flex items-center gap-1.5";
+        }
+    });
+
+    // Show active panel
+    const targetPanel = document.getElementById('panel-' + tabId);
+    if (targetPanel) {
+        targetPanel.classList.remove('hidden');
+    }
+
+    // Set active tab styling
+    const activeTab = document.getElementById('tab-' + tabId);
+    if (activeTab) {
+        activeTab.className = "border-indigo-500 text-indigo-400 whitespace-nowrap border-b-2 py-3 px-1 text-xs sm:text-sm font-bold flex items-center gap-1.5";
+    }
+
+    // Update URL hash cleanly for deep linking
+    if (history.pushState) {
+        history.pushState(null, null, '#' + tabId);
+    } else {
+        location.hash = '#' + tabId;
+    }
+}
+
+// Auto-route tab selection based on URL hash on page load
+window.addEventListener('DOMContentLoaded', () => {
+    const rawHash = window.location.hash;
+    if (!rawHash) return;
+
+    const hash = rawHash.replace('#', '');
+    if (hash === 'topology' || hash === 'architecture' || hash === 'map') {
+        switchTab('topology');
+    } else if (hash === 'vulnerabilities' || hash === 'vuln' || hash === 'security' || hash === 'trivy') {
+        switchTab('vulnerabilities');
+    } else if (hash === 'docs' || hash === 'documentation') {
+        switchTab('docs');
+    } else if (hash === 'envs' || hash === 'environments') {
+        switchTab('envs');
+    } else if (hash === 'overview') {
+        switchTab('overview');
+    } else {
+        switchTab('docs');
+        setTimeout(() => {
+            const targetEl = document.getElementById(hash);
+            if (targetEl) {
+                targetEl.scrollIntoView({ behavior: 'smooth' });
+            }
+        }, 150);
+    }
+});
+</script>
+{{ end }}

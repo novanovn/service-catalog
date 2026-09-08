@@ -1,0 +1,97 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: oona_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-oona_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-service_catalog}
+    ports:
+      - "127.0.0.1:5432:5432" # Bind only to localhost for security
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      - ./migrations:/docker-entrypoint-initdb.d # Auto-run SQL migrations on boot
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-oona_admin} -d $${POSTGRES_DB:-service_catalog}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  valkey:
+    image: valkey/valkey:8.1-alpine
+    container_name: oona_valkey
+    restart: always
+    ports:
+      - "127.0.0.1:6379:6379"
+    environment:
+      - VALKEY_PASSWORD=${VALKEY_PASSWORD:-valkeysecret123}
+    command: ["sh", "-c", "valkey-server --requirepass $${VALKEY_PASSWORD:-valkeysecret123} --save 60 1 --loglevel warning"]
+    healthcheck:
+      test: ["CMD-SHELL", "valkey-cli -a $${VALKEY_PASSWORD:-valkeysecret123} ping || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build: .
+    container_name: oona_api
+    restart: always
+    environment:
+      - PORT=${PORT:-8080}
+      - DB_DSN=${DB_DSN}
+      - VALKEY_URL=${VALKEY_URL:-valkey:6379}
+      - VALKEY_PASSWORD=${VALKEY_PASSWORD:-valkeysecret123}
+      - JWT_SECRET=${JWT_SECRET}
+      - AES_ENCRYPTION_KEY=${AES_ENCRYPTION_KEY}
+      - GITHUB_TOKEN=${GITHUB_TOKEN:-}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - GEMINI_MODEL=${GEMINI_MODEL:-gemini-3-flash-preview}
+      - TERRAFORM_IAC_DIR=/terraform-iac
+    volumes:
+      - ./internal/templates:/app/internal/templates:ro
+      - ./static:/app/static:ro
+      - ../oona-dtc-country-terraform-iac:/terraform-iac:ro
+      - ../repo:/repo:ro
+    ports:
+      - "8080:8080"
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+    depends_on:
+      postgres:
+        condition: service_healthy
+      valkey:
+        condition: service_healthy
+    command: ["api"]
+
+  worker:
+    build: .
+    container_name: oona_worker
+    restart: always
+    environment:
+      - DB_DSN=${DB_DSN}
+      - VALKEY_URL=${VALKEY_URL:-valkey:6379}
+      - VALKEY_PASSWORD=${VALKEY_PASSWORD:-valkeysecret123}
+      - JWT_SECRET=${JWT_SECRET}
+      - AES_ENCRYPTION_KEY=${AES_ENCRYPTION_KEY}
+      - GITHUB_TOKEN=${GITHUB_TOKEN:-} # Pass from your local shell if available
+    deploy:
+      resources:
+        limits:
+          cpus: '1.5'
+          memory: 1024M
+    volumes:
+      # Optional: Mount your local AWS SSO credentials so the worker can invoke Lambda in UAT
+      - ~/.aws:/appuser/.aws:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      valkey:
+        condition: service_healthy
+    command: ["worker"]
+
+volumes:
+  pg_data:

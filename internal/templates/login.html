@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Service Catalog Portal</title>
+    
+    <!-- Tailwind & HTMX -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/static/js/htmx.min.js"></script>
+    <script src="/static/js/lucide.min.js"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* ==========================================================================
+           TRUE TRANSPARENT SEAMLESS BLENDING (NO RECTANGULAR BOX EFFECT)
+           ========================================================================== */
+        :root, body[data-theme="light"] {
+            --bg-page: #f8fafc;
+            --card-bg: #ffffff;
+            --card-border: #e2e8f0;
+            --input-bg: #f8fafc;
+            --input-border: #cbd5e1;
+            
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --text-dim: #94a3b8;
+            
+            --brand-indigo: #4f46e5;
+            --brand-indigo-hover: #4338ca;
+            --brand-periwinkle: #6366f1;
+            
+            --card-shadow: 0 20px 50px -10px rgba(15, 23, 42, 0.12), 0 0 1px 1px rgba(15, 23, 42, 0.06);
+            --bg-glow-1: rgba(99, 102, 241, 0.05);
+            --bg-glow-2: rgba(6, 182, 212, 0.05);
+        }
+
+        body[data-theme="dark"] {
+            --bg-page: #080a10;
+            --card-bg: #0f131d;
+            --card-border: rgba(255, 255, 255, 0.1);
+            --input-bg: #161b26;
+            --input-border: rgba(255, 255, 255, 0.16);
+            
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --text-dim: #64748b;
+            
+            --brand-indigo: #6366f1;
+            --brand-indigo-hover: #818cf8;
+            --brand-periwinkle: #818cf8;
+            
+            --card-shadow: 0 30px 70px -15px rgba(0, 0, 0, 0.95), 0 0 1px 1px rgba(255, 255, 255, 0.1);
+            --bg-glow-1: rgba(99, 102, 241, 0.12);
+            --bg-glow-2: rgba(6, 182, 212, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Ambient Glow behind the whole canvas */
+        .ambient-glow-left {
+            position: absolute;
+            left: 5%;
+            top: 25%;
+            width: 450px;
+            height: 450px;
+            background: var(--bg-glow-1);
+            filter: blur(120px);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .ambient-glow-right {
+            position: absolute;
+            right: 5%;
+            top: 25%;
+            width: 450px;
+            height: 450px;
+            background: var(--bg-glow-2);
+            filter: blur(120px);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Top Toolbar */
+        .top-toolbar {
+            position: absolute;
+            top: 20px;
+            right: 28px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 100;
+        }
+
+        .btn-toggle-theme {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            color: var(--text-main);
+            padding: 7px 16px;
+            border-radius: 999px;
+            font-size: 12.5px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Continuous Stage Layout */
+        .stage-container {
+            width: 100%;
+            max-width: 1600px;
+            min-height: 720px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px 40px;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Floating 2D Seamless Characters (TRUE TRANSPARENT PNG — NO BOX WHATSOEVER) */
+        .flank-illustration {
+            flex: 1;
+            max-width: 540px;
+            height: 520px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .seamless-vector-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            filter: drop-shadow(0 15px 25px rgba(0,0,0,0.3));
+        }
+
+        /* The Only Floating Elevated Card in the Entire Page: Central Login */
+        .login-card-floating {
+            width: 100%;
+            max-width: 440px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 28px;
+            box-shadow: var(--card-shadow);
+            padding: 44px 38px;
+            position: relative;
+            z-index: 30;
+            flex-shrink: 0;
+            margin: 0 20px;
+        }
+
+        .brand-icon-box {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            background: #4f46e5;
+            display: grid;
+            place-items: center;
+            color: #ffffff;
+            margin: 0 auto 16px;
+            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+        }
+
+        .login-heading {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 26px;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            text-align: center;
+            margin-bottom: 4px;
+        }
+
+        .login-subheading {
+            font-size: 13px;
+            color: var(--text-muted);
+            text-align: center;
+            margin-bottom: 28px;
+            line-height: 1.5;
+        }
+
+        .form-item {
+            margin-bottom: 18px;
+        }
+
+        .form-label-title {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-dim);
+            margin-bottom: 6px;
+        }
+
+        .input-box-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .field-icon {
+            position: absolute;
+            left: 14px;
+            color: var(--text-dim);
+            pointer-events: none;
+        }
+
+        .input-control {
+            width: 100%;
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            color: var(--text-main);
+            padding: 12px 14px 12px 42px;
+            border-radius: 12px;
+            font-size: 13.5px;
+            outline: none;
+            font-family: inherit;
+        }
+
+        .input-control:focus {
+            border-color: var(--brand-indigo);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+        }
+
+        .meta-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12.5px;
+            margin-bottom: 24px;
+        }
+
+        .remember-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        .forgot-link-btn {
+            color: var(--brand-periwinkle);
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .forgot-link-btn:hover {
+            text-decoration: underline;
+        }
+
+        .btn-submit-action {
+            width: 100%;
+            padding: 13px;
+            background: #4f46e5;
+            color: #ffffff;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.35);
+        }
+
+        .btn-submit-action:hover {
+            background: #4338ca;
+            transform: translateY(-1px);
+        }
+
+        .security-badge-footer {
+            margin-top: 24px;
+            font-size: 11.5px;
+            color: var(--text-dim);
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        @media (max-width: 1200px) {
+            .flank-right {
+                display: none;
+            }
+        }
+
+        @media (max-width: 860px) {
+            .flank-left, .flank-right {
+                display: none;
+            }
+            .stage-container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body data-theme="dark">
+
+    <!-- AMBIENT BACKGROUND GLOW -->
+    <div class="ambient-glow-left"></div>
+    <div class="ambient-glow-right"></div>
+
+    <!-- THEME TOGGLE -->
+    <div class="top-toolbar">
+        <button class="btn-toggle-theme" onclick="toggleTheme()">
+            <span id="themeEmoji">🌙</span>
+            <span id="themeLabel">Dark Mode</span>
+        </button>
+    </div>
+
+    <!-- MAIN SCENE STAGE (FREE-FLOATING 2D ILLUSTRATIONS BLENDING SEAMLESSLY) -->
+    <main class="stage-container">
+        
+        <!-- LEFT SEAMLESS 2D VECTOR: FEMALE & MALE SOFTWARE ENGINEERS -->
+        <div class="flank-illustration flank-left">
+            <img id="imgLeft" src="/static/img/grok_vector_left_devs_dark.png" alt="Software Engineering" class="seamless-vector-img" />
+        </div>
+
+        <!-- CENTER: FOCUSED FLOATING LOGIN CARD -->
+        <section class="login-card-floating">
+            <div class="brand-icon-box">
+                <i data-lucide="layers" style="width:24px; height:24px;"></i>
+            </div>
+
+            <h1 class="login-heading">Service Catalog</h1>
+            <p class="login-subheading">Developer & DevOps Platform Login</p>
+
+            <form hx-post="/api/login" hx-target="#login-error" class="space-y-4">
+                <div class="form-item">
+                    <label class="form-label-title" for="email">Work Email</label>
+                    <div class="input-box-wrapper">
+                        <i data-lucide="user" class="field-icon" style="width:16px; height:16px;"></i>
+                        <input type="email" id="email" name="email" class="input-control" placeholder="admin@oona-insurance.com" value="admin@oona-insurance.com" required />
+                    </div>
+                </div>
+
+                <div class="form-item">
+                    <label class="form-label-title" for="password">Password</label>
+                    <div class="input-box-wrapper">
+                        <i data-lucide="lock" class="field-icon" style="width:16px; height:16px;"></i>
+                        <input type="password" id="password" name="password" class="input-control" placeholder="••••••••••••" value="admin123" required />
+                    </div>
+                </div>
+
+                <div class="meta-row">
+                    <label class="remember-group">
+                        <input type="checkbox" checked style="accent-color:#4f46e5;" />
+                        <span>Remember session</span>
+                    </label>
+                    <a href="#" class="forgot-link-btn" onclick="alert('Default credentials: admin@oona-insurance.com / admin123')">Help?</a>
+                </div>
+
+                <!-- Error message container for HTMX -->
+                <div id="login-error"></div>
+
+                <button type="submit" class="btn-submit-action">
+                    <span>Sign In to Catalog</span>
+                    <i data-lucide="arrow-right" style="width:16px; height:16px;"></i>
+                </button>
+            </form>
+
+            <div class="security-badge-footer">
+                <i data-lucide="shield-check" style="width:14px; height:14px; color:#10b981;"></i>
+                <span>Single Sign-On & Shift-Left Gate</span>
+            </div>
+        </section>
+
+        <!-- RIGHT SEAMLESS 2D VECTOR: DEVOPS ENGINEER, SERVERS & ROCKET -->
+        <div class="flank-illustration flank-right">
+            <img id="imgRight" src="/static/img/grok_vector_right_devops_dark.png" alt="Cloud Infrastructure" class="seamless-vector-img" />
+        </div>
+
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        let isDark = true;
+        function toggleTheme() {
+            isDark = !isDark;
+            document.body.setAttribute('data-theme', isDark ? 'dark' : 'light');
+            document.getElementById('themeEmoji').innerText = isDark ? '🌙' : '☀️';
+            document.getElementById('themeLabel').innerText = isDark ? 'Dark Mode' : 'Light Mode';
+            
+            const imgLeft = document.getElementById('imgLeft');
+            const imgRight = document.getElementById('imgRight');
+            
+            if (isDark) {
+                imgLeft.src = '/static/img/grok_vector_left_devs_dark.png';
+                imgRight.src = '/static/img/grok_vector_right_devops_dark.png';
+            } else {
+                imgLeft.src = '/static/img/grok_vector_left_devs.png';
+                imgRight.src = '/static/img/grok_vector_right_devops.png';
+            }
+            lucide.createIcons();
+        }
+    </script>
+</body>
+</html>
