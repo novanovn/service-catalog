@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/oona-insurance/dev-portal/internal/auth"
+	"service-catalog/internal/auth"
 )
 
 // PipelineEngine is the universal interface for CI/CD integrations

@@ -8,9 +8,9 @@ import (
 
 	"github.com/hibiken/asynq"
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/oona-insurance/dev-portal/internal/api"
-	db "github.com/oona-insurance/dev-portal/internal/repository/postgres/generated"
-	"github.com/oona-insurance/dev-portal/internal/worker/aws"
+	"service-catalog/internal/api"
+	db "service-catalog/internal/repository/postgres/generated"
+	"service-catalog/internal/worker/aws"
 )
 
 const (

@@ -8,8 +8,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/oona-insurance/dev-portal/internal/auth"
-	db "github.com/oona-insurance/dev-portal/internal/repository/postgres/generated"
+	"service-catalog/internal/auth"
+	db "service-catalog/internal/repository/postgres/generated"
 )
 
 type FullBackupBundle struct {

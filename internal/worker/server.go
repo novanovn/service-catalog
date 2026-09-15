@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/hibiken/asynq"
-	"github.com/oona-insurance/dev-portal/internal/tasks"
+	"service-catalog/internal/tasks"
 )
 
 // Config holds the worker configuration

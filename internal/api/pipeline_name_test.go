@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/oona-insurance/dev-portal/internal/auth"
+	"service-catalog/internal/auth"
 )
 
 func TestJenkinsJobNameFromRepoID(t *testing.T) {

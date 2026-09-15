@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/hibiken/asynq"
-	"github.com/oona-insurance/dev-portal/internal/notify"
+	"service-catalog/internal/notify"
 )
 
 const (

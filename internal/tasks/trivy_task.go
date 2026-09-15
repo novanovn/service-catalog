@@ -10,9 +10,9 @@ import (
 
 	"github.com/hibiken/asynq"
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/oona-insurance/dev-portal/internal/api"
-	"github.com/oona-insurance/dev-portal/internal/notify"
-	db "github.com/oona-insurance/dev-portal/internal/repository/postgres/generated"
+	"service-catalog/internal/api"
+	"service-catalog/internal/notify"
+	db "service-catalog/internal/repository/postgres/generated"
 )
 
 const (

@@ -10,9 +10,9 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/oona-insurance/dev-portal/internal/auth"
-	"github.com/oona-insurance/dev-portal/internal/models"
-	db "github.com/oona-insurance/dev-portal/internal/repository/postgres/generated"
+	"service-catalog/internal/auth"
+	"service-catalog/internal/models"
+	db "service-catalog/internal/repository/postgres/generated"
 )
 
 // DB holds the connection to PostgreSQL mapped by SQLC

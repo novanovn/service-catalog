@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/oona-insurance/dev-portal/internal/auth"
+	"service-catalog/internal/auth"
 )
 
 type DashboardRecentTicket struct {
@@ -151,25 +151,25 @@ func RenderDashboard(w http.ResponseWriter, r *http.Request) {
 		secStatus.Status = "Critical"
 		secStatus.BadgeText = fmt.Sprintf("%d Critical", totalCritical)
 		secStatus.StatusColor = "rose"
-		secStatus.MainText = fmt.Sprintf("%d Critical", totalCritical)
+		secStatus.MainText = fmt.Sprintf("%d", totalCritical)
 		secStatus.SubText = fmt.Sprintf("%d Critical · %d Total Findings", totalCritical, totalVulns)
 	} else if totalHigh > 0 {
 		secStatus.Status = "High Risk"
 		secStatus.BadgeText = fmt.Sprintf("%d High", totalHigh)
 		secStatus.StatusColor = "orange"
-		secStatus.MainText = fmt.Sprintf("%d High", totalHigh)
+		secStatus.MainText = fmt.Sprintf("%d", totalHigh)
 		secStatus.SubText = fmt.Sprintf("%d High Risk · %d Total Findings", totalHigh, totalVulns)
 	} else if totalMedium > 0 {
 		secStatus.Status = "Medium"
 		secStatus.BadgeText = fmt.Sprintf("%d Medium Risk", totalMedium)
 		secStatus.StatusColor = "amber"
-		secStatus.MainText = fmt.Sprintf("%d Medium", totalMedium)
+		secStatus.MainText = fmt.Sprintf("%d", totalMedium)
 		secStatus.SubText = fmt.Sprintf("%d Medium CVE Vulnerability Detected", totalMedium)
 	} else if totalLow > 0 {
 		secStatus.Status = "Low"
 		secStatus.BadgeText = fmt.Sprintf("%d Low", totalLow)
 		secStatus.StatusColor = "blue"
-		secStatus.MainText = fmt.Sprintf("%d Low", totalLow)
+		secStatus.MainText = fmt.Sprintf("%d", totalLow)
 		secStatus.SubText = fmt.Sprintf("%d Minor Findings", totalLow)
 	}
 

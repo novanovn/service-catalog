@@ -3,7 +3,7 @@ package core
 import (
 	"errors"
 
-	"github.com/oona-insurance/dev-portal/internal/models"
+	"service-catalog/internal/models"
 )
 
 var (

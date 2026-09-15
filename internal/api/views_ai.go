@@ -18,8 +18,8 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/oona-insurance/dev-portal/internal/auth"
-	db "github.com/oona-insurance/dev-portal/internal/repository/postgres/generated"
+	"service-catalog/internal/auth"
+	db "service-catalog/internal/repository/postgres/generated"
 	"github.com/redis/go-redis/v9"
 	"golang.org/x/sync/singleflight"
 )
@@ -196,21 +196,21 @@ func CatalogTrivyScanHandler(w http.ResponseWriter, r *http.Request) {
 
 		// Render HTML card report
 		htmlReport := fmt.Sprintf(`
-		<div class="bg-slate-900 border border-slate-800 rounded-xl p-5 text-white shadow-xl my-4">
-			<div class="flex flex-col md:flex-row md:items-center justify-between pb-4 border-b border-slate-800 gap-3">
+		<div class="bg-[#171717] border border-[#282828] rounded-2xl p-5 text-white shadow-sm my-4">
+			<div class="flex flex-col md:flex-row md:items-center justify-between pb-4 border-b border-[#282828] gap-3">
 				<div>
 					<div class="flex items-center gap-2">
-						<span class="h-3 w-3 rounded-full bg-emerald-400 animate-pulse"></span>
-						<h3 class="font-mono text-sm font-bold text-teal-400 uppercase tracking-wider">Trivy Security & Vulnerability Audit Report</h3>
+						<span class="h-2.5 w-2.5 rounded-full bg-[#3ecf8e] animate-pulse"></span>
+						<h3 class="font-mono text-sm font-bold text-white uppercase tracking-wider">Trivy Security &amp; Vulnerability Audit Report</h3>
 					</div>
-					<p class="text-xs text-slate-400 mt-1">
-						Repository: <code class="font-mono text-slate-300">%s</code> 
-						<span class="ml-2 font-mono text-xs font-bold text-teal-300 bg-teal-950/80 px-2 py-0.5 rounded border border-teal-500/30">Branch: %s</span>
+					<p class="text-xs text-slate-400 mt-1 font-mono">
+						Repository: <code class="text-purple-300 bg-[#121212] px-2 py-0.5 rounded border border-[#282828]">%s</code> 
+						<span class="ml-2 font-bold text-[#a78bfa] bg-purple-500/15 px-2.5 py-0.5 rounded-full border border-purple-500/30">Branch: %s</span>
 					</p>
 				</div>
 				<div class="flex items-center gap-2">
-					<span class="px-3 py-1 rounded text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5">
-						<span class="h-2 w-2 rounded-full bg-emerald-400"></span>
+					<span class="px-3 py-1 rounded-full text-xs font-bold font-mono bg-emerald-500/15 text-[#3ecf8e] border border-[#3ecf8e]/30 flex items-center gap-1.5">
+						<span class="h-2 w-2 rounded-full bg-[#3ecf8e]"></span>
 						POLICY STATUS: PASSED
 					</span>
 				</div>
@@ -218,62 +218,62 @@ func CatalogTrivyScanHandler(w http.ResponseWriter, r *http.Request) {
 
 			<!-- Severity Badges Grid -->
 			<div class="grid grid-cols-2 sm:grid-cols-4 gap-3 my-4">
-				<div class="bg-slate-800/80 p-3 rounded-lg border border-red-500/20 text-center">
-					<div class="text-xl font-black text-red-400">%d</div>
-					<div class="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Critical</div>
+				<div class="bg-red-500/10 p-3.5 rounded-2xl border border-red-500/30 text-center">
+					<div class="text-2xl font-black font-mono text-red-500">%d</div>
+					<div class="text-[10px] font-bold font-mono uppercase text-slate-400 tracking-wider mt-1">Critical</div>
 				</div>
-				<div class="bg-slate-800/80 p-3 rounded-lg border border-amber-500/20 text-center">
-					<div class="text-xl font-black text-amber-400">%d</div>
-					<div class="text-[10px] font-bold uppercase text-slate-400 tracking-wider">High</div>
+				<div class="bg-orange-500/10 p-3.5 rounded-2xl border border-orange-500/30 text-center">
+					<div class="text-2xl font-black font-mono text-orange-500">%d</div>
+					<div class="text-[10px] font-bold font-mono uppercase text-slate-400 tracking-wider mt-1">High</div>
 				</div>
-				<div class="bg-slate-800/80 p-3 rounded-lg border border-yellow-500/20 text-center">
-					<div class="text-xl font-black text-yellow-400">%d</div>
-					<div class="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Medium</div>
+				<div class="bg-amber-500/10 p-3.5 rounded-2xl border border-amber-500/30 text-center">
+					<div class="text-2xl font-black font-mono text-amber-500">%d</div>
+					<div class="text-[10px] font-bold font-mono uppercase text-slate-400 tracking-wider mt-1">Medium</div>
 				</div>
-				<div class="bg-slate-800/80 p-3 rounded-lg border border-blue-500/20 text-center">
-					<div class="text-xl font-black text-blue-400">%d</div>
-					<div class="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Low</div>
+				<div class="bg-blue-500/10 p-3.5 rounded-2xl border border-blue-500/30 text-center">
+					<div class="text-2xl font-black font-mono text-blue-500">%d</div>
+					<div class="text-[10px] font-bold font-mono uppercase text-slate-400 tracking-wider mt-1">Low</div>
 				</div>
 			</div>
 		`, html.EscapeString(repoURL), html.EscapeString(branch), criticalCount, highCount, mediumCount, lowCount)
 
 		if len(allVulns) == 0 {
 			htmlReport += `
-			<div class="bg-emerald-950/30 border border-emerald-500/30 text-emerald-300 p-4 rounded-lg text-xs text-center font-medium">
+			<div class="bg-emerald-500/10 border border-emerald-500/30 text-[#3ecf8e] p-4 rounded-xl text-xs text-center font-mono font-medium">
 				✅ No vulnerabilities or hardcoded secrets detected in repository on this branch!
 			</div>`
 		} else {
 			htmlReport += `
-			<div class="overflow-x-auto rounded-lg border border-slate-800 mt-3">
+			<div class="overflow-x-auto rounded-xl border border-[#282828] mt-3">
 				<table class="w-full text-left text-xs font-mono">
-					<thead class="bg-slate-800/90 text-slate-400 uppercase text-[10px]">
+					<thead class="bg-[#121212] text-slate-400 uppercase text-[10px]">
 						<tr>
-							<th class="px-3 py-2">CVE / ID</th>
-							<th class="px-3 py-2">Severity</th>
-							<th class="px-3 py-2">Package</th>
-							<th class="px-3 py-2">Installed</th>
-							<th class="px-3 py-2">Fixed In</th>
+							<th class="px-4 py-3">CVE / ID</th>
+							<th class="px-4 py-3">Severity</th>
+							<th class="px-4 py-3">Package</th>
+							<th class="px-4 py-3">Installed</th>
+							<th class="px-4 py-3">Fixed In</th>
 						</tr>
 					</thead>
-					<tbody class="divide-y divide-slate-800 text-slate-300">`
+					<tbody class="divide-y divide-[#282828]/60 text-slate-300">`
 
 			for _, v := range allVulns {
-				sevBadge := `<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-yellow-500/20 text-yellow-300">MEDIUM</span>`
+				sevBadge := `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30">MEDIUM</span>`
 				if v.Severity == "CRITICAL" {
-					sevBadge = `<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-500/20 text-red-300">CRITICAL</span>`
+					sevBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-500/15 text-red-400 border border-red-500/30">CRITICAL</span>`
 				} else if v.Severity == "HIGH" {
-					sevBadge = `<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300">HIGH</span>`
+					sevBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-orange-500/15 text-orange-400 border border-orange-500/30">HIGH</span>`
 				} else if v.Severity == "LOW" {
-					sevBadge = `<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-500/20 text-blue-300">LOW</span>`
+					sevBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/15 text-blue-400 border border-blue-500/30">LOW</span>`
 				}
 
 				htmlReport += fmt.Sprintf(`
-						<tr class="hover:bg-slate-800/50">
-							<td class="px-3 py-2"><a href="%s" target="_blank" class="text-teal-400 hover:underline font-bold">%s</a></td>
-							<td class="px-3 py-2">%s</td>
-							<td class="px-3 py-2 font-bold text-white">%s</td>
-							<td class="px-3 py-2 text-slate-400">%s</td>
-							<td class="px-3 py-2 text-emerald-400 font-bold">%s</td>
+						<tr class="hover:bg-[#1f1f1f] transition-colors">
+							<td class="px-4 py-3"><a href="%s" target="_blank" class="text-[#a78bfa] hover:text-purple-300 hover:underline font-bold">%s</a></td>
+							<td class="px-4 py-3">%s</td>
+							<td class="px-4 py-3 font-bold text-white">%s</td>
+							<td class="px-4 py-3 text-slate-400">%s</td>
+							<td class="px-4 py-3 text-[#3ecf8e] font-bold">%s</td>
 						</tr>
 				`, html.EscapeString(v.PrimaryURL), html.EscapeString(v.VulnerabilityID), sevBadge, html.EscapeString(v.PkgName), html.EscapeString(v.InstalledVersion), html.EscapeString(v.FixedVersion))
 			}

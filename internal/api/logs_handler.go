@@ -8,9 +8,9 @@ import (
 	"strings"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/oona-insurance/dev-portal/internal/auth"
-	db "github.com/oona-insurance/dev-portal/internal/repository/postgres/generated"
-	"github.com/oona-insurance/dev-portal/internal/worker/ci"
+	"service-catalog/internal/auth"
+	db "service-catalog/internal/repository/postgres/generated"
+	"service-catalog/internal/worker/ci"
 )
 
 // JenkinsLogsHandler is an HTMX endpoint to fetch and display Jenkins build logs

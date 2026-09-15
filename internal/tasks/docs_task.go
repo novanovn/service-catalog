@@ -7,7 +7,7 @@ import (
 	"log"
 
 	"github.com/hibiken/asynq"
-	"github.com/oona-insurance/dev-portal/internal/docs"
+	"service-catalog/internal/docs"
 )
 
 const (

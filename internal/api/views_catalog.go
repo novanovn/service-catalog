@@ -17,10 +17,10 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/oona-insurance/dev-portal/internal/auth"
-	"github.com/oona-insurance/dev-portal/internal/docs"
-	db "github.com/oona-insurance/dev-portal/internal/repository/postgres/generated"
-	"github.com/oona-insurance/dev-portal/internal/worker/infra"
+	"service-catalog/internal/auth"
+	"service-catalog/internal/docs"
+	db "service-catalog/internal/repository/postgres/generated"
+	"service-catalog/internal/worker/infra"
 )
 
 // ShelfView represents a grouping shelf of microservices

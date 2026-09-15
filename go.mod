@@ -1,4 +1,4 @@
-module github.com/oona-insurance/dev-portal
+module service-catalog
 
 go 1.24.0
 

@@ -7,8 +7,8 @@ import (
 	"net/http"
 
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/oona-insurance/dev-portal/internal/auth"
-	db "github.com/oona-insurance/dev-portal/internal/repository/postgres/generated"
+	"service-catalog/internal/auth"
+	db "service-catalog/internal/repository/postgres/generated"
 )
 
 // RecordAudit asynchronously records a mutation audit trail into PostgreSQL

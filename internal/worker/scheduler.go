@@ -11,7 +11,7 @@ import (
 
 	"github.com/hibiken/asynq"
 	_ "github.com/jackc/pgx/v5/stdlib"
-	"github.com/oona-insurance/dev-portal/internal/tasks"
+	"service-catalog/internal/tasks"
 )
 
 // ScanScheduleRecord represents a record in service_scan_schedules table

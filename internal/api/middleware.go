@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/oona-insurance/dev-portal/internal/auth"
+	"service-catalog/internal/auth"
 	"golang.org/x/time/rate"
 )
 

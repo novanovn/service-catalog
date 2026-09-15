@@ -12,8 +12,8 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/oona-insurance/dev-portal/internal/auth"
-	db "github.com/oona-insurance/dev-portal/internal/repository/postgres/generated"
+	"service-catalog/internal/auth"
+	db "service-catalog/internal/repository/postgres/generated"
 )
 
 const catalogStoreFilePath = "internal/docs/cache/catalog_store.json"

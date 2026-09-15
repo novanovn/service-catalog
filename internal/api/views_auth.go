@@ -8,7 +8,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/oona-insurance/dev-portal/internal/auth"
+	"service-catalog/internal/auth"
 	"golang.org/x/crypto/bcrypt"
 )
 
