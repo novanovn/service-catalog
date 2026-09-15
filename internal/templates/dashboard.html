@@ -9,7 +9,7 @@
             <p class="text-xs sm:text-sm text-slate-400 mt-1">Real-time telemetry, service deployments, and infrastructure automation across environments.</p>
         </div>
         <div class="flex items-center gap-3">
-            <a href="/tickets/new" class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-2 text-xs font-bold text-white shadow-lg shadow-indigo-600/25 hover:from-indigo-500 hover:to-violet-500 transition-all">
+            <a href="/tickets/new" class="inline-flex items-center gap-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white shadow-sm px-4 py-2 text-xs font-bold text-white shadow-lg shadow-indigo-600/25 hover:from-indigo-500 hover:to-violet-500 transition-all">
                 <i data-lucide="plus-circle" class="w-4 h-4"></i>
                 Onboard Service
             </a>
@@ -20,22 +20,22 @@
         </div>
     </div>
 
-    <!-- Metrics KPI Stat Cards (Modern Linear Dark / Gradient Sparklines) -->
+    <!-- Metrics KPI Stat Cards (Supabase Dark Theme & Harmonized 4-Card Grid) -->
     <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        <!-- Card 1: Active Services (Hero Indigo Gradient) -->
-        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600 via-indigo-700 to-violet-800 p-5 shadow-xl shadow-indigo-900/30 text-white ring-1 ring-white/10">
+        <!-- Card 1: Active Services (Catalog Services — Supabase Dark Surface + Oona Purple Sparkline) -->
+        <div class="kpi-card relative overflow-hidden rounded-2xl bg-[#171717] border border-[#282828] p-5 shadow-sm text-white hover:border-[#383838] transition-all group">
             <div class="flex items-center justify-between">
-                <span class="text-xs font-bold uppercase tracking-wider text-indigo-200">Catalog Services</span>
-                <span class="inline-flex items-center rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-bold text-white backdrop-blur-sm">Live</span>
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Catalog Services</span>
+                <span class="inline-flex items-center rounded bg-emerald-500/10 px-2 py-0.5 text-[10px] font-mono font-medium text-emerald-400 border border-emerald-500/20">Live</span>
             </div>
             <div class="mt-4 flex items-baseline justify-between">
-                <p class="text-3xl font-extrabold tracking-tight">{{ .CatalogCount }}</p>
-                <div class="h-9 w-20 opacity-80">
-                    <svg class="w-full h-full text-indigo-200" viewBox="0 0 100 40" fill="none">
+                <p class="text-3xl font-extrabold tracking-tight font-mono text-white kpi-counter" data-target="{{ .CatalogCount }}">{{ .CatalogCount }}</p>
+                <div class="h-9 w-20 opacity-90">
+                    <svg class="w-full h-full text-[#a78bfa]" viewBox="0 0 100 40" fill="none">
                         <defs>
                             <linearGradient id="dashSpark1" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stop-color="#ffffff" stop-opacity="0.4"/>
-                                <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+                                <stop offset="0%" stop-color="#7c3aed" stop-opacity="0.4"/>
+                                <stop offset="100%" stop-color="#7c3aed" stop-opacity="0"/>
                             </linearGradient>
                         </defs>
                         <path fill="url(#dashSpark1)" d="M0,35 Q25,15, 50,22 T100,5 L100,40 L0,40 Z"/>
@@ -43,101 +43,107 @@
                     </svg>
                 </div>
             </div>
-            <div class="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-xs text-indigo-200">
-                <span>Deployed in Production</span>
-                <a href="/catalog" class="font-bold text-white hover:underline">Explore &rarr;</a>
+            <div class="mt-4 pt-3 border-t border-[#282828] flex items-center justify-between text-xs text-slate-400">
+                <span>7 Shelves (PH & ID)</span>
+                <a href="/catalog" class="font-bold text-[#a78bfa] hover:text-purple-300">Explore &rarr;</a>
             </div>
         </div>
 
         <!-- Card 2: Open Tickets -->
-        <div class="relative overflow-hidden rounded-2xl bg-slate-900/90 border border-slate-800/80 p-5 shadow-lg shadow-black/20 text-white backdrop-blur-xl hover:border-slate-700 transition-all">
+        <div class="kpi-card relative overflow-hidden rounded-2xl bg-[#171717] border border-[#282828] p-5 shadow-sm text-white hover:border-[#383838] transition-all">
             <div class="flex items-center justify-between">
                 <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Open Tickets</span>
-                <span class="inline-flex items-center rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] font-bold text-blue-400 border border-blue-500/20">Pipeline</span>
+                <span class="inline-flex items-center rounded-full bg-blue-500/10 px-2.5 py-0.5 text-[10px] font-mono font-bold text-blue-400 border border-blue-500/20">Pipeline</span>
             </div>
             <div class="mt-4 flex items-baseline justify-between">
-                <p class="text-3xl font-extrabold tracking-tight text-white">{{ .OpenTicketsCount }}</p>
+                <p class="text-3xl font-extrabold tracking-tight font-mono text-white kpi-counter" data-target="{{ .OpenTicketsCount }}">{{ .OpenTicketsCount }}</p>
                 <div class="p-2.5 rounded-xl bg-blue-500/10 text-blue-400 ring-1 ring-blue-500/20">
                     <i data-lucide="ticket" class="h-5 w-5"></i>
                 </div>
             </div>
-            <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
+            <div class="mt-4 pt-3 border-t border-[#282828] flex items-center justify-between text-xs text-slate-400">
                 <span>In Provisioning Queue</span>
-                <a href="/tickets" class="font-bold text-indigo-400 hover:text-indigo-300">View list &rarr;</a>
+                <a href="/tickets" class="font-bold text-blue-400 hover:text-blue-300">View list &rarr;</a>
             </div>
         </div>
 
         <!-- Card 3: Pending Approvals -->
-        <div class="relative overflow-hidden rounded-2xl bg-slate-900/90 border border-slate-800/80 p-5 shadow-lg shadow-black/20 text-white backdrop-blur-xl hover:border-slate-700 transition-all">
+        <div class="kpi-card relative overflow-hidden rounded-2xl bg-[#171717] border border-[#282828] p-5 shadow-sm text-white hover:border-[#383838] transition-all">
             <div class="flex items-center justify-between">
                 <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Pending Review</span>
-                <span class="inline-flex items-center rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold text-amber-400 border border-amber-500/20">DevOps</span>
+                <span class="inline-flex items-center rounded-full bg-amber-500/10 px-2.5 py-0.5 text-[10px] font-mono font-bold text-amber-400 border border-amber-500/20">DevOps Gate</span>
             </div>
             <div class="mt-4 flex items-baseline justify-between">
-                <p class="text-3xl font-extrabold tracking-tight text-white">{{ .PendingApprovalsCount }}</p>
+                <p class="text-3xl font-extrabold tracking-tight font-mono text-white kpi-counter" data-target="{{ .PendingApprovalsCount }}">{{ .PendingApprovalsCount }}</p>
                 <div class="p-2.5 rounded-xl bg-amber-500/10 text-amber-400 ring-1 ring-amber-500/20">
                     <i data-lucide="check-check" class="h-5 w-5"></i>
                 </div>
             </div>
-            <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
+            <div class="mt-4 pt-3 border-t border-[#282828] flex items-center justify-between text-xs text-slate-400">
                 <span>Awaiting DevOps Gate</span>
                 <a href="/approvals" class="font-bold text-amber-400 hover:text-amber-300">Review &rarr;</a>
             </div>
         </div>
 
-        <!-- Card 4: Security Status (Live Findings Telemetry) -->
-        <div class="relative overflow-hidden rounded-2xl bg-slate-900/90 border border-slate-800/80 p-5 shadow-lg shadow-black/20 text-white backdrop-blur-xl hover:border-slate-700 transition-all">
+        <!-- Card 4: Security Status (Uniform Supabase Border & Clean Color Harmony) -->
+        <div class="kpi-card relative overflow-hidden rounded-2xl bg-[#171717] border border-[#282828] p-5 shadow-sm text-white hover:border-[#383838] transition-all">
             <div class="flex items-center justify-between">
                 <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Security Gate</span>
                 {{ if eq .Security.StatusColor "rose" }}
-                <span class="inline-flex items-center rounded-full bg-rose-500/10 px-2 py-0.5 text-[10px] font-bold text-rose-400 border border-rose-500/20">{{ .Security.BadgeText }}</span>
+                <span class="inline-flex items-center rounded-full bg-red-500/15 px-2.5 py-0.5 text-[10px] font-mono font-bold text-red-400 border border-red-500/30">{{ .Security.BadgeText }}</span>
                 {{ else if eq .Security.StatusColor "orange" }}
-                <span class="inline-flex items-center rounded-full bg-orange-500/10 px-2 py-0.5 text-[10px] font-bold text-orange-400 border border-orange-500/20">{{ .Security.BadgeText }}</span>
+                <span class="inline-flex items-center rounded-full bg-orange-500/15 px-2.5 py-0.5 text-[10px] font-mono font-bold text-orange-400 border border-orange-500/30">{{ .Security.BadgeText }}</span>
                 {{ else if eq .Security.StatusColor "amber" }}
-                <span class="inline-flex items-center rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold text-amber-400 border border-amber-500/20">{{ .Security.BadgeText }}</span>
+                <span class="inline-flex items-center rounded-full bg-amber-500/15 px-2.5 py-0.5 text-[10px] font-mono font-bold text-amber-400 border border-amber-500/30">{{ .Security.BadgeText }}</span>
                 {{ else if eq .Security.StatusColor "blue" }}
-                <span class="inline-flex items-center rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] font-bold text-blue-400 border border-blue-500/20">{{ .Security.BadgeText }}</span>
+                <span class="inline-flex items-center rounded-full bg-blue-500/15 px-2.5 py-0.5 text-[10px] font-mono font-bold text-blue-400 border border-blue-500/30">{{ .Security.BadgeText }}</span>
                 {{ else }}
-                <span class="inline-flex items-center rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-400 border border-emerald-500/20">Clean</span>
+                <span class="inline-flex items-center rounded-full bg-emerald-500/15 px-2.5 py-0.5 text-[10px] font-mono font-bold text-[#3ecf8e] border border-[#3ecf8e]/30">Clean</span>
                 {{ end }}
             </div>
             <div class="mt-4 flex items-baseline justify-between">
                 {{ if eq .Security.StatusColor "rose" }}
-                <p class="text-3xl font-extrabold tracking-tight text-rose-400">{{ .Security.MainText }}</p>
-                <div class="p-2.5 rounded-xl bg-rose-500/10 text-rose-400 ring-1 ring-rose-500/20">
+                <p class="text-3xl font-extrabold tracking-tight font-mono text-red-400 kpi-counter" data-target="{{ .Security.MainText }}">{{ .Security.MainText }}</p>
+                <div class="p-2.5 rounded-xl bg-red-500/10 text-red-400 ring-1 ring-red-500/20">
                     <i data-lucide="shield-alert" class="h-5 w-5"></i>
                 </div>
                 {{ else if or (eq .Security.StatusColor "amber") (eq .Security.StatusColor "orange") }}
-                <p class="text-3xl font-extrabold tracking-tight text-amber-400">{{ .Security.MainText }}</p>
+                <p class="text-3xl font-extrabold tracking-tight font-mono text-amber-400 kpi-counter" data-target="{{ .Security.MainText }}">{{ .Security.MainText }}</p>
                 <div class="p-2.5 rounded-xl bg-amber-500/10 text-amber-400 ring-1 ring-amber-500/20">
                     <i data-lucide="shield-alert" class="h-5 w-5"></i>
                 </div>
                 {{ else }}
-                <p class="text-3xl font-extrabold tracking-tight text-emerald-400">{{ .Security.MainText }}</p>
-                <div class="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20">
+                <p class="text-3xl font-extrabold tracking-tight font-mono text-[#3ecf8e] kpi-counter" data-target="{{ .Security.MainText }}">{{ .Security.MainText }}</p>
+                <div class="p-2.5 rounded-xl bg-emerald-500/10 text-[#3ecf8e] ring-1 ring-[#3ecf8e]/20">
                     <i data-lucide="shield-check" class="h-5 w-5"></i>
                 </div>
                 {{ end }}
             </div>
-            <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
+            <div class="mt-4 pt-3 border-t border-[#282828] flex items-center justify-between text-xs text-slate-400">
                 <span class="truncate pr-2">{{ .Security.SubText }}</span>
+                {{ if eq .Security.StatusColor "rose" }}
+                <a href="/approvals" class="font-bold text-red-400 hover:text-red-300 whitespace-nowrap">Review &rarr;</a>
+                {{ else if or (eq .Security.StatusColor "amber") (eq .Security.StatusColor "orange") }}
                 <a href="/approvals" class="font-bold text-amber-400 hover:text-amber-300 whitespace-nowrap">Review &rarr;</a>
+                {{ else }}
+                <a href="/approvals" class="font-bold text-[#3ecf8e] hover:text-emerald-300 whitespace-nowrap">Review &rarr;</a>
+                {{ end }}
             </div>
         </div>
     </div>
 
-    <!-- Recent Activity Table (Modern Slate Dark Container) -->
-    <div class="bg-slate-900/90 border border-slate-800/80 rounded-2xl shadow-xl shadow-black/30 overflow-hidden backdrop-blur-xl">
-        <div class="border-b border-slate-800 px-6 py-4 flex items-center justify-between">
+    <!-- Recent Activity Table (Supabase Dark Container) -->
+    <div class="bg-[#171717] border border-[#282828] rounded-2xl shadow-sm overflow-hidden">
+        <div class="border-b border-[#282828] px-6 py-4 flex items-center justify-between">
             <div>
                 <h3 class="text-sm font-bold tracking-tight text-white uppercase tracking-wider">Recent Service Provisioning</h3>
                 <p class="text-xs text-slate-400 mt-0.5">Live events from Asynq task workers & CI pipelines</p>
             </div>
-            <a href="/tickets" class="text-xs font-semibold text-indigo-400 hover:text-indigo-300">View All Tickets &rarr;</a>
+            <a href="/tickets" class="text-xs font-semibold text-[#a78bfa] hover:text-purple-300">View All Tickets &rarr;</a>
         </div>
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-slate-800 text-left">
-                <thead class="bg-slate-950/60 text-slate-400 text-xs font-semibold uppercase tracking-wider">
+            <table class="min-w-full divide-y divide-[#282828] text-left">
+                <thead class="bg-[#141414] text-slate-400 text-xs font-semibold uppercase tracking-wider font-mono">
                     <tr>
                         <th scope="col" class="py-3.5 pl-6 pr-3">Service Name</th>
                         <th scope="col" class="px-3 py-3.5">Product & Region</th>
@@ -145,21 +151,21 @@
                         <th scope="col" class="px-3 py-3.5">Activity Time</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-800/60 text-xs">
+                <tbody class="divide-y divide-[#282828]/60 text-xs">
                     {{ if .RecentTickets }}
                     {{ range .RecentTickets }}
-                    <tr class="hover:bg-slate-800/40 transition-colors">
-                        <td class="whitespace-nowrap py-4 pl-6 pr-3 font-semibold text-white">{{ .ServiceName }}</td>
-                        <td class="whitespace-nowrap px-3 py-4 text-slate-400">{{ .Domain }} / {{ .Country }}</td>
+                    <tr class="hover:bg-[#1e1e1e] transition-colors">
+                        <td class="whitespace-nowrap py-4 pl-6 pr-3 font-semibold text-white font-mono">{{ .ServiceName }}</td>
+                        <td class="whitespace-nowrap px-3 py-4 text-slate-400 font-mono">{{ .Domain }} / {{ .Country }}</td>
                         <td class="whitespace-nowrap px-3 py-4">
-                            <span class="inline-flex items-center rounded-lg bg-indigo-500/10 px-2.5 py-1 text-[11px] font-semibold text-indigo-400 border border-indigo-500/20">{{ .Status }}</span>
+                            <span class="inline-flex items-center rounded-lg bg-purple-500/15 px-2.5 py-1 text-[11px] font-semibold text-[#a78bfa] border border-purple-500/30 font-mono">{{ .Status }}</span>
                         </td>
                         <td class="whitespace-nowrap px-3 py-4 text-slate-400 font-mono">{{ .CreatedAt }}</td>
                     </tr>
                     {{ end }}
                     {{ else }}
                     <tr>
-                        <td colspan="4" class="text-center py-10 text-slate-400">
+                        <td colspan="4" class="text-center py-10 text-slate-400 font-mono text-xs">
                             No recent service provisioning activity. Create an onboarding ticket to begin!
                         </td>
                     </tr>
@@ -169,4 +175,57 @@
         </div>
     </div>
 </div>
+
+<script>
+(function() {
+    function animateCountUp(el, start, end, duration) {
+        let startTimestamp = null;
+        const actualDuration = end <= 3 ? 450 : duration;
+
+        const step = (timestamp) => {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const progress = Math.min((timestamp - startTimestamp) / actualDuration, 1);
+            // Ease out cubic: 1 - (1 - t)^3
+            const ease = 1 - Math.pow(1 - progress, 3);
+            el.innerText = Math.round(ease * (end - start) + start);
+            if (progress < 1) {
+                window.requestAnimationFrame(step);
+            } else {
+                el.innerText = end;
+            }
+        };
+        window.requestAnimationFrame(step);
+    }
+
+    function initKpiAnimations() {
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            return;
+        }
+
+        const counters = document.querySelectorAll('.kpi-counter');
+        counters.forEach(counter => {
+            const rawTarget = counter.getAttribute('data-target');
+            const target = parseInt(rawTarget, 10);
+            if (!isNaN(target) && target > 0) {
+                counter.innerText = '0';
+                animateCountUp(counter, 0, target, 750);
+            }
+        });
+    }
+
+    // Trigger on full page load
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initKpiAnimations);
+    } else {
+        initKpiAnimations();
+    }
+
+    // Trigger on HTMX partial content reload/swap
+    document.addEventListener('htmx:afterSwap', function(evt) {
+        if (evt.detail.target && evt.detail.target.querySelector && evt.detail.target.querySelector('.kpi-counter')) {
+            initKpiAnimations();
+        }
+    });
+})();
+</script>
 {{ end }}

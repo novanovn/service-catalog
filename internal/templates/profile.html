@@ -1,25 +1,91 @@
 {{ define "content" }}
-<div class="max-w-4xl mx-auto">
-    <div class="mb-8 border-b pb-5">
-        <h2 class="text-2xl font-bold text-gray-900">User Profile</h2>
-        <p class="text-sm text-gray-500 mt-1">Manage your account information and preferences.</p>
+<div class="max-w-4xl mx-auto space-y-6">
+    <!-- Header with User Avatar Monogram -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-[#282828] pb-5">
+        <div class="flex items-center gap-4">
+            <div class="w-14 h-14 rounded-2xl bg-purple-600 flex items-center justify-center text-white text-2xl font-extrabold shadow-lg shadow-purple-600/20 ring-1 ring-purple-400/30">
+                {{ if .User }}{{ slice .User.Email 0 1 | printf "%s" }}{{ else }}A{{ end }}
+            </div>
+            <div>
+                <div class="flex items-center gap-2.5">
+                    <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
+                        User Profile
+                    </h2>
+                    <span class="inline-flex items-center rounded-full bg-purple-500/15 px-2.5 py-0.5 text-xs font-bold font-mono text-[#a78bfa] border border-purple-500/30 uppercase">
+                        {{ if .User }}{{ .User.Role }}{{ else }}ADMIN{{ end }}
+                    </span>
+                    <span class="inline-flex items-center rounded-full bg-emerald-500/15 px-2.5 py-0.5 text-xs font-bold font-mono text-[#3ecf8e] border border-[#3ecf8e]/30">
+                        ● Active
+                    </span>
+                </div>
+                <p class="text-xs sm:text-sm text-slate-400 mt-1">Manage personal credentials, platform role delegations, and security audit identities.</p>
+            </div>
+        </div>
     </div>
 
-    <div class="bg-white shadow-sm ring-1 ring-gray-900/5 rounded-xl p-6">
-        <dl class="divide-y divide-gray-100">
-            <div class="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                <dt class="text-sm font-medium text-gray-900">Email address</dt>
-                <dd class="mt-1 text-sm text-gray-700 sm:col-span-2 sm:mt-0">{{ if .User }}{{ .User.Email }}{{ else }}N/A{{ end }}</dd>
+    <!-- Main Profile Card (Supabase Dark / Clean Light) -->
+    <div class="bg-[#171717] border border-[#282828] rounded-2xl shadow-sm overflow-hidden text-white">
+        <div class="p-6 border-b border-[#282828]">
+            <h3 class="text-sm font-bold uppercase tracking-wider text-slate-300 font-mono flex items-center gap-2">
+                <i data-lucide="shield" class="w-4 h-4 text-[#a78bfa]"></i>
+                Identity &amp; Credentials
+            </h3>
+        </div>
+        <dl class="divide-y divide-[#282828] text-xs">
+            <div class="p-6 sm:grid sm:grid-cols-3 sm:gap-4 hover:bg-[#1f1f1f] transition-colors">
+                <dt class="font-bold text-slate-400 uppercase tracking-wider font-mono">Work Email</dt>
+                <dd class="mt-1 font-semibold text-white sm:col-span-2 sm:mt-0 font-mono text-sm">
+                    {{ if .User }}{{ .User.Email }}{{ else }}admin@oona-insurance.com{{ end }}
+                </dd>
             </div>
-            <div class="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                <dt class="text-sm font-medium text-gray-900">Role</dt>
-                <dd class="mt-1 text-sm text-gray-700 sm:col-span-2 sm:mt-0 capitalize">{{ if .User }}{{ .User.Role }}{{ else }}N/A{{ end }}</dd>
+            <div class="p-6 sm:grid sm:grid-cols-3 sm:gap-4 hover:bg-[#1f1f1f] transition-colors">
+                <dt class="font-bold text-slate-400 uppercase tracking-wider font-mono">Assigned Platform Role</dt>
+                <dd class="mt-1 sm:col-span-2 sm:mt-0">
+                    <span class="inline-flex items-center rounded-lg bg-purple-500/15 px-3 py-1 font-mono font-bold text-[#a78bfa] border border-purple-500/30 uppercase">
+                        {{ if .User }}{{ .User.Role }}{{ else }}ADMIN{{ end }}
+                    </span>
+                    <span class="text-xs text-slate-400 ml-2 font-mono">(Full administrative access &amp; approval rights)</span>
+                </dd>
             </div>
-            <div class="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                <dt class="text-sm font-medium text-gray-900">User ID</dt>
-                <dd class="mt-1 text-sm font-mono text-gray-500 sm:col-span-2 sm:mt-0">{{ if .User }}{{ .User.UserID }}{{ else }}N/A{{ end }}</dd>
+            <div class="p-6 sm:grid sm:grid-cols-3 sm:gap-4 hover:bg-[#1f1f1f] transition-colors">
+                <dt class="font-bold text-slate-400 uppercase tracking-wider font-mono">System User UUID</dt>
+                <dd class="mt-1 font-mono text-slate-300 sm:col-span-2 sm:mt-0 flex items-center gap-2">
+                    <code class="bg-[#121212] px-2.5 py-1 rounded-lg border border-[#282828] text-purple-300">{{ if .User }}{{ .User.UserID }}{{ else }}N/A{{ end }}</code>
+                </dd>
+            </div>
+            <div class="p-6 sm:grid sm:grid-cols-3 sm:gap-4 hover:bg-[#1f1f1f] transition-colors">
+                <dt class="font-bold text-slate-400 uppercase tracking-wider font-mono">Default Timezone</dt>
+                <dd class="mt-1 sm:col-span-2 sm:mt-0 font-mono text-slate-300 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-[#3ecf8e]"></span>
+                    <span>Asia/Jakarta (WIB, UTC+07:00)</span>
+                </dd>
             </div>
         </dl>
+    </div>
+
+    <!-- Security & Permissions Card -->
+    <div class="bg-[#171717] border border-[#282828] rounded-2xl shadow-sm p-6 text-white space-y-4">
+        <h3 class="text-sm font-bold uppercase tracking-wider text-slate-300 font-mono flex items-center gap-2">
+            <i data-lucide="key" class="w-4 h-4 text-emerald-400"></i>
+            Security &amp; Session Integrity
+        </h3>
+        <p class="text-xs text-slate-400 leading-relaxed">
+            Your session is secured with HTTP-only tokens, AES-256 encrypted credential vaults, and HMAC-SHA256 signature verification for external webhooks.
+        </p>
+        <div class="flex flex-wrap gap-3 pt-2">
+            <div class="p-3 rounded-xl bg-[#121212] border border-[#282828] text-xs font-mono text-slate-300 flex items-center gap-2">
+                <i data-lucide="check-circle" class="w-4 h-4 text-[#3ecf8e]"></i>
+                CSRF Protection: Active
+            </div>
+            <div class="p-3 rounded-xl bg-[#121212] border border-[#282828] text-xs font-mono text-slate-300 flex items-center gap-2">
+                <i data-lucide="shield-check" class="w-4 h-4 text-[#3ecf8e]"></i>
+                Rate Limiter: 10 req/min Login
+            </div>
+            <div class="p-3 rounded-xl bg-[#121212] border border-[#282828] text-xs font-mono text-slate-300 flex items-center gap-2">
+                <i data-lucide="lock" class="w-4 h-4 text-[#a78bfa]"></i>
+                DB Encryption: AES-256 GCM
+            </div>
+        </div>
     </div>
 </div>
 {{ end }}

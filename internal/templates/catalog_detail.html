@@ -3,17 +3,17 @@
   .techdocs-content {
     font-size: 0.875rem;
     line-height: 1.75;
-    color: #334155;
+    color: #cbd5e1;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   }
   .techdocs-content h1 {
     font-size: 1.45rem;
     font-weight: 700;
-    color: #0f172a;
+    color: #f8fafc;
     margin-top: 1.75rem;
     margin-bottom: 1rem;
     padding-bottom: 0.6rem;
-    border-bottom: 2px solid #e2e8f0;
+    border-bottom: 2px solid #282828;
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -24,29 +24,29 @@
     display: inline-block;
     width: 5px;
     height: 1.2rem;
-    background: linear-gradient(135deg, #0d9488, #0284c7);
+    background: linear-gradient(135deg, #7c3aed, #3b82f6);
     border-radius: 3px;
   }
   .techdocs-content h2 {
     font-size: 1.18rem;
     font-weight: 600;
-    color: #0f172a;
+    color: #f8fafc;
     margin-top: 1.5rem;
     margin-bottom: 0.75rem;
     padding-bottom: 0.35rem;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid #282828;
     letter-spacing: -0.01em;
   }
   .techdocs-content h3 {
     font-size: 1.02rem;
     font-weight: 600;
-    color: #1e293b;
+    color: #f1f5f9;
     margin-top: 1.25rem;
     margin-bottom: 0.5rem;
   }
   .techdocs-content p {
     margin-bottom: 1rem;
-    color: #334155;
+    color: #cbd5e1;
     line-height: 1.75;
   }
   .techdocs-content table {
@@ -56,25 +56,28 @@
     margin-top: 1.25rem;
     margin-bottom: 1.25rem;
     font-size: 0.8125rem;
-    border: 1px solid #e2e8f0;
-    border-radius: 0.5rem;
+    border: 1px solid #282828;
+    border-radius: 0.75rem;
     overflow: hidden;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04);
+    background-color: #171717;
   }
   .techdocs-content th {
-    background-color: #f8fafc;
-    border-bottom: 1px solid #cbd5e1;
+    background-color: #141414;
+    border-bottom: 1px solid #282828;
     padding: 10px 14px;
     text-align: left;
     font-weight: 600;
-    color: #0f172a;
+    color: #f8fafc;
     white-space: nowrap;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+    font-size: 0.75rem;
+    text-transform: uppercase;
   }
   .techdocs-content td {
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid #282828;
     padding: 10px 14px;
     vertical-align: top;
-    color: #334155;
+    color: #cbd5e1;
   }
   .techdocs-content tr:last-child td {
     border-bottom: none;
@@ -82,25 +85,24 @@
   .techdocs-content code {
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     font-size: 0.785rem;
-    background-color: #f1f5f9;
-    color: #0f172a;
+    background-color: #121212;
+    color: #a78bfa;
     padding: 2px 6px;
-    border-radius: 5px;
-    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    border: 1px solid #282828;
     font-weight: 500;
   }
   .techdocs-content pre {
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     font-size: 0.8125rem;
-    background-color: #0b1329;
+    background-color: #121212;
     color: #e2e8f0;
     padding: 1.25rem;
     border-radius: 0.75rem;
     overflow-x: auto;
     margin-top: 1.25rem;
     margin-bottom: 1.25rem;
-    border: 1px solid #1e293b;
-    box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.2);
+    border: 1px solid #282828;
   }
   .techdocs-content pre code {
     background-color: transparent;
@@ -117,6 +119,74 @@
     position: relative;
     padding-left: 1.25rem;
     margin-bottom: 0.35rem;
+    color: #cbd5e1;
+  }
+  .techdocs-content ul li::before {
+    content: "•";
+    position: absolute;
+    left: 0.25rem;
+    color: #7c3aed;
+    font-weight: bold;
+  }
+  .techdocs-content a {
+    color: #a78bfa;
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .techdocs-content a:hover {
+    color: #c4b5fd;
+    text-decoration: underline;
+  }
+
+  /* Light Mode Overrides for TechDocs */
+  html.light-mode .techdocs-content {
+    color: #334155;
+  }
+  html.light-mode .techdocs-content h1 {
+    color: #0f172a;
+    border-bottom-color: #e2e8f0;
+  }
+  html.light-mode .techdocs-content h2 {
+    color: #0f172a;
+    border-bottom-color: #f1f5f9;
+  }
+  html.light-mode .techdocs-content h3 {
+    color: #1e293b;
+  }
+  html.light-mode .techdocs-content p {
+    color: #334155;
+  }
+  html.light-mode .techdocs-content table {
+    border-color: #e2e8f0;
+    background-color: #ffffff;
+  }
+  html.light-mode .techdocs-content th {
+    background-color: #f8fafc;
+    border-bottom-color: #e2e8f0;
+    color: #0f172a;
+  }
+  html.light-mode .techdocs-content td {
+    border-bottom-color: #f1f5f9;
+    color: #334155;
+  }
+  html.light-mode .techdocs-content code {
+    background-color: #f5f3ff;
+    color: #6d28d9;
+    border-color: #ddd6fe;
+  }
+  html.light-mode .techdocs-content pre {
+    background-color: #0f172a;
+    color: #f8fafc;
+    border-color: #1e293b;
+  }
+  html.light-mode .techdocs-content ul li {
+    color: #334155;
+  }
+  html.light-mode .techdocs-content a {
+    color: #6d28d9;
+  }
+  html.light-mode .techdocs-content a:hover {
+    color: #4c1d95;
   }
   .techdocs-content ul li::before {
     content: "•";
@@ -262,192 +332,304 @@
     </div>
 
     <!-- PANEL 0: ARCHITECTURE & TOPOLOGY GRAPH -->
+    <!-- PANEL 2: SERVICE TOPOLOGY & ARCHITECTURE (eBPF Live Mesh Canvas Graph) -->
     <div id="panel-topology" class="hidden space-y-6">
-        <div class="bg-slate-900/90 border border-slate-800/80 rounded-2xl shadow-xl shadow-black/30 p-6 backdrop-blur-xl">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-800 pb-4 mb-6">
-                <div>
-                    <h3 class="text-base font-bold text-white flex items-center gap-2">
-                        <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/></svg>
-                        Service Topology & Dependency Graph
-                    </h3>
-                    <p class="text-xs text-slate-400 mt-0.5">End-to-end trace from upstream clients, microservice runtime, data stores, to third-party integrations.</p>
+        <div class="bg-[#171717] border border-[#282828] rounded-2xl shadow-sm overflow-hidden text-white transition-colors">
+            
+            <!-- Topology Header Controls Bar -->
+            <div class="px-5 py-3.5 border-b border-[#282828] flex flex-wrap items-center justify-between gap-3 bg-[#141414]">
+                <div class="flex items-center space-x-3">
+                    <div class="w-2.5 h-2.5 rounded-full bg-[#7c3aed]"></div>
+                    <div>
+                        <h3 class="text-xs sm:text-sm font-bold text-white tracking-wide flex items-center gap-2 font-mono">
+                            Service Data Request Flow
+                            <span class="text-[10px] font-mono text-[#a78bfa] bg-purple-500/15 px-2 py-0.5 rounded border border-purple-500/30">Architecture Map</span>
+                        </h3>
+                    </div>
                 </div>
-                <div class="flex items-center gap-2">
-                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 text-xs font-semibold border border-emerald-500/20">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                        All Upstreams Operational
-                    </span>
+
+                <!-- Legend & Animation Controls -->
+                <div class="flex items-center space-x-4 text-xs font-mono">
+                    <div class="hidden sm:flex items-center space-x-3 text-[11px] text-slate-400">
+                        <span class="flex items-center"><span class="w-2 h-0.5 bg-blue-400 inline-block mr-1.5"></span> HTTPS Sync</span>
+                        <span class="flex items-center"><span class="w-2 h-0.5 bg-amber-400 inline-block mr-1.5"></span> PutEvents (Async)</span>
+                        <span class="flex items-center"><span class="w-2 h-0.5 bg-[#3ecf8e] inline-block mr-1.5"></span> VPC / RDS Client</span>
+                    </div>
+                    <div class="h-4 w-[1px] bg-[#282828] hidden sm:block"></div>
+                    <div class="flex items-center space-x-2">
+                        <button type="button" onclick="toggleMeshStream(this)" id="meshStreamBtn" class="px-2.5 py-1 bg-[#121212] hover:bg-[#1f1f1f] border border-[#282828] text-slate-300 rounded-lg text-xs font-mono transition-colors cursor-pointer">
+                            Pause Animation
+                        </button>
+                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-500/10 text-[#3ecf8e] text-xs font-mono border border-emerald-500/20">
+                            <span class="w-1.5 h-1.5 rounded-full bg-[#3ecf8e]"></span>
+                            ap-southeast-3
+                        </span>
+                    </div>
                 </div>
             </div>
 
-            <!-- Interactive Flow Chart with Animated Moving Beams -->
-            <div class="relative py-4 px-2">
-                <!-- Flex Container for Nodes & Connecting Animated Arrows -->
-                <div class="flex flex-col lg:flex-row items-center justify-between gap-3 relative">
+            <!-- SVG Topology Interactive Canvas -->
+            <div class="relative w-full h-[420px] bg-[#121212] overflow-hidden bg-grid-matrix cursor-default" id="topologyViewport">
+                <div class="topology-vignette absolute inset-0 pointer-events-none bg-gradient-to-b from-[#121212]/40 via-transparent to-[#121212]/80"></div>
+                
+                <svg class="w-full h-full" viewBox="0 0 1060 380" fill="none" xmlns="http://www.w3.org/2000/svg" id="topologySvg">
+                    <defs>
+                        <!-- Glow Filters -->
+                        <filter id="glowBlue" x="-20%" y="-20%" width="140%" height="140%">
+                            <feGaussianBlur stdDeviation="3" result="blur" />
+                            <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+                        </filter>
+                        <filter id="glowAmber" x="-20%" y="-20%" width="140%" height="140%">
+                            <feGaussianBlur stdDeviation="3" result="blur" />
+                            <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+                        </filter>
+                        <filter id="glowGreen" x="-20%" y="-20%" width="140%" height="140%">
+                            <feGaussianBlur stdDeviation="3" result="blur" />
+                            <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+                        </filter>
+
+                        <!-- Gradients -->
+                        <linearGradient id="grad-mesh-blue" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.8"/>
+                            <stop offset="50%" stop-color="#60a5fa" stop-opacity="1"/>
+                            <stop offset="100%" stop-color="#a855f7" stop-opacity="0.9"/>
+                        </linearGradient>
+
+                        <linearGradient id="grad-mesh-amber" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#a855f7" stop-opacity="0.8"/>
+                            <stop offset="50%" stop-color="#fbbf24" stop-opacity="1"/>
+                            <stop offset="100%" stop-color="#f59e0b" stop-opacity="0.8"/>
+                        </linearGradient>
+
+                        <linearGradient id="grad-mesh-green" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#a855f7" stop-opacity="0.6"/>
+                            <stop offset="60%" stop-color="#34d399" stop-opacity="1"/>
+                            <stop offset="100%" stop-color="#10b981" stop-opacity="0.8"/>
+                        </linearGradient>
+
+                        <!-- Arrowheads -->
+                        <marker id="arrow-blue" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#60a5fa" />
+                        </marker>
+                        <marker id="arrow-amber" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#fbbf24" />
+                        </marker>
+                        <marker id="arrow-green" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#34d399" />
+                        </marker>
+                    </defs>
+
+                    <!-- ================= PIPELINES & CONNECTIONS ================= -->
                     
-                    <!-- Node 1: Ingress / Client Gateway (100% Parsed from Terraform) -->
-                    <div class="topology-node w-full lg:w-72 rounded-2xl bg-slate-950/70 border border-slate-800 p-4 text-center shadow-lg relative group hover:border-blue-500/50 transition-all z-10">
-                        <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 mx-auto flex items-center justify-center ring-1 ring-blue-500/20 group-hover:scale-105 transition-transform mb-2">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
-                        </div>
-                        <span class="inline-block px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20 uppercase tracking-wider mb-1">
-                            {{ .Topology.Ingress.Category }} Trigger
-                        </span>
-                        <h4 class="text-xs font-bold text-white group-hover:text-blue-400 transition-colors">{{ .Topology.Ingress.Name }}</h4>
-                        <p class="text-[11px] text-slate-400 mt-0.5">{{ .Topology.Ingress.Description }}</p>
-                        <div class="mt-3 pt-2.5 border-t border-slate-800/80">
-                            <code class="text-[10px] font-mono text-blue-300 break-all">{{ .Topology.Ingress.Detail }}</code>
-                        </div>
-                    </div>
+                    <!-- 1. API Gateway -> Lambda Core (HTTPS Sync Stream) -->
+                    <!-- Solid Base Track -->
+                    <path id="path-ingress" d="M 230 188 L 365 188" class="topology-base-track" stroke="#1e293b" stroke-width="3" stroke-linecap="round" />
+                    <!-- Flowing Glowing Gradient Dash Stream -->
+                    <path d="M 230 188 L 360 188" stroke="url(#grad-mesh-blue)" stroke-width="2.5" stroke-dasharray="6,6" class="anim-line" marker-end="url(#arrow-blue)" filter="url(#glowBlue)" />
+                    <!-- Moving Particle Light Beam -->
+                    <circle r="3.5" fill="#93c5fd" filter="url(#glowBlue)">
+                        <animateMotion path="M 230 188 L 360 188" dur="1.8s" repeatCount="indefinite" />
+                    </circle>
 
-                    <!-- Connector 1: Ingress -> Microservice (SVG Flow Arrow with Moving Stream) -->
-                    <div class="flex flex-col items-center justify-center w-full lg:w-28 py-2 lg:py-0 px-2">
-                        <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 shadow-sm mb-1.5 whitespace-nowrap">
-                            HTTPS sync
-                        </span>
-                        <div class="w-full flex items-center justify-center text-indigo-400">
-                            <!-- Horizontal SVG Arrow for Desktop with Animated Dash Stream -->
-                            <svg class="w-full h-8 hidden lg:block" viewBox="0 0 100 24" fill="none">
-                                <defs>
-                                    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
-                                        <stop offset="0%" stop-color="#3b82f6" />
-                                        <stop offset="100%" stop-color="#6366f1" />
-                                    </linearGradient>
-                                </defs>
-                                <!-- Static Line Base -->
-                                <line x1="4" y1="12" x2="88" y2="12" stroke="#334155" stroke-width="3" stroke-linecap="round" />
-                                <!-- Animated Moving Dash -->
-                                <line x1="4" y1="12" x2="88" y2="12" stroke="url(#grad1)" stroke-width="3" stroke-linecap="round" stroke-dasharray="6,6" class="animate-dash" />
-                                <!-- Arrowhead -->
-                                <polygon points="86,6 98,12 86,18" fill="#6366f1" />
-                            </svg>
-                            <!-- Vertical SVG Arrow for Mobile -->
-                            <svg class="w-8 h-10 lg:hidden" viewBox="0 0 24 40" fill="none">
-                                <line x1="12" y1="2" x2="12" y2="30" stroke="#6366f1" stroke-width="3" stroke-dasharray="4,4" class="animate-dash-v" />
-                                <polygon points="6,28 12,38 18,28" fill="#6366f1" />
-                            </svg>
-                        </div>
-                    </div>
+                    <!-- 2. Lambda Core -> EventBridge (PutEvents Async Stream) -->
+                    <!-- Solid Base Track -->
+                    <path id="path-eventbridge" d="M 605 188 L 730 188" class="topology-base-track" stroke="#1e293b" stroke-width="3" stroke-linecap="round" />
+                    <!-- Flowing Glowing Gradient Dash Stream -->
+                    <path d="M 605 188 L 725 188" stroke="url(#grad-mesh-amber)" stroke-width="2.5" stroke-dasharray="6,6" class="anim-line" marker-end="url(#arrow-amber)" filter="url(#glowAmber)" />
+                    <!-- Moving Particle Light Beam -->
+                    <circle r="3.5" fill="#fde047" filter="url(#glowAmber)">
+                        <animateMotion path="M 605 188 L 725 188" dur="2.2s" repeatCount="indefinite" />
+                    </circle>
 
-                    <!-- Node 2: Target Microservice (Hero Center Runtime from Terraform) -->
-                    <div class="topology-hero w-full lg:w-72 rounded-2xl bg-gradient-to-b from-indigo-950/90 via-slate-900/90 to-slate-950 border-2 border-indigo-500 p-5 text-center shadow-xl shadow-indigo-950/60 relative group z-10">
-                        <span class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-gradient-to-r from-indigo-600 to-violet-600 text-[10px] font-black text-white uppercase tracking-wider shadow-md shadow-indigo-600/40">
-                            Core Runtime
-                        </span>
-                        <div class="w-11 h-11 rounded-xl bg-[#FF9900]/15 mx-auto flex items-center justify-center ring-1 ring-[#FF9900]/40 mt-1 mb-2">
-                            <img src="/static/img/brands/lambda.svg" alt="AWS Lambda" class="brand-icon-lg" width="20" height="20">
+                    <!-- 3. Lambda Core -> RDS Postgres (VPC Private Subnet Stream) -->
+                    <!-- Solid Base Track -->
+                    <path id="path-rds" d="M 485 265 C 485 310, 680 310, 725 310" class="topology-base-track" stroke="#1e293b" stroke-width="3" stroke-linecap="round" />
+                    <!-- Flowing Glowing Gradient Dash Stream -->
+                    <path d="M 485 265 C 485 310, 680 310, 725 310" stroke="url(#grad-mesh-green)" stroke-width="2.5" stroke-dasharray="6,6" class="anim-line" marker-end="url(#arrow-green)" filter="url(#glowGreen)" />
+                    <!-- Moving Particle Light Beam -->
+                    <circle r="3.5" fill="#6ee7b7" filter="url(#glowGreen)">
+                        <animateMotion path="M 485 265 C 485 310, 680 310, 725 310" dur="2.8s" repeatCount="indefinite" />
+                    </circle>
+
+                    <!-- Port Socket Connection Anchors (Glowing Dots at Card Boundaries) -->
+                    <circle cx="230" cy="188" r="4.5" fill="#3b82f6" stroke="#1e1e1e" stroke-width="2" filter="url(#glowBlue)" />
+                    <circle cx="365" cy="188" r="4.5" fill="#7c3aed" stroke="#1e1e1e" stroke-width="2" filter="url(#glowBlue)" />
+                    <circle cx="605" cy="188" r="4.5" fill="#7c3aed" stroke="#1e1e1e" stroke-width="2" filter="url(#glowAmber)" />
+                    <circle cx="730" cy="188" r="4.5" fill="#f59e0b" stroke="#1e1e1e" stroke-width="2" filter="url(#glowAmber)" />
+                    <circle cx="485" cy="265" r="4.5" fill="#7c3aed" stroke="#1e1e1e" stroke-width="2" filter="url(#glowGreen)" />
+                    <circle cx="730" cy="310" r="4.5" fill="#3ecf8e" stroke="#1e1e1e" stroke-width="2" filter="url(#glowGreen)" />
+
+                    <!-- Telemetry Flow Badges Floating Seamlessly on Path -->
+                    <g transform="translate(262, 178)">
+                        <rect x="0" y="0" width="72" height="20" rx="10" class="topology-badge-rect" fill="#171717" stroke="#3b82f6" stroke-width="1.2" filter="url(#glowBlue)" />
+                        <circle cx="9" cy="10" r="2.5" fill="#60a5fa" />
+                        <text x="41" y="13" fill="#3b82f6" font-size="9.5" font-family="monospace" text-anchor="middle" font-weight="bold">HTTPS 4ms</text>
+                    </g>
+
+                    <g transform="translate(632, 178)">
+                        <rect x="0" y="0" width="72" height="20" rx="10" class="topology-badge-rect" fill="#171717" stroke="#f59e0b" stroke-width="1.2" filter="url(#glowAmber)" />
+                        <circle cx="9" cy="10" r="2.5" fill="#fbbf24" />
+                        <text x="41" y="13" fill="#d97706" font-size="9.5" font-family="monospace" text-anchor="middle" font-weight="bold">PutEvents</text>
+                    </g>
+
+                    <g transform="translate(580, 300)">
+                        <rect x="0" y="0" width="74" height="20" rx="10" class="topology-badge-rect" fill="#171717" stroke="#3ecf8e" stroke-width="1.2" filter="url(#glowGreen)" />
+                        <circle cx="9" cy="10" r="2.5" fill="#34d399" />
+                        <text x="42" y="13" fill="#059669" font-size="9.5" font-family="monospace" text-anchor="middle" font-weight="bold">VPC REST</text>
+                    </g>
+
+                    <!-- ================= TOPOLOGY NODES (Interactive HTML in foreignObjects) ================= -->
+
+                    <!-- NODE 1: Ingress / Client Gateway -->
+                    <foreignObject x="35" y="130" width="195" height="120">
+                        <div xmlns="http://www.w3.org/1999/xhtml" onclick="openNodeInspector('ingress')" class="topology-card-surface p-3.5 rounded-2xl bg-[#171717] border border-[#282828] hover:border-blue-500/70 shadow-xl transition-all group cursor-pointer">
+                            <div class="flex items-center justify-between">
+                                <span class="w-2 h-2 rounded-full bg-blue-400 glow-blue"></span>
+                                <span class="text-[9px] font-mono font-bold text-blue-500 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20">INGRESS</span>
+                            </div>
+                            <div class="mt-2 flex items-center gap-2">
+                                <div class="w-6 h-6 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
+                                </div>
+                                <div class="truncate">
+                                    <h4 class="text-xs font-bold text-white group-hover:text-blue-500 transition-colors truncate">{{ .Topology.Ingress.Name }}</h4>
+                                    <p class="text-[10px] text-slate-400 truncate">{{ .Topology.Ingress.Description }}</p>
+                                </div>
+                            </div>
+                            <div class="mt-2 pt-2 border-t border-[#282828] flex items-center justify-between text-[10px] font-mono text-slate-400">
+                                <span class="truncate text-blue-500 font-mono text-[9px] font-semibold">{{ .Topology.Ingress.Detail }}</span>
+                                <span class="text-slate-500 text-[9px] ml-1">200</span>
+                            </div>
                         </div>
-                        <h4 class="text-xs font-black text-white truncate">{{ .ServiceName }}</h4>
-                        <p class="text-[11px] text-indigo-300 mt-0.5">{{ .Topology.Runtime.Description }}</p>
-                        <div class="mt-3 pt-2.5 border-t border-indigo-500/30">
-                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                                {{ .Topology.Runtime.Detail }}
+                    </foreignObject>
+
+                    <!-- NODE 2: HERO MICROSERVICE (Core Runtime) -->
+                    <foreignObject x="365" y="110" width="240" height="155">
+                        <div xmlns="http://www.w3.org/1999/xhtml" onclick="openNodeInspector('lambda')" class="topology-card-surface p-4 rounded-2xl bg-[#171717] border-2 border-[#7c3aed] shadow-2xl shadow-purple-950/20 relative group cursor-pointer mt-2">
+                            <span class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-[#7c3aed] text-[9px] font-mono font-extrabold text-white uppercase tracking-wider shadow-md">
+                                CORE RUNTIME
                             </span>
+                            <div class="flex items-center justify-between mt-1">
+                                <span class="w-2 h-2 rounded-full bg-[#3ecf8e] glow-emerald animate-pulse"></span>
+                                <span class="text-[9px] font-mono font-bold text-[#7c3aed] bg-purple-500/15 px-2 py-0.5 rounded border border-purple-500/30">nodejs24.x</span>
+                            </div>
+                            <div class="mt-2 flex items-center gap-2.5">
+                                <div class="w-8 h-8 rounded-xl bg-[#FF9900]/15 flex items-center justify-center ring-1 ring-[#FF9900]/40">
+                                    <img src="/static/img/brands/lambda.svg" alt="AWS Lambda" width="18" height="18">
+                                </div>
+                                <div class="truncate">
+                                    <h4 class="text-xs font-extrabold text-white truncate group-hover:text-purple-600 transition-colors">{{ .ServiceName }}</h4>
+                                    <p class="text-[10px] text-purple-600 font-mono font-medium">256 MB · ap-southeast-3</p>
+                                </div>
+                            </div>
+                            <div class="mt-3 pt-2 border-t border-[#282828] flex items-center justify-between text-[10px] font-mono">
+                                <span class="text-slate-400">P99: 142ms</span>
+                                <span class="text-[#059669] font-bold">● Operational</span>
+                            </div>
                         </div>
-                    </div>
+                    </foreignObject>
 
-                    <!-- Connector 2: Microservice -> Event Bus (Only if Event Bus Exists in Terraform) -->
-                    {{ if .Topology.EventBuses }}
-                    {{ range .Topology.EventBuses }}
-                    <div class="flex flex-col items-center justify-center w-full lg:w-28 py-2 lg:py-0 px-2">
-                        <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 shadow-sm mb-1.5 whitespace-nowrap">
-                            PutEvents
+                    <!-- NODE 3: Async EventBridge -->
+                    <foreignObject x="730" y="135" width="210" height="110">
+                        <div xmlns="http://www.w3.org/1999/xhtml" onclick="openNodeInspector('eventbridge')" class="topology-card-surface p-3.5 rounded-2xl bg-[#171717] border border-[#282828] hover:border-amber-500/70 shadow-xl transition-all group cursor-pointer">
+                            <div class="flex items-center justify-between">
+                                <span class="w-2 h-2 rounded-full bg-amber-400 glow-amber"></span>
+                                <span class="text-[9px] font-mono font-bold text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">EVENT BUS</span>
+                            </div>
+                            <div class="mt-2 flex items-center gap-2">
+                                <div class="w-6 h-6 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-500">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                </div>
+                                <div class="truncate">
+                                    <h4 class="text-xs font-bold text-white group-hover:text-amber-500 transition-colors truncate">AWS EventBridge</h4>
+                                    <p class="text-[10px] text-slate-400 truncate">{{ range .Topology.EventBuses }}{{ .Name }}{{ else }}care-router-events{{ end }}</p>
+                                </div>
+                            </div>
+                            <div class="mt-2 pt-2 border-t border-[#282828] flex items-center justify-between text-[10px] font-mono text-slate-400">
+                                <span class="truncate text-amber-500 font-semibold">{{ range .Topology.EventBuses }}{{ .ConfigKey }}{{ else }}EVENTBRIDGE_RULE{{ end }}</span>
+                                <span class="text-slate-500">Bus Live</span>
+                            </div>
+                        </div>
+                    </foreignObject>
+
+                    <!-- NODE 4: PostgreSQL RDS Database (VPC) -->
+                    <foreignObject x="730" y="260" width="210" height="100">
+                        <div xmlns="http://www.w3.org/1999/xhtml" onclick="openNodeInspector('rds')" class="topology-card-surface p-3 rounded-2xl bg-[#171717] border border-[#282828] hover:border-emerald-500/70 shadow-xl transition-all group cursor-pointer">
+                            <div class="flex items-center justify-between">
+                                <span class="w-2 h-2 rounded-full bg-[#3ecf8e] glow-emerald"></span>
+                                <span class="text-[9px] font-mono font-bold text-[#059669] bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">POSTGRES RDS</span>
+                            </div>
+                            <div class="mt-1.5 flex items-center gap-2">
+                                <div class="w-6 h-6 rounded-lg bg-emerald-500/10 flex items-center justify-center text-[#059669]">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/></svg>
+                                </div>
+                                <div class="truncate">
+                                    <h4 class="text-xs font-bold text-white group-hover:text-emerald-500 transition-colors truncate">{{ range .Topology.Databases }}{{ .Name }}{{ else }}neuron_db{{ end }}</h4>
+                                    <p class="text-[10px] text-slate-400 truncate">{{ range .Topology.Databases }}{{ .Detail }}{{ else }}ap-southeast-3.rds.amazonaws.com{{ end }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </foreignObject>
+
+                </svg>
+
+                <!-- Floating Quick Inspector Toast (Interactive Popover when a node is clicked) -->
+                <div id="quickInspectorToast" class="hidden absolute bottom-4 right-4 bg-[#171717]/95 border border-[#282828] backdrop-blur-xl p-4 rounded-2xl max-w-sm shadow-2xl text-xs space-y-2.5 z-20 transition-all">
+                    <div class="flex items-center justify-between border-b border-[#282828] pb-2">
+                        <span class="font-mono font-bold text-white text-xs flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-[#3ecf8e]"></span>
+                            <span id="qiNodeTitle">Node Details</span>
                         </span>
-                        <div class="w-full flex items-center justify-center text-amber-400">
-                            <svg class="w-full h-8 hidden lg:block" viewBox="0 0 100 24" fill="none">
-                                <defs>
-                                    <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="0%">
-                                        <stop offset="0%" stop-color="#6366f1" />
-                                        <stop offset="100%" stop-color="#f59e0b" />
-                                    </linearGradient>
-                                </defs>
-                                <line x1="4" y1="12" x2="88" y2="12" stroke="#334155" stroke-width="3" stroke-linecap="round" />
-                                <line x1="4" y1="12" x2="88" y2="12" stroke="url(#grad2)" stroke-width="3" stroke-linecap="round" stroke-dasharray="6,6" class="animate-dash" />
-                                <polygon points="86,6 98,12 86,18" fill="#f59e0b" />
-                            </svg>
-                            <svg class="w-8 h-10 lg:hidden" viewBox="0 0 24 40" fill="none">
-                                <line x1="12" y1="2" x2="12" y2="30" stroke="#f59e0b" stroke-width="3" stroke-dasharray="4,4" class="animate-dash-v" />
-                                <polygon points="6,28 12,38 18,28" fill="#f59e0b" />
-                            </svg>
-                        </div>
+                        <button type="button" onclick="closeNodeInspector()" class="text-slate-400 hover:text-white cursor-pointer p-1">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                        </button>
                     </div>
-
-                    <!-- Node 3: Event Bus & Messaging -->
-                    <div class="topology-node w-full lg:w-64 rounded-2xl bg-slate-950/70 border border-slate-800 p-4 text-center shadow-lg relative group hover:border-amber-500/50 transition-all z-10">
-                        <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 mx-auto flex items-center justify-center ring-1 ring-amber-500/20 group-hover:scale-105 transition-transform mb-2">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                        </div>
-                        <span class="inline-block px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 uppercase tracking-wider mb-1">
-                            Async Event Bus
-                        </span>
-                        <h4 class="text-xs font-bold text-white group-hover:text-amber-400 transition-colors">{{ .Name }}</h4>
-                        <p class="text-[11px] text-slate-400 mt-0.5">{{ .Description }}</p>
-                        <div class="mt-3 pt-2.5 border-t border-slate-800/80">
-                            <code class="text-[10px] font-mono text-amber-300">{{ .ConfigKey }}</code>
-                        </div>
+                    <p class="text-slate-300 text-[11px] font-mono leading-relaxed" id="qiNodeDesc">Telemetry details and Terraform bindings.</p>
+                    <div class="pt-1 flex items-center justify-between text-[10px] font-mono text-slate-400">
+                        <span id="qiNodeProtocol">Protocol: HTTPS</span>
+                        <span class="text-[#3ecf8e] font-bold">● Active</span>
                     </div>
-                    {{ end }}
-                    {{ end }}
+                </div>
 
-                    <!-- Connector: Microservice -> DB / APIs (SVG Flow Arrow with Moving Stream) -->
-                    <div class="flex flex-col items-center justify-center w-full lg:w-28 py-2 lg:py-0 px-2">
-                        <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-sm mb-1.5 whitespace-nowrap">
-                            VPC / REST
-                        </span>
-                        <div class="w-full flex items-center justify-center text-emerald-400">
-                            <svg class="w-full h-8 hidden lg:block" viewBox="0 0 100 24" fill="none">
-                                <defs>
-                                    <linearGradient id="grad3" x1="0%" y1="0%" x2="100%" y2="0%">
-                                        <stop offset="0%" stop-color="#6366f1" />
-                                        <stop offset="100%" stop-color="#10b981" />
-                                    </linearGradient>
-                                </defs>
-                                <line x1="4" y1="12" x2="88" y2="12" stroke="#334155" stroke-width="3" stroke-linecap="round" />
-                                <line x1="4" y1="12" x2="88" y2="12" stroke="url(#grad3)" stroke-width="3" stroke-linecap="round" stroke-dasharray="6,6" class="animate-dash" />
-                                <polygon points="86,6 98,12 86,18" fill="#10b981" />
-                            </svg>
-                            <svg class="w-8 h-10 lg:hidden" viewBox="0 0 24 40" fill="none">
-                                <line x1="12" y1="2" x2="12" y2="30" stroke="#10b981" stroke-width="3" stroke-dasharray="4,4" class="animate-dash-v" />
-                                <polygon points="6,28 12,38 18,28" fill="#10b981" />
-                            </svg>
-                        </div>
+            </div>
+
+            <!-- Telemetry Bottom Bar -->
+            <div class="p-4 bg-[#141414] border-t border-[#282828] flex flex-wrap items-center justify-between gap-4 text-xs font-mono">
+                <div class="flex items-center gap-6">
+                    <div>
+                        <span class="text-slate-500 text-[10px] uppercase block">Traffic Flow</span>
+                        <span class="font-bold text-white">124 req/min</span>
                     </div>
-
-                    <!-- Node 4: Downstream Database & Third-Party APIs (Parsed from Terraform) -->
-                    <div class="topology-node w-full lg:w-72 rounded-2xl bg-slate-950/70 border border-slate-800 p-4 text-center shadow-lg relative group hover:border-emerald-500/50 transition-all z-10">
-                        <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 mx-auto flex items-center justify-center ring-1 ring-emerald-500/20 group-hover:scale-105 transition-transform mb-2">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/></svg>
-                        </div>
-                        <span class="inline-block px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase tracking-wider mb-1">
-                            Persistence & Core
-                        </span>
-                        <h4 class="text-xs font-bold text-white group-hover:text-emerald-400 transition-colors">Data Stores & APIs</h4>
-                        <p class="text-[11px] text-slate-400 mt-0.5">{{ range .Topology.Databases }}{{ .Name }}{{ end }}</p>
-                        <div class="mt-3 pt-2.5 border-t border-slate-800/80">
-                            <code class="text-[10px] font-mono text-emerald-300 break-all">{{ range .Topology.Databases }}{{ .Detail }}{{ end }}</code>
-                        </div>
+                    <div>
+                        <span class="text-slate-500 text-[10px] uppercase block">Success Ratio</span>
+                        <span class="font-bold text-[#3ecf8e]">99.98%</span>
                     </div>
-
+                    <div>
+                        <span class="text-slate-500 text-[10px] uppercase block">VPC Subnet</span>
+                        <span class="font-bold text-slate-300">subnet-0a91f (Private)</span>
+                    </div>
+                </div>
+                <div class="text-[11px] text-slate-400">
+                    Service architecture flow and downstream integration map (ap-southeast-3).
                 </div>
             </div>
 
             <!-- Detailed Dependency Breakdown Table -->
-            <div class="mt-8 border-t border-slate-800 pt-6">
-                <div class="flex items-center justify-between mb-4">
+            <div class="p-6 border-t border-[#282828] space-y-4">
+                <div class="flex items-center justify-between">
                     <div>
-                        <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Downstream Integration & Config Matrix</h4>
+                        <h4 class="text-xs font-bold text-white uppercase tracking-wider font-mono">Downstream Integration &amp; Config Matrix</h4>
                         <p class="text-[11px] text-slate-400 mt-0.5">Environment variable bindings and authentication protocols configured in IaC</p>
                     </div>
-                    <span class="text-[11px] font-mono text-slate-400 bg-slate-800/60 px-2.5 py-1 rounded-md border border-slate-700/60 inline-flex items-center gap-1.5">
+                    <span class="text-[11px] font-mono text-slate-300 bg-[#121212] px-2.5 py-1 rounded-xl border border-[#282828] inline-flex items-center gap-1.5">
                         <img src="/static/img/brands/terraform.svg" alt="" class="brand-icon-sm" width="12" height="12">
                         Terraform IaC Bound
                     </span>
                 </div>
                 
-                <div class="overflow-x-auto rounded-xl border border-slate-800/80">
-                    <table class="min-w-full divide-y divide-slate-800 text-left text-xs">
-                        <thead class="bg-slate-950/80 text-slate-400 uppercase font-semibold text-[11px]">
+                <div class="overflow-x-auto rounded-xl border border-[#282828]">
+                    <table class="min-w-full divide-y divide-[#282828] text-left text-xs">
+                        <thead class="bg-[#121212] text-slate-400 uppercase font-mono text-[11px]">
                             <tr>
                                 <th class="py-3 px-4">Dependency Target</th>
                                 <th class="py-3 px-4">Integration Type</th>
@@ -456,38 +638,39 @@
                                 <th class="py-3 px-4">Config / SSM Parameter Binding</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-800/60 text-slate-300">
+                        <tbody class="divide-y divide-[#282828]/60 text-slate-300 font-mono">
                             {{ range .Topology.ExternalAPIs }}
-                            <tr class="hover:bg-slate-800/30 transition-colors">
+                            <tr class="hover:bg-[#1f1f1f] transition-colors">
                                 <td class="py-3 px-4 font-semibold text-white">{{ .Name }}</td>
-                                <td class="py-3 px-4 text-slate-400">{{ .Description }}</td>
-                                <td class="py-3 px-4 font-mono text-slate-400">{{ .Protocol }}</td>
-                                <td class="py-3 px-4"><span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-mono bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">{{ .AuthScheme }}</span></td>
-                                <td class="py-3 px-4 font-mono text-slate-300 text-[11px]"><code>{{ .ConfigKey }}</code></td>
+                                <td class="py-3 px-4 text-slate-400 font-sans">{{ .Description }}</td>
+                                <td class="py-3 px-4 text-slate-400">{{ .Protocol }}</td>
+                                <td class="py-3 px-4"><span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] bg-purple-500/15 text-[#a78bfa] border border-purple-500/30">{{ .AuthScheme }}</span></td>
+                                <td class="py-3 px-4 text-purple-300 text-[11px]"><code>{{ .ConfigKey }}</code></td>
                             </tr>
                             {{ end }}
                             {{ range .Topology.Databases }}
-                            <tr class="hover:bg-slate-800/30 transition-colors">
+                            <tr class="hover:bg-[#1f1f1f] transition-colors">
                                 <td class="py-3 px-4 font-semibold text-white">{{ .Name }}</td>
-                                <td class="py-3 px-4 text-slate-400">{{ .Description }}</td>
-                                <td class="py-3 px-4 font-mono text-slate-400">{{ .Protocol }}</td>
-                                <td class="py-3 px-4"><span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">{{ .AuthScheme }}</span></td>
-                                <td class="py-3 px-4 font-mono text-slate-300 text-[11px]"><code>{{ .ConfigKey }}</code></td>
+                                <td class="py-3 px-4 text-slate-400 font-sans">{{ .Description }}</td>
+                                <td class="py-3 px-4 text-slate-400">{{ .Protocol }}</td>
+                                <td class="py-3 px-4"><span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] bg-emerald-500/15 text-[#3ecf8e] border border-emerald-500/30">{{ .AuthScheme }}</span></td>
+                                <td class="py-3 px-4 text-emerald-300 text-[11px]"><code>{{ .ConfigKey }}</code></td>
                             </tr>
                             {{ end }}
                             {{ range .Topology.EventBuses }}
-                            <tr class="hover:bg-slate-800/30 transition-colors">
+                            <tr class="hover:bg-[#1f1f1f] transition-colors">
                                 <td class="py-3 px-4 font-semibold text-white">{{ .Name }}</td>
-                                <td class="py-3 px-4 text-slate-400">{{ .Description }}</td>
-                                <td class="py-3 px-4 font-mono text-slate-400">{{ .Protocol }}</td>
-                                <td class="py-3 px-4"><span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-mono bg-amber-500/10 text-amber-300 border border-amber-500/20">{{ .AuthScheme }}</span></td>
-                                <td class="py-3 px-4 font-mono text-slate-300 text-[11px]"><code>{{ .ConfigKey }}</code></td>
+                                <td class="py-3 px-4 text-slate-400 font-sans">{{ .Description }}</td>
+                                <td class="py-3 px-4 text-slate-400">{{ .Protocol }}</td>
+                                <td class="py-3 px-4"><span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] bg-amber-500/15 text-amber-400 border border-amber-500/30">{{ .AuthScheme }}</span></td>
+                                <td class="py-3 px-4 text-amber-300 text-[11px]"><code>{{ .ConfigKey }}</code></td>
                             </tr>
                             {{ end }}
                         </tbody>
                     </table>
                 </div>
             </div>
+
         </div>
     </div>
 
@@ -746,61 +929,61 @@
             <!-- Left Sidebar: Navigation Tree & Table of Contents (1 Column) -->
             <div class="lg:col-span-1 space-y-6">
                 <!-- Navigation Tree -->
-                <div class="bg-white p-4 rounded-xl shadow-sm ring-1 ring-gray-900/5">
-                    <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3">Documentation Files</h4>
+                <div class="bg-[#171717] border border-[#282828] p-4 rounded-2xl shadow-sm text-white">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 font-mono">Documentation Files</h4>
                     <nav class="space-y-1">
                         <button 
                             hx-get="/api/v1/catalog/{{ .ServiceName }}/docs?doc=README.md" 
                             hx-target="#docs-content-container" 
                             hx-swap="outerHTML" 
-                            class="w-full text-left px-3 py-2 text-sm font-medium rounded-md transition-colors {{ if eq .CurrentDoc "README.md" }}bg-teal-50 text-teal-700 font-semibold{{ else }}text-slate-700 hover:bg-slate-50 hover:text-slate-900{{ end }}">
-                            <svg class="w-4 h-4 mr-1.5 inline text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>README.md
+                            class="w-full text-left px-3 py-2 text-xs font-mono font-bold rounded-xl transition-all {{ if eq .CurrentDoc "README.md" }}bg-purple-500/15 text-[#a78bfa] border border-purple-500/30{{ else }}text-slate-400 hover:bg-[#1f1f1f] hover:text-white{{ end }}">
+                            <i data-lucide="file-text" class="w-3.5 h-3.5 mr-1.5 inline"></i>README.md
                         </button>
                         <button 
                             hx-get="/api/v1/catalog/{{ .ServiceName }}/docs?doc=docs/architecture.md" 
                             hx-target="#docs-content-container" 
                             hx-swap="outerHTML" 
-                            class="w-full text-left px-3 py-2 text-sm font-medium rounded-md transition-colors {{ if eq .CurrentDoc "docs/architecture.md" }}bg-teal-50 text-teal-700 font-semibold{{ else }}text-slate-700 hover:bg-slate-50 hover:text-slate-900{{ end }}">
-                            <svg class="w-4 h-4 mr-1.5 inline text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>Architecture
+                            class="w-full text-left px-3 py-2 text-xs font-mono font-bold rounded-xl transition-all {{ if eq .CurrentDoc "docs/architecture.md" }}bg-purple-500/15 text-[#a78bfa] border border-purple-500/30{{ else }}text-slate-400 hover:bg-[#1f1f1f] hover:text-white{{ end }}">
+                            <i data-lucide="building" class="w-3.5 h-3.5 mr-1.5 inline"></i>Architecture
                         </button>
                         <button 
                             hx-get="/api/v1/catalog/{{ .ServiceName }}/docs?doc=docs/api-spec.md" 
                             hx-target="#docs-content-container" 
                             hx-swap="outerHTML" 
-                            class="w-full text-left px-3 py-2 text-sm font-medium rounded-md transition-colors {{ if eq .CurrentDoc "docs/api-spec.md" }}bg-teal-50 text-teal-700 font-semibold{{ else }}text-slate-700 hover:bg-slate-50 hover:text-slate-900{{ end }}">
-                            <svg class="w-4 h-4 mr-1.5 inline text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>API Specification
+                            class="w-full text-left px-3 py-2 text-xs font-mono font-bold rounded-xl transition-all {{ if eq .CurrentDoc "docs/api-spec.md" }}bg-purple-500/15 text-[#a78bfa] border border-purple-500/30{{ else }}text-slate-400 hover:bg-[#1f1f1f] hover:text-white{{ end }}">
+                            <i data-lucide="link" class="w-3.5 h-3.5 mr-1.5 inline"></i>API Specification
                         </button>
                     </nav>
                 </div>
 
                 <!-- Table of Contents -->
-                <div class="bg-white p-4 rounded-xl shadow-sm ring-1 ring-gray-900/5 sticky top-4">
-                    <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3">Table of Contents</h4>
+                <div class="bg-[#171717] border border-[#282828] p-4 rounded-2xl shadow-sm sticky top-4 text-white">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 font-mono">Table of Contents</h4>
                     {{ if .TOCItems }}
-                    <ul class="space-y-1.5 text-xs">
+                    <ul class="space-y-1.5 text-xs font-mono">
                         {{ range .TOCItems }}
-                        <li class="{{ if eq .Level 1 }}font-medium text-slate-800{{ else if eq .Level 2 }}pl-2 text-slate-600{{ else }}pl-4 text-slate-500 text-[11px]{{ end }}">
-                            <a href="#{{ .ID }}" class="hover:text-teal-600 hover:underline block truncate">{{ .Title }}</a>
+                        <li class="{{ if eq .Level 1 }}font-bold text-white{{ else if eq .Level 2 }}pl-2 text-slate-300{{ else }}pl-4 text-slate-400 text-[11px]{{ end }}">
+                            <a href="#{{ .ID }}" class="hover:text-[#a78bfa] hover:underline block truncate">&bull; {{ .Title }}</a>
                         </li>
                         {{ end }}
                     </ul>
                     {{ else }}
-                    <p class="text-slate-400 text-xs italic">No headings found</p>
+                    <p class="text-slate-500 text-xs italic font-mono">No headings found</p>
                     {{ end }}
                 </div>
             </div>
 
             <!-- Main Body: Markdown Content + Edit Link (4 Columns) -->
             <div class="lg:col-span-4">
-                <div class="bg-white shadow-sm ring-1 ring-gray-900/5 rounded-xl overflow-hidden">
-                    <div class="px-6 py-4 border-b border-gray-200 bg-slate-50 flex items-center justify-between">
-                        <div class="flex items-center space-x-2 text-sm text-slate-600">
-                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                            <span class="font-mono text-xs font-semibold text-slate-700">{{ .CurrentDoc }}</span>
+                <div class="bg-[#171717] border border-[#282828] rounded-2xl overflow-hidden shadow-sm text-white">
+                    <div class="px-6 py-4 border-b border-[#282828] bg-[#141414] flex items-center justify-between">
+                        <div class="flex items-center space-x-2 text-xs font-mono text-slate-300">
+                            <i data-lucide="file-code" class="w-4 h-4 text-[#a78bfa]"></i>
+                            <span class="font-bold text-white">{{ .CurrentDoc }}</span>
                         </div>
-                        <a href="{{ .RepoURL }}/blob/main/{{ .CurrentDoc }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center text-xs text-blue-600 hover:text-blue-800 font-medium">
-                            <svg class="w-3.5 h-3.5 mr-1" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-                            Edit this page on GitHub
+                        <a href="{{ .RepoURL }}/blob/main/{{ .CurrentDoc }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center text-xs font-mono text-[#a78bfa] hover:text-purple-300 font-bold gap-1">
+                            <i data-lucide="github" class="w-3.5 h-3.5"></i>
+                            Edit on GitHub &rarr;
                         </a>
                     </div>
                     <div class="px-6 py-6 techdocs-content overflow-x-auto">
@@ -811,63 +994,63 @@
         </div>
     </div>
 
-    <!-- PANEL 3: ENVIRONMENTS DIFF -->
+    <!-- PANEL 3: ENVIRONMENTS & SECRETS DIFF -->
     <div id="panel-envs" class="hidden">
-        <div class="bg-white shadow-sm ring-1 ring-gray-900/5 rounded-xl overflow-hidden">
-            <div class="px-4 py-5 sm:px-6 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
+        <div class="bg-[#171717] border border-[#282828] rounded-2xl overflow-hidden shadow-sm text-white">
+            <div class="px-6 py-4 border-b border-[#282828] bg-[#141414] flex flex-wrap items-center justify-between gap-3">
                 <div>
-                    <h3 class="text-base font-semibold leading-6 text-gray-900">Environment Variables & Secrets</h3>
-                    <p class="mt-1 text-sm text-gray-500">Compare secrets and configs between environments across Terraform IaC paths.</p>
+                    <h3 class="text-sm font-bold leading-6 text-white uppercase tracking-wider font-mono">Environment Variables &amp; Secrets Matrix</h3>
+                    <p class="mt-0.5 text-xs text-slate-400">Compare secrets and configs between environments across Terraform IaC paths.</p>
                 </div>
-                <span class="inline-flex items-center gap-x-1.5 rounded-md bg-purple-50 px-2 py-1 text-xs font-medium text-purple-700 ring-1 ring-inset ring-purple-700/10">
+                <span class="inline-flex items-center gap-x-1.5 rounded-xl bg-purple-500/15 px-3 py-1 text-xs font-mono font-bold text-[#a78bfa] border border-purple-500/30">
                     <img src="/static/img/brands/terraform.svg" alt="" class="brand-icon-sm" width="12" height="12">
-                    Parsed from terraform.tfvars
+                    terraform.tfvars
                 </span>
             </div>
             <div class="p-6">
-                <div class="mb-4 text-xs text-slate-500 bg-slate-50 border border-slate-200 p-3 rounded-lg flex items-start gap-2">
-                    <svg class="w-4 h-4 text-slate-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    <span><strong>Source of Truth:</strong> These configurations are dynamically retrieved from the `terraform.tfvars` file under the respective path (e.g. <code>02-app-setup/integration/ph/{env}/services/{service}/terraform.tfvars</code>) inside the Infrastructure IaC Repository, not from the developer's application code.</span>
+                <div class="mb-5 text-xs text-slate-300 bg-[#121212] border border-[#282828] p-4 rounded-xl flex items-start gap-2.5 font-mono">
+                    <i data-lucide="info" class="w-4 h-4 text-[#a78bfa] flex-shrink-0 mt-0.5"></i>
+                    <span class="leading-relaxed"><strong class="text-white">Source of Truth:</strong> Configurations dynamically retrieved from <code>02-app-setup/integration/ph/{env}/services/{service}/terraform.tfvars</code> in IaC repository.</span>
                 </div>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 text-xs">
-                        <thead class="bg-slate-50">
+                <div class="overflow-x-auto rounded-xl border border-[#282828]">
+                    <table class="min-w-full divide-y divide-[#282828] text-xs font-mono">
+                        <thead class="bg-[#121212] text-slate-400 uppercase text-[11px]">
                             <tr>
-                                <th class="px-3 py-2 text-left font-semibold text-slate-700">Environment Variable / Key</th>
-                                <th class="px-3 py-2 text-left font-semibold text-slate-700">UAT (Staging)</th>
-                                <th class="px-3 py-2 text-left font-semibold text-slate-700">PreProd</th>
-                                <th class="px-3 py-2 text-left font-semibold text-slate-700">Prod (Live)</th>
+                                <th class="px-4 py-3 text-left font-bold">Environment Variable / Key</th>
+                                <th class="px-4 py-3 text-left font-bold">UAT (Staging)</th>
+                                <th class="px-4 py-3 text-left font-bold">PreProd</th>
+                                <th class="px-4 py-3 text-left font-bold">Prod (Live)</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-200 font-mono">
+                        <tbody class="divide-y divide-[#282828]/60 text-slate-300">
                             {{ range .EnvVars }}
-                            <tr>
-                                <td class="px-3 py-2.5 font-bold text-slate-800">{{ .Key }}</td>
-                                <td class="px-3 py-2.5">
+                            <tr class="hover:bg-[#1f1f1f] transition-colors">
+                                <td class="px-4 py-3 font-bold text-white">{{ .Key }}</td>
+                                <td class="px-4 py-3">
                                     {{ if eq .UAT "Configured in SSM" }}
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-100 text-emerald-800 font-sans">Configured in SSM</span>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-[#3ecf8e] border border-emerald-500/30">SSM Vault</span>
                                     {{ else if .UAT }}
-                                    <span class="text-teal-700 font-semibold">{{ .UAT }}</span>
+                                    <span class="text-teal-400 font-semibold">{{ .UAT }}</span>
                                     {{ else }}
-                                    <span class="text-gray-400 italic">N/A</span>
+                                    <span class="text-slate-500 italic">N/A</span>
                                     {{ end }}
                                 </td>
-                                <td class="px-3 py-2.5">
+                                <td class="px-4 py-3">
                                     {{ if eq .PreProd "Configured in SSM" }}
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-100 text-emerald-800 font-sans">Configured in SSM</span>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-[#3ecf8e] border border-emerald-500/30">SSM Vault</span>
                                     {{ else if .PreProd }}
-                                    <span class="text-teal-700 font-semibold">{{ .PreProd }}</span>
+                                    <span class="text-teal-400 font-semibold">{{ .PreProd }}</span>
                                     {{ else }}
-                                    <span class="text-gray-400 italic">N/A</span>
+                                    <span class="text-slate-500 italic">N/A</span>
                                     {{ end }}
                                 </td>
-                                <td class="px-3 py-2.5">
+                                <td class="px-4 py-3">
                                     {{ if eq .Prod "Configured in SSM" }}
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-amber-100 text-amber-800 font-sans">⚠️ Configured in SSM</span>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30">⚠️ SSM Vault</span>
                                     {{ else if .Prod }}
-                                    <span class="text-teal-700 font-semibold">{{ .Prod }}</span>
+                                    <span class="text-teal-400 font-semibold">{{ .Prod }}</span>
                                     {{ else }}
-                                    <span class="text-gray-400 italic">N/A</span>
+                                    <span class="text-slate-500 italic">N/A</span>
                                     {{ end }}
                                 </td>
                             </tr>
@@ -881,20 +1064,20 @@
 
     <!-- PANEL 4: VULNERABILITY MANAGEMENT & TRIVY SCAN -->
     <div id="panel-vulnerabilities" class="hidden">
-        <div class="bg-white shadow-sm ring-1 ring-gray-900/5 rounded-xl overflow-hidden p-6 mb-8">
-            <div class="sm:flex sm:items-center sm:justify-between border-b border-gray-100 pb-4 mb-6 gap-4">
+        <div class="bg-[#171717] border border-[#282828] rounded-2xl overflow-hidden p-6 mb-8 text-white shadow-sm">
+            <div class="sm:flex sm:items-center sm:justify-between border-b border-[#282828] pb-4 mb-6 gap-4">
                 <div>
-                    <h3 class="text-base font-bold leading-6 text-gray-900 flex items-center gap-2">
-                        <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
-                        Vulnerability & Security Management
+                    <h3 class="text-base font-bold leading-6 text-white flex items-center gap-2">
+                        <i data-lucide="shield-alert" class="w-5 h-5 text-emerald-400"></i>
+                        Vulnerability &amp; Security Management
                     </h3>
-                    <p class="mt-1 text-xs text-gray-500">Perform Trivy security audits per Git branch, inspect detected CVE vulnerabilities, and accept security risk before deployment.</p>
+                    <p class="mt-1 text-xs text-slate-400">Perform Trivy security audits per Git branch, inspect detected CVE vulnerabilities, and accept security risk before deployment.</p>
                 </div>
                 
                 <form id="trivy-scan-form" class="mt-4 sm:mt-0 flex flex-wrap items-center gap-3">
                     <div class="flex items-center gap-2">
-                        <label for="vuln-branch-select" class="text-xs font-semibold text-gray-700">Target Branch:</label>
-                        <select id="vuln-branch-select" name="branch" class="rounded-md border-gray-300 shadow-sm ring-1 ring-gray-300 focus:ring-2 focus:ring-emerald-600 text-xs py-1.5 px-3 font-mono font-bold text-gray-800 bg-gray-50">
+                        <label for="vuln-branch-select" class="text-xs font-mono font-bold text-slate-300">Target Branch:</label>
+                        <select id="vuln-branch-select" name="branch" class="rounded-xl border border-[#282828] text-xs py-2 px-3 font-mono font-bold text-white bg-[#121212] focus:ring-2 focus:ring-purple-500">
                             <option value="main" selected>main</option>
                             <option value="uat">uat</option>
                             <option value="dev">dev</option>
@@ -908,14 +1091,14 @@
                         hx-target="#vulnerability-results"
                         hx-indicator="#vuln-spinner"
                         type="button" 
-                        class="inline-flex items-center rounded-md bg-emerald-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-emerald-500 transition-colors">
-                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                        class="inline-flex items-center rounded-xl bg-[#7c3aed] hover:bg-[#6d28d9] px-4 py-2 text-xs font-bold font-mono text-white shadow-sm transition-all gap-1.5 cursor-pointer">
+                        <i data-lucide="refresh-cw" class="w-4 h-4"></i>
                         Run Branch Security Scan
                     </button>
                 </form>
             </div>
 
-            <div id="vuln-spinner" class="htmx-indicator hidden my-6 bg-slate-900 border border-slate-800 text-teal-400 p-5 rounded-xl text-center text-xs font-mono">
+            <div id="vuln-spinner" class="htmx-indicator hidden my-6 bg-[#121212] border border-[#282828] text-[#a78bfa] p-5 rounded-xl text-center text-xs font-mono">
                 <span class="inline-block animate-spin mr-2">⟳</span> Running Trivy security audit on selected branch...
             </div>
 
@@ -927,16 +1110,16 @@
             </div>
 
             <!-- Per-Service Automated Scan Scheduler Card -->
-            <div class="mt-8 pt-6 border-t border-slate-800">
+            <div class="mt-8 pt-6 border-t border-[#282828]">
                 <div class="flex items-center gap-2 mb-3">
-                    <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    <h4 class="text-sm font-bold text-white uppercase tracking-wider">Per-Service Scan Schedule & Queue Policy</h4>
+                    <i data-lucide="clock" class="w-5 h-5 text-[#a78bfa]"></i>
+                    <h4 class="text-sm font-bold text-white uppercase tracking-wider font-mono">Per-Service Scan Schedule &amp; Queue Policy</h4>
                 </div>
                 <p class="text-xs text-slate-400 mb-4">Configure background Trivy scan execution times. All queued scans run sequentially in the <code>trivy_scan</code> queue (FIFO) to prevent resource contention.</p>
                 <div id="scan-schedule-container" 
                      hx-get="/api/v1/catalog/{{ .ServiceName }}/scan-schedule" 
                      hx-trigger="load" 
-                     class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-inner">
+                     class="bg-[#121212] border border-[#282828] rounded-xl p-5 shadow-inner">
                     <div class="text-xs text-slate-400 font-mono animate-pulse">Loading schedule settings...</div>
                 </div>
             </div>
@@ -1109,5 +1292,53 @@ window.addEventListener('DOMContentLoaded', () => {
         }, 150);
     }
 });
+
+// Service Data Request Flow Interactive Controller
+let isMeshStreamPaused = false;
+function toggleMeshStream(btn) {
+    isMeshStreamPaused = !isMeshStreamPaused;
+    const animLines = document.querySelectorAll('#panel-topology .anim-line');
+    animLines.forEach(el => {
+        el.style.animationPlayState = isMeshStreamPaused ? 'paused' : 'running';
+    });
+    btn.innerText = isMeshStreamPaused ? 'Resume Animation' : 'Pause Animation';
+}
+
+const meshNodeProfiles = {
+    ingress: {
+        title: "API Gateway Route Ingress",
+        desc: "Ingress HTTP route parsed from Terraform IaC. Maps public requests to internal Lambda authorizers.",
+        protocol: "Protocol: HTTPS / JSON (4ms P99)"
+    },
+    lambda: {
+        title: "AWS Lambda Core Compute",
+        desc: "Active microservice runtime nodejs24.x allocated with 256MB memory residing in VPC private subnets.",
+        protocol: "Runtime: AWS Lambda (142ms P99)"
+    },
+    eventbridge: {
+        title: "AWS EventBridge Async Bus",
+        desc: "Asynchronous event mesh fanout handling domain events with zero consumer lag and DLQ protection.",
+        protocol: "Protocol: AWS SDK PutEvents"
+    },
+    rds: {
+        title: "Amazon RDS PostgreSQL",
+        desc: "Database storage engine in private VPC subnet. Connections secured via IAM Auth and SSL required.",
+        protocol: "Port: 5432 / PostgreSQL 15"
+    }
+};
+
+function openNodeInspector(nodeKey) {
+    const prof = meshNodeProfiles[nodeKey];
+    if (!prof) return;
+    document.getElementById('qiNodeTitle').innerText = prof.title;
+    document.getElementById('qiNodeDesc').innerText = prof.desc;
+    document.getElementById('qiNodeProtocol').innerText = prof.protocol;
+    document.getElementById('quickInspectorToast').classList.remove('hidden');
+    if (window.lucide) lucide.createIcons();
+}
+
+function closeNodeInspector() {
+    document.getElementById('quickInspectorToast').classList.add('hidden');
+}
 </script>
 {{ end }}

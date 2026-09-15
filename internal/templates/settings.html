@@ -1,12 +1,84 @@
 {{ define "content" }}
-<div class="max-w-4xl mx-auto">
-    <div class="mb-8 border-b pb-5">
-        <h2 class="text-2xl font-bold text-gray-900">Account Settings</h2>
-        <p class="text-sm text-gray-500 mt-1">Configure application settings and preferences.</p>
+<div class="max-w-4xl mx-auto space-y-6">
+    <!-- Header -->
+    <div class="border-b border-[#282828] pb-5">
+        <div class="flex items-center gap-2">
+            <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
+                Account &amp; Platform Settings
+            </h2>
+            <span class="inline-flex items-center rounded-full bg-purple-500/15 px-2.5 py-1 text-xs font-bold font-mono text-[#a78bfa] border border-purple-500/30">
+                Preferences
+            </span>
+        </div>
+        <p class="text-xs sm:text-sm text-slate-400 mt-1">Configure interface preferences, regional infrastructure defaults, and system telemetry notifications.</p>
     </div>
 
-    <div class="bg-white shadow-sm ring-1 ring-gray-900/5 rounded-xl p-6">
-        <p class="text-sm text-gray-600">Settings configuration interface. Additional settings will be enabled in upcoming releases.</p>
+    <!-- Appearance & Theme Preferences -->
+    <div class="bg-[#171717] border border-[#282828] rounded-2xl shadow-sm p-6 text-white space-y-5">
+        <div class="border-b border-[#282828] pb-3">
+            <h3 class="text-sm font-bold uppercase tracking-wider text-slate-300 font-mono flex items-center gap-2">
+                <i data-lucide="palette" class="w-4 h-4 text-[#a78bfa]"></i>
+                Appearance &amp; Theme
+            </h3>
+            <p class="text-xs text-slate-400 mt-0.5">Choose your preferred visual mode for developer catalog operations.</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- Theme Card: Supabase Dark -->
+            <button type="button" onclick="applyTheme('dark')" class="p-4 rounded-xl border border-[#282828] bg-[#121212] hover:border-purple-500 text-left transition-all group cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-500">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs font-bold font-mono text-white flex items-center gap-2">
+                        <span>🌙</span>
+                        Supabase Dark Mode
+                    </span>
+                    <span class="text-[10px] font-mono px-2 py-0.5 rounded-md bg-purple-500/20 text-[#a78bfa] border border-purple-500/30">Default</span>
+                </div>
+                <p class="text-xs text-slate-400">Deep obsidian (#121212) canvas, matte cards (#171717), and Oona violet brand highlights.</p>
+            </button>
+
+            <!-- Theme Card: Clean Light -->
+            <button type="button" onclick="applyTheme('light')" class="p-4 rounded-xl border border-[#282828] bg-[#121212] hover:border-purple-500 text-left transition-all group cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-500">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs font-bold font-mono text-white flex items-center gap-2">
+                        <span>☀️</span>
+                        Clean Light Mode
+                    </span>
+                    <span class="text-[10px] font-mono px-2 py-0.5 rounded-md bg-slate-800 text-slate-400">High Contrast</span>
+                </div>
+                <p class="text-xs text-slate-400">Pure white cards, crisp slate typography, and lavender status preview containers.</p>
+            </button>
+        </div>
+    </div>
+
+    <!-- Infrastructure Defaults & Region Information -->
+    <div class="bg-[#171717] border border-[#282828] rounded-2xl shadow-sm p-6 text-white space-y-4">
+        <div class="border-b border-[#282828] pb-3">
+            <h3 class="text-sm font-bold uppercase tracking-wider text-slate-300 font-mono flex items-center gap-2">
+                <i data-lucide="globe" class="w-4 h-4 text-[#3ecf8e]"></i>
+                Oona Cloud Infrastructure Policy
+            </h3>
+            <p class="text-xs text-slate-400 mt-0.5">Configured cloud region anchors and scheduler time settings.</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-mono">
+            <div class="p-4 rounded-xl bg-[#121212] border border-[#282828] space-y-1">
+                <span class="text-slate-400 text-[10px] uppercase">AWS Primary Region</span>
+                <p class="text-sm font-bold text-white flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-[#3ecf8e]"></span>
+                    ap-southeast-3 (Jakarta)
+                </p>
+                <p class="text-[11px] text-slate-500">All PH &amp; ID serverless workloads deployed in Jakarta cloud region.</p>
+            </div>
+
+            <div class="p-4 rounded-xl bg-[#121212] border border-[#282828] space-y-1">
+                <span class="text-slate-400 text-[10px] uppercase">Standard Scheduler Timezone</span>
+                <p class="text-sm font-bold text-white flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-[#3ecf8e]"></span>
+                    Asia/Jakarta (WIB, UTC+7)
+                </p>
+                <p class="text-[11px] text-slate-500">Trivy vulnerability cron schedules executed sequentially on WIB.</p>
+            </div>
+        </div>
     </div>
 </div>
 {{ end }}

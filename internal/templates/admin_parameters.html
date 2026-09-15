@@ -1,7 +1,7 @@
 {{ define "content" }}
 <div class="max-w-6xl mx-auto space-y-6">
     <!-- Header Section -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-800 pb-5">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-[#282828] pb-5">
         <div>
             <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
                 System Parameters
@@ -10,25 +10,28 @@
         </div>
         <button 
             onclick="document.getElementById('param-form').classList.toggle('hidden')"
-            class="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-2 text-xs font-bold text-white shadow-lg shadow-indigo-600/25 hover:from-indigo-500 hover:to-violet-500 transition-all cursor-pointer">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
-            + Add Parameter
+            class="inline-flex items-center gap-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white shadow-sm px-4 py-2 text-xs font-bold text-white shadow-lg shadow-indigo-600/25 hover:from-indigo-500 hover:to-violet-500 transition-all cursor-pointer">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            Add Parameter
         </button>
     </div>
 
     <!-- Form Container (Hidden by default) -->
-    <div id="param-form" class="hidden bg-slate-900/90 border border-slate-800/80 shadow-xl shadow-black/30 rounded-2xl p-6 backdrop-blur-xl transition-all">
-        <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-5">
-            <h3 class="text-sm font-bold text-white uppercase tracking-wider">Add New System Parameter</h3>
+    <div id="param-form" class="hidden bg-[#171717] border border-[#282828] shadow-2xl rounded-2xl p-6 text-white transition-all">
+        <div class="flex items-center justify-between border-b border-[#282828] pb-3 mb-5">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 font-mono flex items-center gap-2">
+                <i data-lucide="sliders" class="w-4 h-4 text-[#a78bfa]"></i>
+                Add New System Parameter
+            </h3>
             <button type="button" onclick="document.getElementById('param-form').classList.add('hidden')" class="text-slate-400 hover:text-white p-1 rounded-lg">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                <i data-lucide="x" class="w-5 h-5"></i>
             </button>
         </div>
-        <form hx-post="/api/v1/admin/parameters" class="space-y-4">
+        <form hx-post="/api/v1/admin/parameters" class="space-y-4 font-mono text-xs">
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1.5">Category</label>
-                    <select name="category" required class="block w-full rounded-xl bg-slate-950 border-0 py-2.5 text-white ring-1 ring-inset ring-slate-800 focus:ring-2 focus:ring-inset focus:ring-indigo-500 text-xs px-3.5">
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">Category</label>
+                    <select name="category" required class="block w-full rounded-xl bg-[#121212] border border-[#282828] py-2.5 text-white focus:ring-2 focus:ring-purple-500 text-xs px-3.5">
                         <option value="country">Country</option>
                         <option value="shelf">Shelf / Product Suite</option>
                         <option value="domain">Product / Domain</option>
@@ -36,22 +39,22 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1.5">Code</label>
-                    <input type="text" name="code" placeholder="e.g. ph, dtc, uat" required class="block w-full rounded-xl bg-slate-950 border-0 py-2.5 text-white ring-1 ring-inset ring-slate-800 placeholder:text-slate-500 focus:ring-2 focus:ring-inset focus:ring-indigo-500 text-xs px-3.5"/>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">Code</label>
+                    <input type="text" name="code" placeholder="e.g. ph, dtc, uat" required class="block w-full rounded-xl bg-[#121212] border border-[#282828] py-2.5 text-white placeholder:text-slate-600 focus:ring-2 focus:ring-purple-500 text-xs px-3.5"/>
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1.5">Display Name</label>
-                    <input type="text" name="name" placeholder="e.g. Philippines (PH)" required class="block w-full rounded-xl bg-slate-950 border-0 py-2.5 text-white ring-1 ring-inset ring-slate-800 placeholder:text-slate-500 focus:ring-2 focus:ring-inset focus:ring-indigo-500 text-xs px-3.5"/>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">Display Name</label>
+                    <input type="text" name="name" placeholder="e.g. Philippines (PH)" required class="block w-full rounded-xl bg-[#121212] border border-[#282828] py-2.5 text-white placeholder:text-slate-600 focus:ring-2 focus:ring-purple-500 text-xs px-3.5"/>
                 </div>
             </div>
             <div>
-                <label class="block text-xs font-semibold text-slate-300 mb-1.5">Description</label>
-                <input type="text" name="description" placeholder="Brief description of the parameter" class="block w-full rounded-xl bg-slate-950 border-0 py-2.5 text-white ring-1 ring-inset ring-slate-800 placeholder:text-slate-500 focus:ring-2 focus:ring-inset focus:ring-indigo-500 text-xs px-3.5"/>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">Description</label>
+                <input type="text" name="description" placeholder="Brief description of the parameter" class="block w-full rounded-xl bg-[#121212] border border-[#282828] py-2.5 text-white placeholder:text-slate-600 focus:ring-2 focus:ring-purple-500 text-xs px-3.5"/>
             </div>
 
-            <div class="pt-4 border-t border-slate-800 flex items-center justify-end gap-3">
-                <button type="button" onclick="document.getElementById('param-form').classList.add('hidden')" class="rounded-xl bg-slate-800 hover:bg-slate-700 px-4 py-2 text-xs font-semibold text-slate-300 hover:text-white transition-colors">Cancel</button>
-                <button type="submit" class="rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-2 text-xs font-bold text-white shadow-lg shadow-indigo-600/30 hover:from-indigo-500 hover:to-violet-500 transition-all">
+            <div class="pt-4 border-t border-[#282828] flex items-center justify-end gap-3">
+                <button type="button" onclick="document.getElementById('param-form').classList.add('hidden')" class="rounded-xl bg-[#1e1e1e] hover:bg-[#282828] border border-[#2e2e2e] px-4 py-2 text-xs font-bold text-slate-300 hover:text-white transition-colors">Cancel</button>
+                <button type="submit" class="rounded-xl bg-[#7c3aed] hover:bg-[#6d28d9] px-4 py-2 text-xs font-bold text-white shadow-sm transition-all">
                     Save Parameter
                 </button>
             </div>
@@ -61,252 +64,289 @@
     <!-- Parameter Sections -->
     <div class="space-y-8">
         <!-- Countries Table -->
-        <div class="bg-white shadow-sm ring-1 ring-gray-900/5 rounded-xl overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
-                <h3 class="text-base font-semibold text-gray-900 flex items-center">
-                    <svg class="w-5 h-5 mr-2 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Countries
-                </h3>
-                <span class="text-xs font-medium text-gray-500 bg-gray-200 px-2 py-1 rounded-full">{{ len .Countries }} items</span>
+        <div class="bg-[#171717] border border-[#282828] rounded-2xl overflow-hidden shadow-sm text-white">
+            <div class="px-6 py-4 border-b border-[#282828] bg-[#141414] flex items-center justify-between">
+                <div class="flex items-center space-x-2.5">
+                    <div class="p-1.5 rounded-xl bg-teal-500/10 text-teal-400 border border-teal-500/20">
+                        <i data-lucide="globe" class="w-4 h-4"></i>
+                    </div>
+                    <h3 class="text-xs font-bold leading-6 text-white uppercase tracking-wider font-mono">Countries</h3>
+                </div>
+                <span class="text-xs font-mono font-bold text-[#a78bfa] bg-purple-500/15 px-2.5 py-0.5 rounded-full border border-purple-500/30">{{ len .Countries }} items</span>
             </div>
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="py-3 pl-6 pr-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Code</th>
-                        <th class="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Name</th>
-                        <th class="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Description</th>
-                        <th class="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Status</th>
-                        <th class="px-3 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">Action</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-200 bg-white">
-                    {{ range .Countries }}
-                    <tr>
-                        <td class="py-3.5 pl-6 pr-3 text-sm font-mono text-gray-900">{{ .Code }}</td>
-                        <td class="px-3 py-3.5 text-sm font-medium text-gray-900">{{ .Name }}</td>
-                        <td class="px-3 py-3.5 text-sm text-gray-500">{{ .Description }}</td>
-                        <td class="px-3 py-3.5 text-sm">
-                            {{ if .IsActive }}
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Active</span>
-                            {{ else }}
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">Inactive</span>
-                            {{ end }}
-                        </td>
-                        <td class="px-3 py-3.5 text-right text-sm">
-                            <div class="flex items-center justify-end gap-2">
-                                <button type="button" onclick="openEditParamModal('{{ .ID }}', '{{ .Code }}', '{{ .Name }}', '{{ .Description }}')" class="text-xs font-medium text-slate-700 hover:text-slate-900 border border-slate-300 hover:border-slate-400 px-2 py-1 rounded-md transition-colors bg-white shadow-sm">
-                                    Edit
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-[#282828] text-xs font-mono">
+                    <thead class="bg-[#121212] text-slate-400 uppercase text-[11px]">
+                        <tr>
+                            <th class="py-3.5 pl-6 pr-3 text-left font-bold">Code</th>
+                            <th class="px-4 py-3.5 text-left font-bold">Name</th>
+                            <th class="px-4 py-3.5 text-left font-bold">Description</th>
+                            <th class="px-4 py-3.5 text-left font-bold">Status</th>
+                            <th class="px-6 py-3.5 text-right font-bold">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-[#282828]/60 text-slate-300">
+                        {{ range .Countries }}
+                        <tr class="hover:bg-[#1f1f1f] transition-colors">
+                            <td class="py-4 pl-6 pr-3 font-bold text-purple-300 font-mono">
+                                <code class="px-2 py-0.5 rounded-lg bg-[#121212] border border-[#282828] text-purple-300">{{ .Code }}</code>
+                            </td>
+                            <td class="px-4 py-4 font-bold text-white">{{ .Name }}</td>
+                            <td class="px-4 py-4 text-slate-400 font-sans">{{ .Description }}</td>
+                            <td class="px-4 py-4">
+                                {{ if .IsActive }}
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-[#3ecf8e] border border-[#3ecf8e]/30 font-bold text-[11px]">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-[#3ecf8e] animate-pulse"></span>
+                                    Active
+                                </span>
+                                {{ else }}
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700 text-[11px]">
+                                    Inactive
+                                </span>
+                                {{ end }}
+                            </td>
+                            <td class="px-6 py-4 text-right space-x-2">
+                                <button type="button" onclick="openEditParamModal('{{ .ID }}', '{{ .Code }}', '{{ .Name }}', '{{ .Description }}')" class="btn-secondary-action inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-[#1e1e1e] hover:bg-[#282828] text-slate-300 hover:text-white border border-[#2e2e2e] text-xs font-mono font-bold transition-all cursor-pointer">
+                                    <i data-lucide="edit-3" class="w-3 h-3"></i>Edit
                                 </button>
                                 <form hx-post="/api/v1/admin/parameters/{{ .ID }}/toggle" class="inline">
-                                    <button type="submit" class="text-xs font-medium text-teal-600 hover:text-teal-900 border border-teal-200 hover:border-teal-400 px-2.5 py-1 rounded-md transition-colors">
-                                        {{ if .IsActive }}Disable{{ else }}Enable{{ end }}
+                                    <button type="submit" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 text-xs font-mono font-bold transition-all cursor-pointer">
+                                        <i data-lucide="power" class="w-3 h-3"></i>{{ if .IsActive }}Disable{{ else }}Enable{{ end }}
                                     </button>
                                 </form>
-                                <button type="button" hx-delete="/api/v1/admin/parameters/{{ .ID }}" hx-confirm="Are you sure you want to delete parameter '{{ .Name }}'?" class="text-xs font-medium text-red-600 hover:text-red-900 border border-red-200 hover:border-red-400 px-2 py-1 rounded-md transition-colors">
-                                    Delete
+                                <button type="button" hx-delete="/api/v1/admin/parameters/{{ .ID }}" hx-confirm="Are you sure you want to delete parameter '{{ .Name }}'?" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 text-xs font-mono font-bold transition-all cursor-pointer">
+                                    <i data-lucide="trash-2" class="w-3 h-3"></i>Delete
                                 </button>
-                            </div>
-                        </td>
-                    </tr>
-                    {{ end }}
-                </tbody>
-            </table>
+                            </td>
+                        </tr>
+                        {{ end }}
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <!-- Shelves (Product Suites / Integration Groups) Table -->
-        <div class="bg-white shadow-sm ring-1 ring-gray-900/5 rounded-xl overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
-                <h3 class="text-base font-semibold text-gray-900 flex items-center">
-                    <svg class="w-5 h-5 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg> Service Shelves (Product Suites / Ecosystems)
-                </h3>
-                <span class="text-xs font-medium text-gray-500 bg-gray-200 px-2 py-1 rounded-full">{{ len .Shelves }} items</span>
+        <div class="bg-[#171717] border border-[#282828] rounded-2xl overflow-hidden shadow-sm text-white">
+            <div class="px-6 py-4 border-b border-[#282828] bg-[#141414] flex items-center justify-between">
+                <div class="flex items-center space-x-2.5">
+                    <div class="p-1.5 rounded-xl bg-purple-500/10 text-[#a78bfa] border border-purple-500/20">
+                        <i data-lucide="layers" class="w-4 h-4"></i>
+                    </div>
+                    <h3 class="text-xs font-bold leading-6 text-white uppercase tracking-wider font-mono">Service Shelves (Product Suites / Ecosystems)</h3>
+                </div>
+                <span class="text-xs font-mono font-bold text-[#a78bfa] bg-purple-500/15 px-2.5 py-0.5 rounded-full border border-purple-500/30">{{ len .Shelves }} items</span>
             </div>
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="py-3 pl-6 pr-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Shelf Key (Country:Product)</th>
-                        <th class="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Display Name</th>
-                        <th class="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Description</th>
-                        <th class="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Status</th>
-                        <th class="px-3 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">Action</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-200 bg-white">
-                    {{ range .Shelves }}
-                    <tr>
-                        <td class="py-3.5 pl-6 pr-3 text-sm font-mono text-gray-900 font-bold text-indigo-700">{{ .Code }}</td>
-                        <td class="px-3 py-3.5 text-sm font-medium text-gray-900">{{ .Name }}</td>
-                        <td class="px-3 py-3.5 text-sm text-gray-500">{{ .Description }}</td>
-                        <td class="px-3 py-3.5 text-sm">
-                            {{ if .IsActive }}
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Active</span>
-                            {{ else }}
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">Inactive</span>
-                            {{ end }}
-                        </td>
-                        <td class="px-3 py-3.5 text-right text-sm">
-                            <div class="flex items-center justify-end gap-2">
-                                <button type="button" onclick="openEditParamModal('{{ .ID }}', '{{ .Code }}', '{{ .Name }}', '{{ .Description }}')" class="text-xs font-medium text-slate-700 hover:text-slate-900 border border-slate-300 hover:border-slate-400 px-2 py-1 rounded-md transition-colors bg-white shadow-sm">
-                                    Edit
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-[#282828] text-xs font-mono">
+                    <thead class="bg-[#121212] text-slate-400 uppercase text-[11px]">
+                        <tr>
+                            <th class="py-3.5 pl-6 pr-3 text-left font-bold">Shelf Key (Country:Product)</th>
+                            <th class="px-4 py-3.5 text-left font-bold">Display Name</th>
+                            <th class="px-4 py-3.5 text-left font-bold">Description</th>
+                            <th class="px-4 py-3.5 text-left font-bold">Status</th>
+                            <th class="px-6 py-3.5 text-right font-bold">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-[#282828]/60 text-slate-300">
+                        {{ range .Shelves }}
+                        <tr class="hover:bg-[#1f1f1f] transition-colors">
+                            <td class="py-4 pl-6 pr-3">
+                                <code class="px-2.5 py-1 rounded-lg bg-[#121212] border border-[#282828] text-purple-300 font-bold font-mono">{{ .Code }}</code>
+                            </td>
+                            <td class="px-4 py-4 font-bold text-white">{{ .Name }}</td>
+                            <td class="px-4 py-4 text-slate-400 font-sans">{{ .Description }}</td>
+                            <td class="px-4 py-4">
+                                {{ if .IsActive }}
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-[#3ecf8e] border border-[#3ecf8e]/30 font-bold text-[11px]">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-[#3ecf8e] animate-pulse"></span>
+                                    Active
+                                </span>
+                                {{ else }}
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700 text-[11px]">
+                                    Inactive
+                                </span>
+                                {{ end }}
+                            </td>
+                            <td class="px-6 py-4 text-right space-x-2">
+                                <button type="button" onclick="openEditParamModal('{{ .ID }}', '{{ .Code }}', '{{ .Name }}', '{{ .Description }}')" class="btn-secondary-action inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-[#1e1e1e] hover:bg-[#282828] text-slate-300 hover:text-white border border-[#2e2e2e] text-xs font-mono font-bold transition-all cursor-pointer">
+                                    <i data-lucide="edit-3" class="w-3 h-3"></i>Edit
                                 </button>
                                 <form hx-post="/api/v1/admin/parameters/{{ .ID }}/toggle" class="inline">
-                                    <button type="submit" class="text-xs font-medium text-teal-600 hover:text-teal-900 border border-teal-200 hover:border-teal-400 px-2.5 py-1 rounded-md transition-colors">
-                                        {{ if .IsActive }}Disable{{ else }}Enable{{ end }}
+                                    <button type="submit" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 text-xs font-mono font-bold transition-all cursor-pointer">
+                                        <i data-lucide="power" class="w-3 h-3"></i>{{ if .IsActive }}Disable{{ else }}Enable{{ end }}
                                     </button>
                                 </form>
-                                <button type="button" hx-delete="/api/v1/admin/parameters/{{ .ID }}" hx-confirm="Are you sure you want to delete shelf '{{ .Name }}'?" class="text-xs font-medium text-red-600 hover:text-red-900 border border-red-200 hover:border-red-400 px-2 py-1 rounded-md transition-colors">
-                                    Delete
+                                <button type="button" hx-delete="/api/v1/admin/parameters/{{ .ID }}" hx-confirm="Are you sure you want to delete shelf '{{ .Name }}'?" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 text-xs font-mono font-bold transition-all cursor-pointer">
+                                    <i data-lucide="trash-2" class="w-3 h-3"></i>Delete
                                 </button>
-                            </div>
-                        </td>
-                    </tr>
-                    {{ end }}
-                </tbody>
-            </table>
+                            </td>
+                        </tr>
+                        {{ end }}
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <!-- Products / Domains Table -->
-        <div class="bg-white shadow-sm ring-1 ring-gray-900/5 rounded-xl overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
-                <h3 class="text-base font-semibold text-gray-900 flex items-center">
-                    <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg> Products / Domains
-                </h3>
-                <span class="text-xs font-medium text-gray-500 bg-gray-200 px-2 py-1 rounded-full">{{ len .Domains }} items</span>
+        <div class="bg-[#171717] border border-[#282828] rounded-2xl overflow-hidden shadow-sm text-white">
+            <div class="px-6 py-4 border-b border-[#282828] bg-[#141414] flex items-center justify-between">
+                <div class="flex items-center space-x-2.5">
+                    <div class="p-1.5 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                        <i data-lucide="box" class="w-4 h-4"></i>
+                    </div>
+                    <h3 class="text-xs font-bold leading-6 text-white uppercase tracking-wider font-mono">Products / Domains</h3>
+                </div>
+                <span class="text-xs font-mono font-bold text-[#a78bfa] bg-purple-500/15 px-2.5 py-0.5 rounded-full border border-purple-500/30">{{ len .Domains }} items</span>
             </div>
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="py-3 pl-6 pr-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Code</th>
-                        <th class="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Name</th>
-                        <th class="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Description</th>
-                        <th class="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Status</th>
-                        <th class="px-3 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">Action</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-200 bg-white">
-                    {{ range .Domains }}
-                    <tr>
-                        <td class="py-3.5 pl-6 pr-3 text-sm font-mono text-gray-900">{{ .Code }}</td>
-                        <td class="px-3 py-3.5 text-sm font-medium text-gray-900">{{ .Name }}</td>
-                        <td class="px-3 py-3.5 text-sm text-gray-500">{{ .Description }}</td>
-                        <td class="px-3 py-3.5 text-sm">
-                            {{ if .IsActive }}
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Active</span>
-                            {{ else }}
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">Inactive</span>
-                            {{ end }}
-                        </td>
-                        <td class="px-3 py-3.5 text-right text-sm">
-                            <div class="flex items-center justify-end gap-2">
-                                <button type="button" onclick="openEditParamModal('{{ .ID }}', '{{ .Code }}', '{{ .Name }}', '{{ .Description }}')" class="text-xs font-medium text-slate-700 hover:text-slate-900 border border-slate-300 hover:border-slate-400 px-2 py-1 rounded-md transition-colors bg-white shadow-sm">
-                                    Edit
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-[#282828] text-xs font-mono">
+                    <thead class="bg-[#121212] text-slate-400 uppercase text-[11px]">
+                        <tr>
+                            <th class="py-3.5 pl-6 pr-3 text-left font-bold">Code</th>
+                            <th class="px-4 py-3.5 text-left font-bold">Name</th>
+                            <th class="px-4 py-3.5 text-left font-bold">Description</th>
+                            <th class="px-4 py-3.5 text-left font-bold">Status</th>
+                            <th class="px-6 py-3.5 text-right font-bold">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-[#282828]/60 text-slate-300">
+                        {{ range .Domains }}
+                        <tr class="hover:bg-[#1f1f1f] transition-colors">
+                            <td class="py-4 pl-6 pr-3">
+                                <code class="px-2 py-0.5 rounded-lg bg-[#121212] border border-[#282828] text-purple-300">{{ .Code }}</code>
+                            </td>
+                            <td class="px-4 py-4 font-bold text-white">{{ .Name }}</td>
+                            <td class="px-4 py-4 text-slate-400 font-sans">{{ .Description }}</td>
+                            <td class="px-4 py-4">
+                                {{ if .IsActive }}
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-[#3ecf8e] border border-[#3ecf8e]/30 font-bold text-[11px]">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-[#3ecf8e] animate-pulse"></span>
+                                    Active
+                                </span>
+                                {{ else }}
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700 text-[11px]">
+                                    Inactive
+                                </span>
+                                {{ end }}
+                            </td>
+                            <td class="px-6 py-4 text-right space-x-2">
+                                <button type="button" onclick="openEditParamModal('{{ .ID }}', '{{ .Code }}', '{{ .Name }}', '{{ .Description }}')" class="btn-secondary-action inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-[#1e1e1e] hover:bg-[#282828] text-slate-300 hover:text-white border border-[#2e2e2e] text-xs font-mono font-bold transition-all cursor-pointer">
+                                    <i data-lucide="edit-3" class="w-3 h-3"></i>Edit
                                 </button>
                                 <form hx-post="/api/v1/admin/parameters/{{ .ID }}/toggle" class="inline">
-                                    <button type="submit" class="text-xs font-medium text-teal-600 hover:text-teal-900 border border-teal-200 hover:border-teal-400 px-2.5 py-1 rounded-md transition-colors">
-                                        {{ if .IsActive }}Disable{{ else }}Enable{{ end }}
+                                    <button type="submit" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 text-xs font-mono font-bold transition-all cursor-pointer">
+                                        <i data-lucide="power" class="w-3 h-3"></i>{{ if .IsActive }}Disable{{ else }}Enable{{ end }}
                                     </button>
                                 </form>
-                                <button type="button" hx-delete="/api/v1/admin/parameters/{{ .ID }}" hx-confirm="Are you sure you want to delete parameter '{{ .Name }}'?" class="text-xs font-medium text-red-600 hover:text-red-900 border border-red-200 hover:border-red-400 px-2 py-1 rounded-md transition-colors">
-                                    Delete
+                                <button type="button" hx-delete="/api/v1/admin/parameters/{{ .ID }}" hx-confirm="Are you sure you want to delete parameter '{{ .Name }}'?" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 text-xs font-mono font-bold transition-all cursor-pointer">
+                                    <i data-lucide="trash-2" class="w-3 h-3"></i>Delete
                                 </button>
-                            </div>
-                        </td>
-                    </tr>
-                    {{ end }}
-                </tbody>
-            </table>
+                            </td>
+                        </tr>
+                        {{ end }}
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <!-- Environments Table -->
-        <div class="bg-white shadow-sm ring-1 ring-gray-900/5 rounded-xl overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
-                <h3 class="text-base font-semibold text-gray-900 flex items-center">
-                    <svg class="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"></path></svg> Environments
-                </h3>
-                <span class="text-xs font-medium text-gray-500 bg-gray-200 px-2 py-1 rounded-full">{{ len .Environments }} items</span>
+        <div class="bg-[#171717] border border-[#282828] rounded-2xl overflow-hidden shadow-sm text-white">
+            <div class="px-6 py-4 border-b border-[#282828] bg-[#141414] flex items-center justify-between">
+                <div class="flex items-center space-x-2.5">
+                    <div class="p-1.5 rounded-xl bg-purple-500/10 text-[#a78bfa] border border-purple-500/20">
+                        <i data-lucide="server" class="w-4 h-4"></i>
+                    </div>
+                    <h3 class="text-xs font-bold leading-6 text-white uppercase tracking-wider font-mono">Environments</h3>
+                </div>
+                <span class="text-xs font-mono font-bold text-[#a78bfa] bg-purple-500/15 px-2.5 py-0.5 rounded-full border border-purple-500/30">{{ len .Environments }} items</span>
             </div>
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="py-3 pl-6 pr-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Code</th>
-                        <th class="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Name</th>
-                        <th class="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Description</th>
-                        <th class="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Status</th>
-                        <th class="px-3 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">Action</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-200 bg-white">
-                    {{ range .Environments }}
-                    <tr>
-                        <td class="py-3.5 pl-6 pr-3 text-sm font-mono text-gray-900">{{ .Code }}</td>
-                        <td class="px-3 py-3.5 text-sm font-medium text-gray-900">{{ .Name }}</td>
-                        <td class="px-3 py-3.5 text-sm text-gray-500">{{ .Description }}</td>
-                        <td class="px-3 py-3.5 text-sm">
-                            {{ if .IsActive }}
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Active</span>
-                            {{ else }}
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">Inactive</span>
-                            {{ end }}
-                        </td>
-                        <td class="px-3 py-3.5 text-right text-sm">
-                            <div class="flex items-center justify-end gap-2">
-                                <button type="button" onclick="openEditParamModal('{{ .ID }}', '{{ .Code }}', '{{ .Name }}', '{{ .Description }}')" class="text-xs font-medium text-slate-700 hover:text-slate-900 border border-slate-300 hover:border-slate-400 px-2 py-1 rounded-md transition-colors bg-white shadow-sm">
-                                    Edit
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-[#282828] text-xs font-mono">
+                    <thead class="bg-[#121212] text-slate-400 uppercase text-[11px]">
+                        <tr>
+                            <th class="py-3.5 pl-6 pr-3 text-left font-bold">Code</th>
+                            <th class="px-4 py-3.5 text-left font-bold">Name</th>
+                            <th class="px-4 py-3.5 text-left font-bold">Description</th>
+                            <th class="px-4 py-3.5 text-left font-bold">Status</th>
+                            <th class="px-6 py-3.5 text-right font-bold">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-[#282828]/60 text-slate-300">
+                        {{ range .Environments }}
+                        <tr class="hover:bg-[#1f1f1f] transition-colors">
+                            <td class="py-4 pl-6 pr-3">
+                                <code class="px-2 py-0.5 rounded-lg bg-[#121212] border border-[#282828] text-purple-300">{{ .Code }}</code>
+                            </td>
+                            <td class="px-4 py-4 font-bold text-white">{{ .Name }}</td>
+                            <td class="px-4 py-4 text-slate-400 font-sans">{{ .Description }}</td>
+                            <td class="px-4 py-4">
+                                {{ if .IsActive }}
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-[#3ecf8e] border border-[#3ecf8e]/30 font-bold text-[11px]">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-[#3ecf8e] animate-pulse"></span>
+                                    Active
+                                </span>
+                                {{ else }}
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700 text-[11px]">
+                                    Inactive
+                                </span>
+                                {{ end }}
+                            </td>
+                            <td class="px-6 py-4 text-right space-x-2">
+                                <button type="button" onclick="openEditParamModal('{{ .ID }}', '{{ .Code }}', '{{ .Name }}', '{{ .Description }}')" class="btn-secondary-action inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-[#1e1e1e] hover:bg-[#282828] text-slate-300 hover:text-white border border-[#2e2e2e] text-xs font-mono font-bold transition-all cursor-pointer">
+                                    <i data-lucide="edit-3" class="w-3 h-3"></i>Edit
                                 </button>
                                 <form hx-post="/api/v1/admin/parameters/{{ .ID }}/toggle" class="inline">
-                                    <button type="submit" class="text-xs font-medium text-teal-600 hover:text-teal-900 border border-teal-200 hover:border-teal-400 px-2.5 py-1 rounded-md transition-colors">
-                                        {{ if .IsActive }}Disable{{ else }}Enable{{ end }}
+                                    <button type="submit" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 text-xs font-mono font-bold transition-all cursor-pointer">
+                                        <i data-lucide="power" class="w-3 h-3"></i>{{ if .IsActive }}Disable{{ else }}Enable{{ end }}
                                     </button>
                                 </form>
-                                <button type="button" hx-delete="/api/v1/admin/parameters/{{ .ID }}" hx-confirm="Are you sure you want to delete parameter '{{ .Name }}'?" class="text-xs font-medium text-red-600 hover:text-red-900 border border-red-200 hover:border-red-400 px-2 py-1 rounded-md transition-colors">
-                                    Delete
+                                <button type="button" hx-delete="/api/v1/admin/parameters/{{ .ID }}" hx-confirm="Are you sure you want to delete parameter '{{ .Name }}'?" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 text-xs font-mono font-bold transition-all cursor-pointer">
+                                    <i data-lucide="trash-2" class="w-3 h-3"></i>Delete
                                 </button>
-                            </div>
-                        </td>
-                    </tr>
-                    {{ end }}
-                </tbody>
-            </table>
+                            </td>
+                        </tr>
+                        {{ end }}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- Edit Parameter Modal Dialog -->
-<div id="edit-param-modal" class="hidden relative z-50" aria-labelledby="modal-edit-param-title" role="dialog" aria-modal="true">
-    <div class="fixed inset-0 bg-gray-500/75 transition-opacity"></div>
-    <div class="fixed inset-0 z-50 w-screen overflow-y-auto">
-        <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-            <div class="relative transform overflow-hidden rounded-xl bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
-                
-                <div class="flex items-center justify-between border-b pb-3 mb-4">
-                    <h3 class="text-lg font-bold leading-6 text-gray-900" id="modal-edit-param-title">Edit System Parameter</h3>
-                    <button type="button" onclick="closeEditParamModal()" class="text-gray-400 hover:text-gray-500">
-                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                    </button>
-                </div>
-
-                <form id="edit-param-form" hx-post="" hx-swap="none" class="space-y-4 text-xs">
-                    <div>
-                        <label class="block font-semibold text-gray-800 mb-1">Code</label>
-                        <input type="text" id="edit-param-code" name="code" required class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-teal-600 text-xs px-3 font-mono"/>
-                    </div>
-                    <div>
-                        <label class="block font-semibold text-gray-800 mb-1">Display Name</label>
-                        <input type="text" id="edit-param-name" name="name" required class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-teal-600 text-xs px-3"/>
-                    </div>
-                    <div>
-                        <label class="block font-semibold text-gray-800 mb-1">Description</label>
-                        <input type="text" id="edit-param-desc" name="description" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-teal-600 text-xs px-3"/>
-                    </div>
-
-                    <div class="mt-6 flex items-center justify-end gap-x-3 pt-3 border-t">
-                        <button type="button" onclick="closeEditParamModal()" class="rounded-md bg-white px-3.5 py-2 text-xs font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">Cancel</button>
-                        <button type="submit" class="rounded-md bg-teal-600 px-3.5 py-2 text-xs font-semibold text-white shadow-sm hover:bg-teal-500">
-                            Save Changes
-                        </button>
-                    </div>
-                </form>
-            </div>
+<!-- Edit Parameter Modal Dialog (Supabase Dark) -->
+<div id="edit-param-modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="relative w-full max-w-lg rounded-2xl bg-[#171717] border border-[#282828] shadow-2xl p-6 text-white space-y-4">
+        <div class="flex items-center justify-between border-b border-[#282828] pb-3">
+            <h3 class="text-sm font-bold uppercase tracking-wider text-white font-mono flex items-center gap-2" id="modal-edit-param-title">
+                <i data-lucide="edit-3" class="w-4 h-4 text-[#a78bfa]"></i>
+                Edit System Parameter
+            </h3>
+            <button type="button" onclick="closeEditParamModal()" class="rounded-lg p-1 text-slate-400 hover:bg-[#242424] hover:text-white">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
         </div>
+
+        <form id="edit-param-form" hx-post="" hx-swap="none" class="space-y-4 font-mono text-xs">
+            <div>
+                <label class="block font-bold uppercase tracking-wider text-slate-300 mb-1">Code</label>
+                <input type="text" id="edit-param-code" name="code" required class="block w-full rounded-xl bg-[#121212] border border-[#282828] py-2 text-white focus:ring-2 focus:ring-purple-500 text-xs px-3 font-mono"/>
+            </div>
+            <div>
+                <label class="block font-bold uppercase tracking-wider text-slate-300 mb-1">Display Name</label>
+                <input type="text" id="edit-param-name" name="name" required class="block w-full rounded-xl bg-[#121212] border border-[#282828] py-2 text-white focus:ring-2 focus:ring-purple-500 text-xs px-3 font-sans"/>
+            </div>
+            <div>
+                <label class="block font-bold uppercase tracking-wider text-slate-300 mb-1">Description</label>
+                <input type="text" id="edit-param-desc" name="description" class="block w-full rounded-xl bg-[#121212] border border-[#282828] py-2 text-white focus:ring-2 focus:ring-purple-500 text-xs px-3 font-sans"/>
+            </div>
+
+            <div class="mt-6 flex items-center justify-end gap-x-3 pt-3 border-t border-[#282828]">
+                <button type="button" onclick="closeEditParamModal()" class="rounded-xl bg-[#1e1e1e] hover:bg-[#282828] border border-[#2e2e2e] px-4 py-2 text-xs font-bold text-slate-300 hover:text-white transition-colors">Cancel</button>
+                <button type="submit" class="rounded-xl bg-[#7c3aed] hover:bg-[#6d28d9] px-4 py-2 text-xs font-bold text-white shadow-sm transition-all">
+                    Save Changes
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -321,6 +361,7 @@ function openEditParamModal(id, code, name, desc) {
     htmx.process(form);
 
     document.getElementById('edit-param-modal').classList.remove('hidden');
+    if (window.lucide) lucide.createIcons();
 }
 
 function closeEditParamModal() {

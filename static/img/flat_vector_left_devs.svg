@@ -1,0 +1,122 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 520" width="100%" height="100%" fill="none">
+  <defs>
+    <linearGradient id="devCyan" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#0284c7"/>
+    </linearGradient>
+    <linearGradient id="devPurple" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#c084fc"/>
+      <stop offset="100%" stop-color="#7c3aed"/>
+    </linearGradient>
+    <filter id="softGlowLeft" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="12" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Ambient Cloud Shapes -->
+  <path d="M70,90 Q90,70 120,75 Q150,60 170,85 Q190,95 180,120 Q160,140 120,135 Q80,140 65,115 Q55,95 70,90 Z" fill="#6366f1" fill-opacity="0.08" stroke="#818cf8" stroke-width="1.5" stroke-dasharray="4,4"/>
+  <path d="M430,70 Q455,50 485,55 Q515,40 535,65 Q555,75 545,100 Q525,120 485,115 Q445,120 430,95 Q420,75 430,70 Z" fill="#38bdf8" fill-opacity="0.08" stroke="#38bdf8" stroke-width="1.5" stroke-dasharray="4,4"/>
+  <path d="M410,400 Q435,380 465,385 Q495,370 515,395 Q535,405 525,430 Q505,450 465,445 Q425,450 410,425 Q400,405 410,400 Z" fill="#c084fc" fill-opacity="0.08" stroke="#c084fc" stroke-width="1.5" stroke-dasharray="4,4"/>
+
+  <!-- Git Branching Network Nodes -->
+  <path d="M120,130 L160,200 L160,320" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+  <circle cx="120" cy="130" r="4" fill="#38bdf8"/>
+  <circle cx="160" cy="200" r="4" fill="#38bdf8"/>
+  <circle cx="160" cy="320" r="4" fill="#38bdf8"/>
+
+  <path d="M160,200 L230,170" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+  <circle cx="230" cy="170" r="4" fill="#a78bfa"/>
+
+  <path d="M460,115 L430,190 L430,340" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+  <circle cx="460" cy="115" r="4" fill="#38bdf8"/>
+  <circle cx="430" cy="190" r="4" fill="#38bdf8"/>
+
+  <!-- Floating Code Badges -->
+  <g transform="translate(190, 80)">
+    <rect width="105" height="32" rx="10" fill="#1e1b4b" fill-opacity="0.8" stroke="#6366f1" stroke-width="1.5"/>
+    <text x="14" y="20" font-family="monospace" font-size="11" font-weight="bold" fill="#a78bfa">&lt;service /&gt;</text>
+  </g>
+
+  <g transform="translate(340, 110)">
+    <rect width="115" height="32" rx="10" fill="#0c4a6e" fill-opacity="0.8" stroke="#0284c7" stroke-width="1.5"/>
+    <text x="14" y="20" font-family="monospace" font-size="11" font-weight="bold" fill="#38bdf8">git push main</text>
+  </g>
+
+  <g transform="translate(80, 360)">
+    <rect width="125" height="32" rx="10" fill="#1e1b4b" fill-opacity="0.8" stroke="#a855f7" stroke-width="1.5"/>
+    <text x="14" y="20" font-family="monospace" font-size="11" font-weight="bold" fill="#c084fc">async handler()</text>
+  </g>
+
+  <!-- LEFT DEVELOPER 1 (Female Engineer with Laptop in IDE Window) -->
+  <g transform="translate(60, 160)">
+    <!-- IDE Window Frame -->
+    <rect width="210" height="190" rx="18" fill="#0f172a" fill-opacity="0.9" stroke="#38bdf8" stroke-width="2"/>
+    <!-- Window Header -->
+    <path d="M0,18 Q0,0 18,0 L192,0 Q210,0 210,18 L210,26 L0,26 Z" fill="#1e293b"/>
+    <circle cx="16" cy="13" r="3.5" fill="#ef4444"/>
+    <circle cx="28" cy="13" r="3.5" fill="#eab308"/>
+    <circle cx="40" cy="13" r="3.5" fill="#22c55e"/>
+    <text x="60" y="17" font-family="monospace" font-size="9" fill="#94a3b8">app_service.go</text>
+
+    <!-- Female Developer Vector Art -->
+    <!-- Head / Ponytail -->
+    <path d="M125,55 Q145,45 150,70 Q145,90 130,85 Z" fill="#475569"/>
+    <circle cx="110" cy="72" r="22" fill="#fcd34d"/>
+    <path d="M92,68 Q100,50 120,52 Q132,60 128,75 Q115,70 100,75 Z" fill="#1e293b"/>
+    <!-- Glasses -->
+    <rect x="98" y="68" width="10" height="7" rx="2" fill="none" stroke="#0f172a" stroke-width="1.5"/>
+    <rect x="112" y="68" width="10" height="7" rx="2" fill="none" stroke="#0f172a" stroke-width="1.5"/>
+    <line x1="108" y1="72" x2="112" y2="72" stroke="#0f172a" stroke-width="1.5"/>
+    <!-- Smile -->
+    <path d="M106,82 Q111,86 116,82" stroke="#0f172a" stroke-width="1.5" stroke-linecap="round"/>
+
+    <!-- Body / Hoodie -->
+    <path d="M78,135 Q85,98 110,98 Q135,98 142,135 Z" fill="#38bdf8"/>
+    <!-- Hoodie Strings -->
+    <line x1="105" y1="104" x2="105" y2="120" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="115" y1="104" x2="115" y2="120" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>
+
+    <!-- Laptop -->
+    <polygon points="65,150 155,150 145,178 75,178" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5"/>
+    <polygon points="75,148 145,148 135,115 85,115" fill="#0284c7" stroke="#38bdf8" stroke-width="1.5"/>
+    <polygon points="88,118 132,118 124,145 96,145" fill="#bae6fd"/>
+    <circle cx="110" cy="132" r="3" fill="#0284c7"/>
+  </g>
+
+  <!-- RIGHT DEVELOPER 2 (Male Engineer with Tablet) -->
+  <g transform="translate(320, 150)">
+    <!-- IDE Window Frame -->
+    <rect width="210" height="190" rx="18" fill="#0f172a" fill-opacity="0.9" stroke="#818cf8" stroke-width="2"/>
+    <!-- Window Header -->
+    <path d="M0,18 Q0,0 18,0 L192,0 Q210,0 210,18 L210,26 L0,26 Z" fill="#1e293b"/>
+    <circle cx="16" cy="13" r="3.5" fill="#ef4444"/>
+    <circle cx="28" cy="13" r="3.5" fill="#eab308"/>
+    <circle cx="40" cy="13" r="3.5" fill="#22c55e"/>
+    <text x="60" y="17" font-family="monospace" font-size="9" fill="#94a3b8">catalog_view.tsx</text>
+
+    <!-- Male Developer Vector Art -->
+    <!-- Head -->
+    <circle cx="105" cy="70" r="22" fill="#fcd34d"/>
+    <!-- Hair -->
+    <path d="M85,65 Q95,46 115,48 Q128,52 125,65 Q115,60 95,62 Z" fill="#334155"/>
+    <!-- Smile & Eyes -->
+    <circle cx="98" cy="67" r="2" fill="#0f172a"/>
+    <circle cx="112" cy="67" r="2" fill="#0f172a"/>
+    <path d="M102,78 Q107,82 112,78" stroke="#0f172a" stroke-width="1.5" stroke-linecap="round"/>
+
+    <!-- Body / Shirt -->
+    <path d="M72,135 Q80,96 105,96 Q130,96 138,135 Z" fill="#6366f1"/>
+    <!-- Collar -->
+    <polygon points="98,96 105,108 112,96" fill="#e0e7ff"/>
+
+    <!-- Tablet held in hand -->
+    <g transform="translate(85, 115)">
+      <rect width="65" height="52" rx="6" fill="#1e1b4b" stroke="#a78bfa" stroke-width="2"/>
+      <rect x="5" y="5" width="55" height="42" rx="3" fill="#312e81"/>
+      <text x="32" y="30" font-family="monospace" font-size="14" font-weight="bold" fill="#c084fc" text-anchor="middle">&lt; / &gt;</text>
+      <!-- Finger touching screen -->
+      <circle cx="32" cy="26" r="4" fill="#fcd34d"/>
+    </g>
+  </g>
+</svg>

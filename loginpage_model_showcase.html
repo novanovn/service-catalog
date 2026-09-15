@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oona Service Catalog — New Login Page Concepts (Inspired by loginpage.jpg)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Ambient Wave Animations */
+        @keyframes waveFloat {
+            0%, 100% { transform: translateY(0px) scaleY(1); }
+            50% { transform: translateY(-8px) scaleY(1.02); }
+        }
+        .anim-wave {
+            animation: waveFloat 6s ease-in-out infinite;
+        }
+
+        /* Particle flow along paths */
+        @keyframes dashFlow {
+            to { stroke-dashoffset: -32; }
+        }
+        .flow-dash {
+            stroke-dasharray: 6, 6;
+            animation: dashFlow 2s linear infinite;
+        }
+
+        /* Central SC Hub Glow */
+        @keyframes hubGlow {
+            0%, 100% { filter: drop-shadow(0 8px 16px rgba(124, 58, 237, 0.35)); }
+            50% { filter: drop-shadow(0 12px 28px rgba(124, 58, 237, 0.65)); }
+        }
+        .hub-glow {
+            animation: hubGlow 3s ease-in-out infinite;
+        }
+
+        /* Floating node card hover */
+        .node-card {
+            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .node-card:hover {
+            transform: translateY(-4px) scale(1.05);
+        }
+
+        /* Mode Styles */
+        html.light {
+            --bg-canvas: #f4f0fc;
+            --panel-bg: #ffffff;
+            --panel-border: #e4ddf7;
+            --text-title: #1e1b4b;
+            --text-body: #475569;
+            --input-bg: #f8fafc;
+            --input-border: #cbd5e1;
+            --brand-primary: #7c3aed;
+        }
+
+        html.dark {
+            --bg-canvas: #0c0d14;
+            --panel-bg: #14151f;
+            --panel-border: #252738;
+            --text-title: #f8fafc;
+            --text-body: #94a3b8;
+            --input-bg: #0e0f17;
+            --input-border: #26283b;
+            --brand-primary: #7c3aed;
+        }
+    </style>
+</head>
+<body class="bg-[var(--bg-canvas)] text-[var(--text-body)] min-h-screen p-6 sm:p-10 space-y-12">
+
+    <!-- Top Master Control Bar -->
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-purple-200/40 dark:border-purple-900/30 pb-6">
+        <div>
+            <div class="flex items-center gap-2">
+                <span class="px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/30">Visual Identity Evolution</span>
+                <span class="text-xs text-slate-500 font-mono">Reference: loginpage.jpg</span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white mt-1">New Login Page Concept Gallery</h1>
+            <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">Dua pilar utama loginpage.jpg: <strong>Arsitektur Cloud SC di kiri</strong> & <strong>Kolaborasi Tim Developer di kanan</strong> dalam 3 filosofi model.</p>
+        </div>
+
+        <!-- Global Theme Toggle (Flat Icon, No 3D) -->
+        <div class="flex items-center gap-3">
+            <button onclick="toggleGlobalMode()" class="px-4 py-2 rounded-xl bg-white dark:bg-[#181926] border border-purple-200 dark:border-purple-900/50 shadow-sm hover:border-purple-500 text-slate-800 dark:text-slate-200 flex items-center gap-2 text-xs font-mono font-bold transition-all cursor-pointer">
+                <i id="themeToggleIcon" data-lucide="moon" class="w-4 h-4 text-purple-600 dark:text-purple-400"></i>
+                <span id="themeToggleLabel">Switch to Dark Mode</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- 3 Concepts Stack -->
+    <div class="max-w-7xl mx-auto space-y-20">
+
+        <!-- ══════════════════════════════════════════════════════════
+             SAMPLE 1: GEMINI 3.8 FLASH PHILOSOPHY
+             (High Visual Fidelity, Exact Composition & Dynamic Curved Mesh)
+             ══════════════════════════════════════════════════════════ -->
+        <div class="space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="px-2.5 py-0.5 rounded-md bg-purple-600 text-white text-xs font-mono font-black uppercase shadow">Sample 1</span>
+                        <h2 class="text-lg font-bold text-slate-900 dark:text-white font-mono">Gemini 3.8 Flash — Harmonic SC Ecosystem (Direct Reflection of loginpage.jpg)</h2>
+                        <span class="text-[10px] font-mono uppercase bg-emerald-500/15 text-emerald-600 dark:text-[#3ecf8e] px-2.5 py-0.5 rounded-full border border-emerald-500/30 font-bold">⭐ Recommended</span>
+                    </div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Mengadopsi komposisi murni dari <strong>loginpage.jpg</strong>: Hub 3D folder "SC" di kiri memancarkan koneksi ke Code, Cloud, Server, dan UI, bersanding dengan kolaborasi pair-programming di sisi kanan.</p>
+                </div>
+            </div>
+
+            <!-- Login Container Canvas -->
+            <div class="relative w-full h-[620px] rounded-3xl overflow-hidden border border-purple-200/60 dark:border-[#252738] bg-gradient-to-br from-[#f5f1fd] via-[#ede6fb] to-[#e4dcf7] dark:from-[#0b0c13] dark:via-[#11121c] dark:to-[#171826] shadow-2xl flex items-center justify-between px-8 sm:px-14">
+
+                <!-- Ambient Spotlight Circle behind Characters -->
+                <div class="absolute -right-20 top-1/2 -translate-y-1/2 w-[580px] h-[580px] rounded-full bg-purple-300/25 dark:bg-purple-600/10 blur-3xl pointer-events-none"></div>
+
+                <!-- Bottom Ambient Wave Ribbons -->
+                <svg class="absolute bottom-0 left-0 w-full h-44 pointer-events-none opacity-40 dark:opacity-20 anim-wave" viewBox="0 0 1440 220" fill="none">
+                    <path d="M0,120 C320,180 540,60 880,120 C1200,180 1340,90 1440,110 L1440,220 L0,220 Z" fill="#7c3aed" fill-opacity="0.3"/>
+                    <path d="M0,150 C400,100 680,200 1080,140 C1280,110 1380,160 1440,170 L1440,220 L0,220 Z" fill="#6d28d9" fill-opacity="0.4"/>
+                </svg>
+
+                <!-- Left Column (~44%): Architecture Diagram + Floating Login Card -->
+                <div class="w-full max-w-[430px] z-20 flex flex-col justify-between h-[540px]">
+                    
+                    <!-- Upper Architecture Diagram (Directly inspired by loginpage.jpg) -->
+                    <div class="relative w-full h-56">
+                        <!-- Connecting Bezier Curved Lines -->
+                        <svg class="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 420 220" fill="none">
+                            <defs>
+                                <linearGradient id="curveGrad1" x1="0" y1="1" x2="1" y2="0">
+                                    <stop offset="0%" stop-color="#7c3aed"/>
+                                    <stop offset="100%" stop-color="#a78bfa"/>
+                                </linearGradient>
+                            </defs>
+                            <!-- Paths from SC hub (center ~210, 110) to spoke nodes -->
+                            <path d="M210,80 C210,30 210,25 210,20" stroke="url(#curveGrad1)" stroke-width="2" class="flow-dash"/>
+                            <path d="M170,110 C90,110 60,65 50,55" stroke="url(#curveGrad1)" stroke-width="2" class="flow-dash"/>
+                            <path d="M250,110 C330,110 360,65 370,55" stroke="url(#curveGrad1)" stroke-width="2" class="flow-dash"/>
+                            <path d="M175,130 C110,150 70,165 55,175" stroke="url(#curveGrad1)" stroke-width="1.5" stroke-dasharray="4,4" opacity="0.6"/>
+                            <path d="M245,130 C310,150 350,165 365,175" stroke="url(#curveGrad1)" stroke-width="1.5" stroke-dasharray="4,4" opacity="0.6"/>
+                        </svg>
+
+                        <!-- Central Raised "SC" Folder Badge -->
+                        <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
+                            <div class="hub-glow w-16 h-16 rounded-2xl bg-gradient-to-tr from-[#6d28d9] via-[#7c3aed] to-[#8b5cf6] p-[2px] shadow-2xl cursor-pointer">
+                                <div class="w-full h-full rounded-[14px] bg-[#6d28d9] flex flex-col items-center justify-center text-white border border-purple-400/40">
+                                    <i data-lucide="folder" class="w-5 h-5 fill-purple-300 text-purple-200"></i>
+                                    <span class="text-[11px] font-black tracking-wider mt-0.5 font-mono">SC</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Spoke Node 1: Code < / > (Top-Left) -->
+                        <div class="node-card absolute left-3 top-4 px-3 py-1.5 rounded-xl bg-white dark:bg-[#181926] border border-purple-200 dark:border-purple-800/60 shadow-md flex items-center gap-1.5 z-10">
+                            <i data-lucide="code-2" class="w-3.5 h-3.5 text-purple-600 dark:text-purple-400"></i>
+                            <span class="text-[11px] font-bold font-mono text-slate-800 dark:text-slate-200">&lt; / &gt;</span>
+                        </div>
+
+                        <!-- Spoke Node 2: Cloud ☁ (Top Center) -->
+                        <div class="node-card absolute left-1/2 -translate-x-1/2 -top-1 px-3 py-1.5 rounded-xl bg-white dark:bg-[#181926] border border-purple-200 dark:border-purple-800/60 shadow-md flex items-center gap-1.5 z-10">
+                            <i data-lucide="cloud" class="w-3.5 h-3.5 text-blue-500"></i>
+                            <span class="text-[10px] font-bold font-mono text-slate-800 dark:text-slate-200">Cloud IaC</span>
+                        </div>
+
+                        <!-- Spoke Node 3: Server Rack (Top-Right) -->
+                        <div class="node-card absolute right-3 top-4 px-3 py-1.5 rounded-xl bg-white dark:bg-[#181926] border border-purple-200 dark:border-purple-800/60 shadow-md flex items-center gap-1.5 z-10">
+                            <i data-lucide="server" class="w-3.5 h-3.5 text-emerald-500"></i>
+                            <span class="text-[10px] font-bold font-mono text-slate-800 dark:text-slate-200">RDS Compute</span>
+                        </div>
+
+                        <!-- Spoke Node 4: Web Browser (Bottom-Left) -->
+                        <div class="node-card absolute left-2 bottom-2 px-2.5 py-1 rounded-lg bg-white/90 dark:bg-[#181926]/90 border border-purple-200/70 dark:border-purple-800/40 shadow-sm flex items-center gap-1.5 z-10">
+                            <i data-lucide="layout" class="w-3 h-3 text-indigo-500"></i>
+                            <span class="text-[10px] font-mono text-slate-600 dark:text-slate-400">API Portal</span>
+                        </div>
+
+                        <!-- Spoke Node 5: Subfolders / Shelves (Bottom-Right) -->
+                        <div class="node-card absolute right-2 bottom-2 px-2.5 py-1 rounded-lg bg-white/90 dark:bg-[#181926]/90 border border-purple-200/70 dark:border-purple-800/40 shadow-sm flex items-center gap-1.5 z-10">
+                            <i data-lucide="folders" class="w-3 h-3 text-amber-500"></i>
+                            <span class="text-[10px] font-mono text-slate-600 dark:text-slate-400">Shelves</span>
+                        </div>
+                    </div>
+
+                    <!-- Lower Login Card (Sleek Glassmorphic Form) -->
+                    <div class="w-full bg-white/95 dark:bg-[#151622]/95 backdrop-blur-xl border border-purple-200/80 dark:border-purple-900/40 rounded-3xl p-6 shadow-xl space-y-4">
+                        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 pb-3">
+                            <div>
+                                <h3 class="text-base font-extrabold text-slate-900 dark:text-white">Service Catalog</h3>
+                                <p class="text-[11px] text-slate-500 font-mono">Platform Authentication</p>
+                            </div>
+                            <span class="px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-700 dark:text-purple-300 font-mono text-[10px] font-bold border border-purple-500/20">Oona Portal</span>
+                        </div>
+
+                        <div class="space-y-3 font-mono text-xs">
+                            <div class="relative">
+                                <i data-lucide="user" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3"></i>
+                                <input type="email" value="admin@oona-insurance.com" class="w-full bg-slate-50 dark:bg-[#0e0f17] border border-slate-200 dark:border-[#26283b] rounded-xl py-2.5 pl-10 pr-3 text-slate-900 dark:text-white text-xs outline-none focus:ring-2 focus:ring-purple-500" readonly />
+                            </div>
+                            <div class="relative">
+                                <i data-lucide="lock" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3"></i>
+                                <input type="password" value="••••••••••••" class="w-full bg-slate-50 dark:bg-[#0e0f17] border border-slate-200 dark:border-[#26283b] rounded-xl py-2.5 pl-10 pr-10 text-slate-900 dark:text-white text-xs outline-none focus:ring-2 focus:ring-purple-500" readonly />
+                                <i data-lucide="eye" class="w-4 h-4 text-slate-400 absolute right-3.5 top-3 cursor-pointer"></i>
+                            </div>
+
+                            <!-- Single Vibrant Arrow CTA (Exactly matching loginpage.jpg) -->
+                            <button class="w-full py-3 rounded-xl bg-gradient-to-r from-[#6d28d9] via-[#7c3aed] to-[#8b5cf6] hover:from-[#5b21b6] hover:to-[#7c3aed] text-white font-bold font-mono text-xs flex items-center justify-center gap-2 shadow-lg shadow-purple-600/30 transition-all cursor-pointer">
+                                <span>Authenticate to Catalog</span>
+                                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column (~55%): Vector Developer Collaboration Artwork -->
+                <div class="hidden md:flex flex-1 items-center justify-center relative z-20 h-full pl-6">
+                    <svg class="w-full max-w-[560px] h-[480px]" viewBox="0 0 560 480" fill="none">
+                        <!-- Halftone dot matrix patterns (loginpage.jpg accent) -->
+                        <g opacity="0.25">
+                            <circle cx="480" cy="80" r="2" fill="#7c3aed"/>
+                            <circle cx="500" cy="80" r="2" fill="#7c3aed"/>
+                            <circle cx="520" cy="80" r="2" fill="#7c3aed"/>
+                            <circle cx="480" cy="100" r="2" fill="#7c3aed"/>
+                            <circle cx="500" cy="100" r="2" fill="#7c3aed"/>
+                            <circle cx="520" cy="100" r="2" fill="#7c3aed"/>
+                        </g>
+
+                        <!-- Desk Surface -->
+                        <path d="M120,380 L490,380" stroke="#7c3aed" stroke-width="4" stroke-linecap="round"/>
+                        <line x1="160" y1="382" x2="160" y2="460" stroke="#a78bfa" stroke-width="3" stroke-linecap="round"/>
+                        <line x1="450" y1="382" x2="450" y2="460" stroke="#a78bfa" stroke-width="3" stroke-linecap="round"/>
+
+                        <!-- SEATED FEMALE DEVELOPER (Left of desk, typing on laptop) -->
+                        <g transform="translate(140, 200)">
+                            <!-- Ergonomic Chair -->
+                            <path d="M30,120 Q30,190 70,180 L70,240" stroke="#a78bfa" stroke-width="3" fill="none"/>
+                            <ellipse cx="65" cy="245" rx="35" ry="8" fill="#7c3aed" fill-opacity="0.3"/>
+
+                            <!-- Body (White tee) -->
+                            <path d="M70,130 Q50,70 85,68 Q120,70 100,130 Z" fill="#ffffff" stroke="#1e1b4b" stroke-width="2"/>
+                            <!-- Legs & Dark Denim -->
+                            <path d="M70,130 L60,180 L110,180 L100,130 Z" fill="#312e81"/>
+                            
+                            <!-- Head & Ponytail -->
+                            <circle cx="85" cy="40" r="18" fill="#fed7aa"/>
+                            <path d="M70,35 Q75,18 95,20 Q108,24 105,40 Q90,30 70,35 Z" fill="#1e1b4b"/>
+                            <!-- Ponytail ribbon -->
+                            <path d="M68,36 Q55,42 50,60 Q65,65 72,46 Z" fill="#1e1b4b"/>
+                            <!-- Spectacles -->
+                            <rect x="80" y="36" width="9" height="7" rx="2" fill="none" stroke="#6d28d9" stroke-width="1.5"/>
+                            <rect x="91" y="36" width="9" height="7" rx="2" fill="none" stroke="#6d28d9" stroke-width="1.5"/>
+                            <line x1="89" y1="40" x2="91" y2="40" stroke="#6d28d9" stroke-width="1.5"/>
+
+                            <!-- Arms reaching to laptop -->
+                            <path d="M72,85 Q110,105 135,115" stroke="#fed7aa" stroke-width="6" stroke-linecap="round"/>
+
+                            <!-- Laptop on Desk -->
+                            <polygon points="120,130 175,130 165,110 130,110" fill="#6d28d9"/>
+                            <polygon points="128,110 168,110 160,82 135,82" fill="#ede9fe" stroke="#6d28d9" stroke-width="1.5"/>
+                            <circle cx="148" cy="96" r="3" fill="#6d28d9"/>
+                        </g>
+
+                        <!-- STANDING MALE ENGINEER (Right of desk, observing & collaborating) -->
+                        <g transform="translate(320, 110)">
+                            <!-- Over-ear Headphones around neck -->
+                            <path d="M82,75 C70,95 110,95 98,75" stroke="#a78bfa" stroke-width="5" fill="none" stroke-linecap="round"/>
+                            <rect x="68" y="70" width="10" height="15" rx="4" fill="#6d28d9"/>
+                            <rect x="102" y="70" width="10" height="15" rx="4" fill="#6d28d9"/>
+
+                            <!-- Head -->
+                            <circle cx="90" cy="48" r="20" fill="#fed7aa"/>
+                            <!-- Swept Hair -->
+                            <path d="M72,45 Q80,22 105,24 Q115,30 112,48 Q100,38 72,45 Z" fill="#1e1b4b"/>
+                            
+                            <!-- Thinking Hand under Chin -->
+                            <path d="M85,110 Q95,85 92,68" stroke="#fed7aa" stroke-width="6" stroke-linecap="round"/>
+
+                            <!-- Dark Navy Hoodie -->
+                            <path d="M60,170 Q70,95 90,95 Q115,95 125,170 Z" fill="#1e1b4b"/>
+                            <!-- Hoodie strings -->
+                            <line x1="86" y1="102" x2="86" y2="125" stroke="#ffffff" stroke-width="1.5"/>
+                            <line x1="94" y1="102" x2="94" y2="125" stroke="#ffffff" stroke-width="1.5"/>
+
+                            <!-- Trousers -->
+                            <path d="M65,170 L60,330 L85,330 L90,200 L95,330 L120,330 L115,170 Z" fill="#312e81"/>
+
+                            <!-- Clean White Sneakers -->
+                            <ellipse cx="68" cy="336" rx="14" ry="6" fill="#ffffff" stroke="#1e1b4b" stroke-width="1.5"/>
+                            <ellipse cx="112" cy="336" rx="14" ry="6" fill="#ffffff" stroke="#1e1b4b" stroke-width="1.5"/>
+                        </g>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════════════════
+             SAMPLE 2: CLAUDE OPUS 5 PHILOSOPHY
+             (Architectural Infrastructure Blueprint & Editorial Precision)
+             ══════════════════════════════════════════════════════════ -->
+        <div class="space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="px-2.5 py-0.5 rounded-md bg-indigo-600 text-white text-xs font-mono font-black uppercase shadow">Sample 2</span>
+                        <h2 class="text-lg font-bold text-slate-900 dark:text-white font-mono">Claude Opus 5 — Architectural Blueprint & Infrastructure Mesh</h2>
+                    </div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Struktur <strong>loginpage.jpg</strong> disesuaikan dengan arsitektur riil Oona: Hub "SC" di kiri memetakan AWS Jakarta <code class="text-purple-600 dark:text-purple-300">ap-southeast-3</code>, Terraform IaC Mesh, dan pipeline status dengan presisi garis CAD/blueprint.</p>
+                </div>
+            </div>
+
+            <div class="relative w-full h-[620px] rounded-3xl overflow-hidden border border-indigo-200/60 dark:border-[#252738] bg-gradient-to-br from-[#f6f3ff] via-[#ede9fe] to-[#e0e7ff] dark:from-[#090a12] dark:via-[#101222] dark:to-[#16182e] shadow-2xl flex items-center justify-between px-8 sm:px-14">
+                
+                <!-- Blueprint Isometric Grid -->
+                <div class="absolute inset-0 opacity-20 dark:opacity-10 pointer-events-none" style="background-image: radial-gradient(#6366f1 1px, transparent 1px); background-size: 24px 24px;"></div>
+
+                <!-- Left Column (~44%): Architecture Blueprint + Login Card -->
+                <div class="w-full max-w-[430px] z-20 flex flex-col justify-between h-[540px]">
+                    <!-- Blueprint Nodes around SC Hub -->
+                    <div class="relative w-full h-56">
+                        <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
+                            <div class="w-16 h-16 rounded-2xl bg-indigo-600 p-[2px] shadow-2xl">
+                                <div class="w-full h-full rounded-[14px] bg-[#1e1b4b] flex flex-col items-center justify-center text-white border border-indigo-400/40">
+                                    <i data-lucide="layers" class="w-5 h-5 text-indigo-300"></i>
+                                    <span class="text-[10px] font-mono font-bold mt-0.5">IAC MESH</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Spoke 1: ap-southeast-3 -->
+                        <div class="absolute left-4 top-2 px-3 py-1.5 rounded-xl bg-white dark:bg-[#141628] border border-indigo-300 dark:border-indigo-800 shadow-md flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                            <span class="text-[10px] font-mono font-bold text-slate-800 dark:text-slate-200">ap-southeast-3</span>
+                        </div>
+                        <!-- Spoke 2: Terraform Registry -->
+                        <div class="absolute right-4 top-2 px-3 py-1.5 rounded-xl bg-white dark:bg-[#141628] border border-indigo-300 dark:border-indigo-800 shadow-md flex items-center gap-1.5">
+                            <i data-lucide="git-merge" class="w-3.5 h-3.5 text-indigo-400"></i>
+                            <span class="text-[10px] font-mono font-bold text-slate-800 dark:text-slate-200">IaC Modules</span>
+                        </div>
+                    </div>
+
+                    <!-- Clean Login Card -->
+                    <div class="w-full bg-white/95 dark:bg-[#141628]/95 backdrop-blur-xl border border-indigo-200/80 dark:border-indigo-900/40 rounded-3xl p-6 shadow-xl space-y-4">
+                        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 pb-3">
+                            <div>
+                                <h3 class="text-base font-extrabold text-slate-900 dark:text-white">Service Catalog</h3>
+                                <p class="text-[11px] text-slate-500 font-mono">Infrastructure Gateway</p>
+                            </div>
+                            <span class="px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 font-mono text-[10px] font-bold border border-indigo-500/20">AWS IAM Verified</span>
+                        </div>
+
+                        <div class="space-y-3 font-mono text-xs">
+                            <input type="email" value="admin@oona-insurance.com" class="w-full bg-slate-50 dark:bg-[#0c0d17] border border-slate-200 dark:border-[#26283b] rounded-xl py-2.5 px-3 text-slate-900 dark:text-white text-xs outline-none" readonly />
+                            <input type="password" value="••••••••••••" class="w-full bg-slate-50 dark:bg-[#0c0d17] border border-slate-200 dark:border-[#26283b] rounded-xl py-2.5 px-3 text-slate-900 dark:text-white text-xs outline-none" readonly />
+                            
+                            <button class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold font-mono text-xs flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30 transition-all cursor-pointer">
+                                <span>Sign In with IAM &rarr;</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Engineering Collaboration Scene -->
+                <div class="hidden md:flex flex-1 items-center justify-center relative z-20 h-full pl-6">
+                    <div class="p-8 rounded-3xl bg-white/60 dark:bg-[#121424]/60 backdrop-blur-md border border-indigo-200/60 dark:border-indigo-900/40 max-w-lg space-y-4">
+                        <span class="text-[10px] font-mono font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-full">Engineering Collaboration</span>
+                        <h4 class="text-xl font-bold text-slate-900 dark:text-white">Unified Multi-Country Catalog</h4>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-sans">
+                            Pairing developer velocity with cloud security governance. Single pane of glass for all services across Philippines and Indonesia insurance platforms.
+                        </p>
+                        <div class="grid grid-cols-2 gap-3 pt-2 font-mono text-xs">
+                            <div class="p-3 rounded-xl bg-white dark:bg-[#0c0d18] border border-indigo-200/60 dark:border-indigo-900/40">
+                                <span class="text-[10px] text-slate-500 block">REGION</span>
+                                <span class="text-xs text-indigo-600 dark:text-indigo-400 font-bold">Jakarta (ap-se-3)</span>
+                            </div>
+                            <div class="p-3 rounded-xl bg-white dark:bg-[#0c0d18] border border-indigo-200/60 dark:border-indigo-900/40">
+                                <span class="text-[10px] text-slate-500 block">STATUS</span>
+                                <span class="text-xs text-emerald-500 font-bold">100% Operational</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════════════════
+             SAMPLE 3: GROK PHILOSOPHY
+             (High-Contrast Cyber-HUD with Neon Edge Flow)
+             ══════════════════════════════════════════════════════════ -->
+        <div class="space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="px-2.5 py-0.5 rounded-md bg-cyan-600 text-white text-xs font-mono font-black uppercase shadow">Sample 3</span>
+                        <h2 class="text-lg font-bold text-slate-900 dark:text-white font-mono">Grok — High-Contrast Cyber Telemetry Mesh</h2>
+                    </div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Kombinasi diagram SC timbul dengan telemetry HUD berenergi tinggi (Cyan `#22d3ee` + Deep Violet `#7c3aed`), memancarkan kesan futuristik dan bertenaga.</p>
+                </div>
+            </div>
+
+            <div class="relative w-full h-[620px] rounded-3xl overflow-hidden border border-cyan-200/60 dark:border-[#1e293b] bg-gradient-to-br from-[#f0f9ff] via-[#e0f2fe] to-[#ede9fe] dark:from-[#060810] dark:via-[#0c101c] dark:to-[#141226] shadow-2xl flex items-center justify-between px-8 sm:px-14">
+                
+                <!-- Left Column (~44%) -->
+                <div class="w-full max-w-[430px] z-20 flex flex-col justify-between h-[540px]">
+                    <div class="relative w-full h-56">
+                        <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
+                            <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-cyan-600 to-purple-600 p-[2px] shadow-2xl">
+                                <div class="w-full h-full rounded-[14px] bg-[#0c101c] flex flex-col items-center justify-center text-white border border-cyan-400/40">
+                                    <i data-lucide="folder-git-2" class="w-5 h-5 text-cyan-400"></i>
+                                    <span class="text-[10px] font-mono font-bold mt-0.5 text-cyan-300">SC</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="absolute left-4 top-2 px-3 py-1.5 rounded-xl bg-white dark:bg-[#0c101c] border border-cyan-300 dark:border-cyan-800 shadow-md flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+                            <span class="text-[10px] font-mono font-bold text-slate-800 dark:text-cyan-300">Telemetry: LIVE</span>
+                        </div>
+                    </div>
+
+                    <div class="w-full bg-white/95 dark:bg-[#0c101c]/95 backdrop-blur-xl border border-cyan-200/80 dark:border-cyan-900/40 rounded-3xl p-6 shadow-xl space-y-4">
+                        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 pb-3">
+                            <h3 class="text-base font-extrabold text-slate-900 dark:text-white font-mono">Service Catalog</h3>
+                            <span class="text-[10px] font-mono text-cyan-500 font-bold">v2.4.0</span>
+                        </div>
+
+                        <div class="space-y-3 font-mono text-xs">
+                            <input type="email" value="admin@oona-insurance.com" class="w-full bg-slate-50 dark:bg-[#060810] border border-slate-200 dark:border-[#1e293b] rounded-xl py-2.5 px-3 text-slate-900 dark:text-white text-xs outline-none" readonly />
+                            <input type="password" value="••••••••••••" class="w-full bg-slate-50 dark:bg-[#060810] border border-slate-200 dark:border-[#1e293b] rounded-xl py-2.5 px-3 text-slate-900 dark:text-white text-xs outline-none" readonly />
+                            
+                            <button class="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 text-white font-bold font-mono text-xs flex items-center justify-center gap-2 shadow-lg shadow-cyan-600/30 transition-all cursor-pointer">
+                                <span>Fast Connect &rarr;</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: HUD Tiles -->
+                <div class="hidden md:flex flex-1 items-center justify-center relative z-20 h-full pl-6">
+                    <div class="grid grid-cols-2 gap-4 max-w-md w-full font-mono text-xs">
+                        <div class="p-4 rounded-2xl bg-white/80 dark:bg-[#0c101c]/80 border border-cyan-200 dark:border-cyan-900/40 shadow-lg space-y-1">
+                            <span class="text-[10px] text-slate-500 block">MICROSERVICES</span>
+                            <p class="text-base font-bold text-slate-900 dark:text-white">14 Deployed</p>
+                        </div>
+                        <div class="p-4 rounded-2xl bg-white/80 dark:bg-[#0c101c]/80 border border-purple-200 dark:border-purple-900/40 shadow-lg space-y-1">
+                            <span class="text-[10px] text-slate-500 block">ASYNC QUEUE</span>
+                            <p class="text-base font-bold text-purple-600 dark:text-purple-400">Redis Active</p>
+                        </div>
+                        <div class="p-4 rounded-2xl bg-white/80 dark:bg-[#0c101c]/80 border border-emerald-200 dark:border-emerald-900/40 shadow-lg space-y-1">
+                            <span class="text-[10px] text-slate-500 block">SECURITY GATE</span>
+                            <p class="text-base font-bold text-emerald-600 dark:text-emerald-400">Trivy Scan OK</p>
+                        </div>
+                        <div class="p-4 rounded-2xl bg-white/80 dark:bg-[#0c101c]/80 border border-blue-200 dark:border-blue-900/40 shadow-lg space-y-1">
+                            <span class="text-[10px] text-slate-500 block">CLOUD REGION</span>
+                            <p class="text-base font-bold text-blue-600 dark:text-blue-400">AWS Jakarta</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        function toggleGlobalMode() {
+            const html = document.documentElement;
+            const isDark = html.classList.contains('dark');
+            const newMode = isDark ? 'light' : 'dark';
+
+            html.classList.remove('light', 'dark');
+            html.classList.add(newMode);
+
+            const label = document.getElementById('themeToggleLabel');
+            const icon = document.getElementById('themeToggleIcon');
+
+            if (newMode === 'dark') {
+                label.innerText = 'Switch to Light Mode';
+                icon.setAttribute('data-lucide', 'sun');
+                icon.className = 'w-4 h-4 text-amber-400';
+            } else {
+                label.innerText = 'Switch to Dark Mode';
+                icon.setAttribute('data-lucide', 'moon');
+                icon.className = 'w-4 h-4 text-purple-600';
+            }
+            lucide.createIcons();
+        }
+    </script>
+</body>
+</html>

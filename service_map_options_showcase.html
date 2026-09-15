@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Map Integration Visual Options - Castan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0c0d10;
+            color: #f1f5f9;
+        }
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+    </style>
+</head>
+<body class="p-8 max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="mb-10 border-b border-[#282828] pb-6">
+        <div class="flex items-center gap-3 mb-2">
+            <span class="text-xs font-mono font-bold uppercase tracking-wider text-purple-400 bg-purple-500/10 px-2.5 py-1 rounded border border-purple-500/20">Design Concept Review</span>
+            <span class="text-xs text-slate-500 font-mono">Option 1: Sidebar 'Service Map' Integration</span>
+        </div>
+        <h1 class="text-2xl font-bold tracking-tight text-white">Castan Service Map — 3 Pilihan Pendekatan Visual</h1>
+        <p class="text-sm text-slate-400 mt-1 max-w-3xl">
+            Membandingkan 3 arsitektur integrasi visual untuk embedding peta topologi multi-account AWS ke dalam portal Castan Service Catalog tanpa merusak layout atau menciptakan "double navigation".
+        </p>
+    </div>
+
+    <!-- 3 COMPARISON CARDS -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- OPTION A: Full Immersive Canvas -->
+        <div class="flex flex-col rounded-2xl bg-[#171717] border border-[#282828] overflow-hidden hover:border-[#383838] transition-all">
+            <div class="p-5 border-b border-[#282828] bg-[#1a1a1a]">
+                <div class="flex items-center justify-between">
+                    <span class="text-[11px] font-mono font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">Opsi A (Rekomendasi)</span>
+                    <span class="text-[11px] text-slate-400">Zen / Pro SRE</span>
+                </div>
+                <h2 class="text-base font-bold text-white mt-2">Full Immersive Canvas (Seamless Embed)</h2>
+                <p class="text-xs text-slate-400 mt-1">Toolbar filter & search Datadog dipadukan langsung menjadi sub-header Castan. Area peta canvas 100% mengisi viewport tanpa frame bertingkat.</p>
+            </div>
+
+            <!-- Wireframe Mockup -->
+            <div class="p-4 bg-[#121212] flex-1">
+                <div class="rounded-xl border border-[#282828] bg-[#141414] overflow-hidden flex h-72 shadow-lg text-[10px]">
+                    <!-- Mini Sidebar -->
+                    <div class="w-24 bg-[#171717] border-r border-[#282828] p-2 flex flex-col justify-between flex-shrink-0">
+                        <div class="space-y-2">
+                            <div class="flex items-center gap-1.5 pb-2 border-b border-[#282828]">
+                                <div class="w-3 h-3 rounded bg-white"></div>
+                                <span class="font-bold text-white text-[9px]">Castan</span>
+                            </div>
+                            <div class="space-y-1">
+                                <div class="px-1.5 py-1 text-slate-400">Dashboard</div>
+                                <div class="px-1.5 py-1 text-slate-400">Catalog</div>
+                                <div class="px-1.5 py-1 rounded bg-purple-500/15 text-purple-400 font-bold border-l-2 border-purple-500">Service Map</div>
+                                <div class="px-1.5 py-1 text-slate-400">Tickets</div>
+                            </div>
+                        </div>
+                        <div class="text-[8px] text-slate-500 font-mono">v1.2</div>
+                    </div>
+
+                    <!-- Mini Content Area -->
+                    <div class="flex-1 flex flex-col">
+                        <!-- Castan Header + Topology Controls in 1 Clean Line -->
+                        <div class="h-8 bg-[#171717] border-b border-[#282828] px-3 flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold text-white text-[10px]">Service Map</span>
+                                <span class="text-[8px] bg-slate-800 text-slate-300 px-1 rounded">30 Nodes</span>
+                            </div>
+                            <!-- Integrated Mini Filters -->
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-[8px] bg-[#222] border border-[#333] px-1.5 py-0.5 rounded text-slate-300">env: *</span>
+                                <span class="text-[8px] bg-[#222] border border-[#333] px-1.5 py-0.5 rounded text-slate-300">Region: All</span>
+                                <span class="text-[8px] bg-slate-900 border border-[#333] px-2 py-0.5 rounded text-slate-500">Search CIDR...</span>
+                            </div>
+                        </div>
+
+                        <!-- Canvas Simulator -->
+                        <div class="flex-1 relative bg-[#0d0f14] p-3 flex items-center justify-center overflow-hidden">
+                            <!-- Nodes schematic -->
+                            <div class="absolute inset-0 opacity-20 bg-[radial-gradient(#334155_1px,transparent_1px)] [background-size:12px_12px]"></div>
+                            
+                            <!-- Hub ID -->
+                            <div class="absolute left-6 top-10 flex flex-col items-center">
+                                <div class="w-6 h-6 rounded-full bg-blue-500/20 border border-blue-400 flex items-center justify-center text-[8px] text-blue-300 font-bold">TGW</div>
+                                <span class="text-[7px] text-slate-400 mt-0.5">ID-HUB</span>
+                            </div>
+                            <!-- Peering Line -->
+                            <div class="absolute left-12 top-12 w-16 h-0.5 border-t border-dashed border-amber-400/60"></div>
+                            <!-- Hub PH -->
+                            <div class="absolute right-6 top-10 flex flex-col items-center">
+                                <div class="w-6 h-6 rounded-full bg-blue-500/20 border border-blue-400 flex items-center justify-center text-[8px] text-blue-300 font-bold">TGW</div>
+                                <span class="text-[7px] text-slate-400 mt-0.5">PH-HUB</span>
+                            </div>
+                            <!-- Spokes -->
+                            <div class="absolute left-10 bottom-6 flex gap-2">
+                                <div class="w-5 h-5 rounded bg-emerald-500/20 border border-emerald-400 text-[6px] text-emerald-300 flex items-center justify-center">DTC</div>
+                                <div class="w-5 h-5 rounded bg-emerald-500/20 border border-emerald-400 text-[6px] text-emerald-300 flex items-center justify-center">KHO</div>
+                            </div>
+                            <div class="absolute right-10 bottom-6 flex gap-2">
+                                <div class="w-5 h-5 rounded bg-purple-500/20 border border-purple-400 text-[6px] text-purple-300 flex items-center justify-center">DC</div>
+                                <div class="w-5 h-5 rounded bg-teal-500/20 border border-teal-400 text-[6px] text-teal-300 flex items-center justify-center">RDS</div>
+                            </div>
+
+                            <!-- Floating HUD Control on Canvas -->
+                            <div class="absolute bottom-2 left-2 flex gap-1">
+                                <span class="text-[7px] bg-[#1a1a1a]/90 border border-[#333] px-1.5 py-0.5 rounded text-slate-300">↺ Reset</span>
+                                <span class="text-[7px] bg-[#1a1a1a]/90 border border-[#333] px-1.5 py-0.5 rounded text-emerald-400">⚡ Stream</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pros/Cons -->
+            <div class="p-4 border-t border-[#282828] text-xs space-y-2 bg-[#171717]">
+                <div class="text-slate-300 font-semibold text-[11px] uppercase tracking-wider">Karakteristik:</div>
+                <ul class="text-slate-400 space-y-1 list-disc list-inside text-[11px]">
+                    <li><strong class="text-white">Immersive 100%</strong>: Peta memiliki area kerja maksimal, ideal untuk inspect 30+ node.</li>
+                    <li><strong class="text-white">Clean Unified Header</strong>: Tidak ada header ganda yang bertumpuk.</li>
+                    <li><strong class="text-white">Palet Supabase</strong>: Warna background canvas disinkronkan ke `#0f1117` agar selaras dengan Castan.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- OPTION B: Split View Panel -->
+        <div class="flex flex-col rounded-2xl bg-[#171717] border border-[#282828] overflow-hidden hover:border-[#383838] transition-all">
+            <div class="p-5 border-b border-[#282828] bg-[#1a1a1a]">
+                <div class="flex items-center justify-between">
+                    <span class="text-[11px] font-mono font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20">Opsi B</span>
+                    <span class="text-[11px] text-slate-400">Catalog Inspector</span>
+                </div>
+                <h2 class="text-base font-bold text-white mt-2">Split-Screen View (Canvas + Service Drawer)</h2>
+                <p class="text-xs text-slate-400 mt-1">Canvas peta interaktif di sisi kiri, dengan drawer metadata detail service di sisi kanan saat salah satu node di-klik.</p>
+            </div>
+
+            <!-- Wireframe Mockup -->
+            <div class="p-4 bg-[#121212] flex-1">
+                <div class="rounded-xl border border-[#282828] bg-[#141414] overflow-hidden flex h-72 shadow-lg text-[10px]">
+                    <!-- Mini Sidebar -->
+                    <div class="w-20 bg-[#171717] border-r border-[#282828] p-2 flex flex-col justify-between flex-shrink-0">
+                        <div class="space-y-1">
+                            <span class="font-bold text-white text-[8px] block mb-2">Castan</span>
+                            <div class="text-slate-500 text-[8px]">Catalog</div>
+                            <div class="px-1 py-0.5 rounded bg-purple-500/15 text-purple-400 font-bold text-[8px]">Service Map</div>
+                        </div>
+                    </div>
+
+                    <!-- Mini Content Area with Right Drawer -->
+                    <div class="flex-1 flex flex-col">
+                        <div class="h-8 bg-[#171717] border-b border-[#282828] px-2 flex items-center justify-between text-[9px]">
+                            <span class="font-bold text-white">Service Map</span>
+                            <span class="text-[8px] text-slate-400">ID-DTC-PROD selected</span>
+                        </div>
+
+                        <div class="flex-1 flex">
+                            <!-- Left: Map (65%) -->
+                            <div class="flex-1 relative bg-[#0d0f14] p-2 flex items-center justify-center border-r border-[#282828]">
+                                <div class="w-8 h-8 rounded-full bg-blue-500/20 border-2 border-purple-400 flex items-center justify-center text-[7px] text-purple-300 font-bold shadow-sm shadow-purple-500/50">
+                                    DTC
+                                </div>
+                            </div>
+                            
+                            <!-- Right: Service Catalog Info Drawer (35%) -->
+                            <div class="w-32 bg-[#171717] p-2.5 space-y-2 flex flex-col justify-between">
+                                <div class="space-y-1.5">
+                                    <div class="text-[8px] font-mono text-purple-400 uppercase font-bold">Node Inspector</div>
+                                    <div class="font-bold text-white text-[9px]">ID-DTC-PROD</div>
+                                    <div class="text-[7px] text-slate-400">CIDR: 10.242.0.0/18</div>
+                                    <div class="text-[7px] text-emerald-400 bg-emerald-500/10 px-1 py-0.5 rounded inline-block">Healthy · 6 Svcs</div>
+                                </div>
+                                <button class="w-full py-1 bg-purple-600 text-white rounded text-[7px] font-bold">Open in Catalog →</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pros/Cons -->
+            <div class="p-4 border-t border-[#282828] text-xs space-y-2 bg-[#171717]">
+                <div class="text-slate-300 font-semibold text-[11px] uppercase tracking-wider">Karakteristik:</div>
+                <ul class="text-slate-400 space-y-1 list-disc list-inside text-[11px]">
+                    <li><strong class="text-white">Hubungan Erat ke Catalog</strong>: Klik node langsung menampilkan repositori GitHub, owner, dan status CI.</li>
+                    <li><strong class="text-white">Drawer Contextual</strong>: Tidak perlu meninggalkan halaman untuk melihat detail CIDR atau endpoint.</li>
+                    <li><strong class="text-white">Area Kanvas Lebih Kecil</strong>: Area diagram berkurang 30% karena adanya panel samping.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- OPTION C: Tabbed Studio View -->
+        <div class="flex flex-col rounded-2xl bg-[#171717] border border-[#282828] overflow-hidden hover:border-[#383838] transition-all">
+            <div class="p-5 border-b border-[#282828] bg-[#1a1a1a]">
+                <div class="flex items-center justify-between">
+                    <span class="text-[11px] font-mono font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">Opsi C</span>
+                    <span class="text-[11px] text-slate-400">Multi-Perspective</span>
+                </div>
+                <h2 class="text-base font-bold text-white mt-2">Tabbed Topology Studio</h2>
+                <p class="text-xs text-slate-400 mt-1">Menyediakan tab view di dalam menu Service Map: Tab 1: Global Network Mesh (D3), Tab 2: Service Dependency Flow, Tab 3: Regional Shelves (ID vs PH).</p>
+            </div>
+
+            <!-- Wireframe Mockup -->
+            <div class="p-4 bg-[#121212] flex-1">
+                <div class="rounded-xl border border-[#282828] bg-[#141414] overflow-hidden flex h-72 shadow-lg text-[10px]">
+                    <!-- Mini Sidebar -->
+                    <div class="w-20 bg-[#171717] border-r border-[#282828] p-2 flex flex-col justify-between flex-shrink-0">
+                        <div class="space-y-1">
+                            <span class="font-bold text-white text-[8px] block mb-2">Castan</span>
+                            <div class="text-slate-500 text-[8px]">Catalog</div>
+                            <div class="px-1 py-0.5 rounded bg-purple-500/15 text-purple-400 font-bold text-[8px]">Service Map</div>
+                        </div>
+                    </div>
+
+                    <!-- Mini Content Area with Tabs -->
+                    <div class="flex-1 flex flex-col">
+                        <!-- Top Header with Tabs -->
+                        <div class="h-8 bg-[#171717] border-b border-[#282828] px-2 flex items-center justify-between">
+                            <span class="font-bold text-white text-[9px]">Service Map</span>
+                            <div class="flex items-center gap-1 bg-[#121212] p-0.5 rounded border border-[#282828]">
+                                <span class="bg-purple-600 text-white px-1.5 py-0.5 rounded text-[7px] font-bold">Global Mesh</span>
+                                <span class="text-slate-400 px-1.5 py-0.5 text-[7px]">Jakarta (ID)</span>
+                                <span class="text-slate-400 px-1.5 py-0.5 text-[7px]">Manila (PH)</span>
+                            </div>
+                        </div>
+
+                        <!-- Canvas Content -->
+                        <div class="flex-1 relative bg-[#0d0f14] p-3 flex items-center justify-center">
+                            <div class="text-center space-y-1">
+                                <div class="w-8 h-8 mx-auto rounded-full bg-blue-500/20 border border-blue-400 flex items-center justify-center text-[7px] text-blue-300 font-bold">
+                                    TGW
+                                </div>
+                                <span class="text-[8px] text-slate-400 block">Isolated Regional View Filter</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pros/Cons -->
+            <div class="p-4 border-t border-[#282828] text-xs space-y-2 bg-[#171717]">
+                <div class="text-slate-300 font-semibold text-[11px] uppercase tracking-wider">Karakteristik:</div>
+                <ul class="text-slate-400 space-y-1 list-disc list-inside text-[11px]">
+                    <li><strong class="text-white">Struktur Terorganisir</strong>: Pengguna bisa fokus pada region tertentu tanpa terdistraksi node region lain.</li>
+                    <li><strong class="text-white">Ekspansi Masa Depan</strong>: Siap jika di masa mendatang ingin menambah tab "Kubernetes Cluster Map" atau "Kafka Event Streams".</li>
+                    <li><strong class="text-white">Kompleksitas Navigasi</strong>: Ada dua lapis filter (tab regional di atas + filter dropdown di dalam canvas).</li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- RECOMMENDED DECISION SUMMARY -->
+    <div class="mt-8 p-5 rounded-2xl bg-[#141414] border border-[#282828] flex items-center justify-between">
+        <div class="space-y-1">
+            <h3 class="text-sm font-bold text-white">Rekomendasi Arsitektur: Opsi A (Full Immersive) dengan Drawer Sederhana</h3>
+            <p class="text-xs text-slate-400">
+                Pilihan paling elegan adalah **Opsi A**: menempatkan `Service Map` di sidebar utama, lalu menyatukan filter toolbar bawaan file ke dalam header Castan secara native. Saat node di-klik, drawer samping muncul (*overlay drawer* yang bisa di-dismiss).
+            </p>
+        </div>
+        <div class="flex-shrink-0 ml-4">
+            <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono text-xs font-bold">
+                ✓ Siap Diintegrasikan
+            </span>
+        </div>
+    </div>
+</body>
+</html>

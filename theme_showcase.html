@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Oona Dev Portal — Design Direction Showcase (Light & Dark Mode)</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              400: '#818cf8',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            },
+            // High-precision slate-dark palette (Deep Obsidian & Nebula)
+            dark: {
+              950: '#07090E',
+              900: '#0B0F17',
+              850: '#101623',
+              800: '#161F30',
+              750: '#1C273C',
+              700: '#23324C',
+            }
+          },
+          animation: {
+            'dash-flow': 'dash 15s linear infinite',
+          },
+          keyframes: {
+            dash: {
+              to: { strokeDashoffset: '-1000' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    .dark ::-webkit-scrollbar-track { background: #0B0F17; }
+    .dark ::-webkit-scrollbar-thumb { background: #23324C; border-radius: 3px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+    /* Subtle grid pattern */
+    .dark .bg-grid-pattern {
+      background-size: 28px 28px;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+    }
+    .bg-grid-pattern {
+      background-size: 28px 28px;
+      background-image: 
+        linear-gradient(to right, rgba(0, 0, 0, 0.035) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0, 0, 0, 0.035) 1px, transparent 1px);
+    }
+  </style>
+</head>
+<body class="bg-slate-50 dark:bg-dark-950 text-slate-800 dark:text-slate-100 font-sans antialiased min-h-screen transition-colors duration-200">
+
+  <!-- Floating Theme Switcher & Showcase Bar -->
+  <header class="sticky top-0 z-50 backdrop-blur-xl bg-white/80 dark:bg-dark-900/80 border-b border-slate-200 dark:border-dark-800 px-4 sm:px-8 py-3 transition-colors">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="h-9 w-9 rounded-xl bg-gradient-to-tr from-brand-600 via-indigo-500 to-emerald-400 p-[1px] shadow-md shadow-brand-500/20">
+          <div class="h-full w-full bg-white dark:bg-dark-950 rounded-[11px] flex items-center justify-center">
+            <i data-lucide="layers" class="w-5 h-5 text-brand-600 dark:text-brand-400"></i>
+          </div>
+        </div>
+        <div>
+          <h1 class="text-sm font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
+            Oona Service Catalog
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30">
+              ● Live Multi-Theme Preview
+            </span>
+          </h1>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Pilih arah styling visual (Variant A vs Variant B) dan uji saklar Dark/Light mode</p>
+        </div>
+      </div>
+
+      <!-- Controls: Variant Selector & Dark/Light Mode Toggle -->
+      <div class="flex items-center gap-3">
+        <!-- Variant Buttons -->
+        <div class="flex items-center bg-slate-100 dark:bg-dark-850 p-1 rounded-xl border border-slate-200 dark:border-dark-750 text-xs font-semibold">
+          <button onclick="switchVariant('A')" id="btnVarA" class="px-3 py-1.5 rounded-lg bg-white dark:bg-dark-700 text-slate-900 dark:text-white shadow-sm transition-all flex items-center gap-1.5">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-brand-500"></i>
+            Varian A: Nebula Modern (Gemini Style)
+          </button>
+          <button onclick="switchVariant('B')" id="btnVarB" class="px-3 py-1.5 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all flex items-center gap-1.5">
+            <i data-lucide="layout" class="w-3.5 h-3.5 text-slate-400"></i>
+            Varian B: Crisp Enterprise (High-Contrast)
+          </button>
+        </div>
+
+        <!-- Light/Dark Toggle Button -->
+        <button onclick="toggleTheme()" class="flex items-center gap-2 px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-dark-750 bg-white dark:bg-dark-850 text-slate-700 dark:text-slate-200 hover:border-brand-500 shadow-sm transition-all text-xs font-bold cursor-pointer">
+          <span id="themeIcon">🌙</span>
+          <span id="themeLabel">Dark Mode</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Ambient Light Effects (Only active in dark mode) -->
+  <div class="fixed inset-0 pointer-events-none overflow-hidden z-0 opacity-40 dark:opacity-100 transition-opacity">
+    <div class="absolute -top-40 left-1/4 w-96 h-96 bg-brand-500/10 rounded-full blur-3xl"></div>
+    <div class="absolute top-1/3 right-10 w-[28rem] h-[28rem] bg-emerald-500/5 rounded-full blur-3xl"></div>
+  </div>
+
+  <main class="relative z-10 max-w-7xl mx-auto px-4 sm:px-8 py-8 space-y-8 bg-grid-pattern">
+
+    <!-- INFO BANNER -->
+    <div class="p-4 rounded-2xl border border-brand-200 dark:border-brand-500/20 bg-brand-50/50 dark:bg-dark-900/90 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 backdrop-blur-md">
+      <div class="flex items-center gap-3">
+        <div class="p-2 rounded-xl bg-brand-500/10 text-brand-600 dark:text-brand-400">
+          <i data-lucide="palette" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h2 class="text-xs font-bold uppercase tracking-wider text-brand-700 dark:text-brand-400 font-mono">Design System Evaluation</h2>
+          <p class="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
+            Komponen di bawah menyajikan <strong>KPI Cards</strong>, <strong>Service Catalog Inventory Table</strong>, <strong>Vulnerability Badges</strong>, dan <strong>Topology Flow</strong>. Coba toggle mode Dark ➔ Light untuk memastikan kontras teks 100% terbaca di kedua kondisi!
+          </p>
+        </div>
+      </div>
+      <span class="text-[11px] font-mono font-bold text-slate-500 dark:text-slate-400 bg-white dark:bg-dark-850 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-dark-800 shrink-0">
+        Region: ap-southeast-3 (Jakarta)
+      </span>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- SECTION 1: KPI TELEMETRY METRICS -->
+    <!-- ========================================================================= -->
+    <section>
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="text-sm font-extrabold uppercase tracking-wider text-slate-900 dark:text-white font-mono flex items-center gap-2">
+            <i data-lucide="activity" class="w-4 h-4 text-emerald-500"></i> Platform Pulse & Telemetry
+          </h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Agregasi performa dari 8 Active Shelves / Microservices</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <!-- Metric 1: Total Services -->
+        <div class="metric-card p-5 rounded-2xl bg-white dark:bg-dark-900/90 border border-slate-200 dark:border-dark-800 shadow-sm hover:shadow-md transition-all">
+          <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs font-medium">
+            <span>Total Microservices</span>
+            <span class="p-1.5 rounded-lg bg-indigo-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400">
+              <i data-lucide="server" class="w-4 h-4"></i>
+            </span>
+          </div>
+          <div class="mt-3 flex items-baseline gap-2">
+            <span class="text-2xl font-black tracking-tight text-slate-900 dark:text-white font-mono">14</span>
+            <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 flex items-center font-mono">
+              <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i> 100% Uptime
+            </span>
+          </div>
+          <div class="mt-3 text-[11px] text-slate-500 dark:text-slate-400 border-t border-slate-100 dark:border-dark-800/80 pt-2.5 flex justify-between">
+            <span>7 Shelves (PH & ID)</span>
+            <span class="font-mono font-semibold text-slate-700 dark:text-slate-300">1 LIVE In Prod</span>
+          </div>
+        </div>
+
+        <!-- Metric 2: Vulnerability Triage -->
+        <div class="metric-card p-5 rounded-2xl bg-white dark:bg-dark-900/90 border border-slate-200 dark:border-dark-800 shadow-sm hover:shadow-md transition-all">
+          <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs font-medium">
+            <span>Security Policy Gate</span>
+            <span class="p-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+              <i data-lucide="shield-check" class="w-4 h-4"></i>
+            </span>
+          </div>
+          <div class="mt-3 flex items-baseline gap-2">
+            <span class="text-2xl font-black tracking-tight text-slate-900 dark:text-white font-mono">0</span>
+            <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-500/20">
+              PASSED (0 Critical)
+            </span>
+          </div>
+          <div class="mt-3 text-[11px] text-slate-500 dark:text-slate-400 border-t border-slate-100 dark:border-dark-800/80 pt-2.5 flex justify-between">
+            <span>Trivy Nightly Queue</span>
+            <span class="font-mono text-amber-600 dark:text-amber-400 font-semibold">4 High (Review)</span>
+          </div>
+        </div>
+
+        <!-- Metric 3: CI/CD Pipeline Health -->
+        <div class="metric-card p-5 rounded-2xl bg-white dark:bg-dark-900/90 border border-slate-200 dark:border-dark-800 shadow-sm hover:shadow-md transition-all">
+          <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs font-medium">
+            <span>Jenkins CI Automation</span>
+            <span class="p-1.5 rounded-lg bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400">
+              <i data-lucide="git-merge" class="w-4 h-4"></i>
+            </span>
+          </div>
+          <div class="mt-3 flex items-baseline gap-2">
+            <span class="text-2xl font-black tracking-tight text-slate-900 dark:text-white font-mono">98.4%</span>
+            <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 font-mono">Build Success</span>
+          </div>
+          <div class="mt-3 text-[11px] text-slate-500 dark:text-slate-400 border-t border-slate-100 dark:border-dark-800/80 pt-2.5 flex justify-between">
+            <span>Live Check: 45s Cache</span>
+            <span class="font-mono font-semibold text-brand-600 dark:text-brand-400">AWS Lambda Projects</span>
+          </div>
+        </div>
+
+        <!-- Metric 4: Scheduled Scans -->
+        <div class="metric-card p-5 rounded-2xl bg-white dark:bg-dark-900/90 border border-slate-200 dark:border-dark-800 shadow-sm hover:shadow-md transition-all">
+          <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs font-medium">
+            <span>Nightly Trivy Queue</span>
+            <span class="p-1.5 rounded-lg bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400">
+              <i data-lucide="clock" class="w-4 h-4"></i>
+            </span>
+          </div>
+          <div class="mt-3 flex items-baseline gap-2">
+            <span class="text-2xl font-black tracking-tight text-slate-900 dark:text-white font-mono">01:30</span>
+            <span class="text-xs font-bold text-slate-600 dark:text-slate-300 font-mono">WIB (UTC+7)</span>
+          </div>
+          <div class="mt-3 text-[11px] text-slate-500 dark:text-slate-400 border-t border-slate-100 dark:border-dark-800/80 pt-2.5 flex justify-between">
+            <span>Target: main, uat</span>
+            <span class="font-mono text-emerald-600 dark:text-emerald-400 font-semibold">Active FIFO</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- SECTION 2: TOPOLOGY INTERACTIVE CANVAS -->
+    <!-- ========================================================================= -->
+    <section class="rounded-2xl border border-slate-200 dark:border-dark-800 bg-white/90 dark:bg-dark-900/90 backdrop-blur-xl p-6 shadow-sm overflow-hidden transition-colors">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 mb-4 border-b border-slate-100 dark:border-dark-800 gap-2">
+        <div class="flex items-center gap-2.5">
+          <div class="p-2 rounded-xl bg-brand-500/10 text-brand-600 dark:text-brand-400">
+            <i data-lucide="network" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              Topology Flow & Architecture
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-brand-50 dark:bg-brand-500/20 text-brand-700 dark:text-brand-300 border border-brand-200 dark:border-brand-500/30 font-bold">
+                lmd-oona-ph-integration-health-renewal-svc-clone
+              </span>
+            </h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Visualisasi aliran event bus, runtime execution, dan dependency AWS RDS/SSM</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 text-xs font-mono">
+          <span class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-dark-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-dark-750">
+            <img src="/static/img/brands/lambda.svg" class="w-3.5 h-3.5" alt="Lambda"> AWS Jakarta
+          </span>
+          <span class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-dark-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-dark-750">
+            <img src="/static/img/brands/terraform.svg" class="w-3.5 h-3.5" alt="TF"> 02-app-setup
+          </span>
+        </div>
+      </div>
+
+      <!-- Interactive SVG Canvas -->
+      <div class="relative w-full overflow-x-auto py-2">
+        <svg viewBox="0 0 1000 240" class="w-full min-w-[760px] h-60 select-none">
+          <defs>
+            <linearGradient id="streamGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#6366f1" stop-opacity="0.8"/>
+              <stop offset="50%" stop-color="#10b981" stop-opacity="0.9"/>
+              <stop offset="100%" stop-color="#6366f1" stop-opacity="0.8"/>
+            </linearGradient>
+          </defs>
+
+          <!-- Stream Connecting Beams -->
+          <line x1="200" y1="120" x2="380" y2="120" stroke="url(#streamGradient)" stroke-width="2.5" stroke-dasharray="6,6" class="animate-dash" />
+          <line x1="580" y1="120" x2="760" y2="80" stroke="url(#streamGradient)" stroke-width="2.5" stroke-dasharray="6,6" class="animate-dash" />
+          <line x1="580" y1="120" x2="760" y2="170" stroke="url(#streamGradient)" stroke-width="2.5" stroke-dasharray="6,6" class="animate-dash" />
+
+          <!-- NODE 1: Ingress Gateway -->
+          <foreignObject x="40" y="75" width="160" height="90">
+            <div xmlns="http://www.w3.org/1999/xhtml" class="p-3.5 rounded-xl bg-slate-50 dark:bg-dark-850 border border-slate-200 dark:border-dark-750 shadow-sm flex flex-col justify-between h-full">
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] font-mono font-bold uppercase text-slate-500 dark:text-slate-400">INGRESS</span>
+                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+              </div>
+              <div class="text-xs font-bold text-slate-900 dark:text-white truncate">Care Router Gateway</div>
+              <div class="text-[10px] font-mono text-slate-500 dark:text-slate-400">HTTP/2 POST /renew</div>
+            </div>
+          </foreignObject>
+
+          <!-- NODE 2: Main Lambda Hero Node -->
+          <foreignObject x="380" y="55" width="200" height="130">
+            <div xmlns="http://www.w3.org/1999/xhtml" class="p-4 rounded-2xl bg-gradient-to-b from-indigo-50 to-white dark:from-dark-850 dark:to-dark-900 border-2 border-brand-500 shadow-xl shadow-brand-500/10 flex flex-col justify-between h-full relative">
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-brand-500/10 text-brand-600 dark:text-brand-400 border border-brand-500/30">
+                  CORE RUNTIME
+                </span>
+                <img src="/static/img/brands/lambda.svg" class="w-4 h-4" alt="Lambda">
+              </div>
+              <div>
+                <div class="text-xs font-extrabold text-slate-900 dark:text-white truncate">health-renewal-svc</div>
+                <div class="text-[10px] font-mono text-slate-500 dark:text-slate-400 mt-0.5">NodeJS 20.x · 512 MB</div>
+              </div>
+              <div class="text-[10px] font-mono flex items-center justify-between text-emerald-600 dark:text-emerald-400 pt-1.5 border-t border-slate-200 dark:border-dark-800">
+                <span>Timeout: 30s</span>
+                <span class="font-bold">LIVE (Prod)</span>
+              </div>
+            </div>
+          </foreignObject>
+
+          <!-- NODE 3A: EventBus -->
+          <foreignObject x="760" y="35" width="180" height="80">
+            <div xmlns="http://www.w3.org/1999/xhtml" class="p-3 rounded-xl bg-slate-50 dark:bg-dark-850 border border-slate-200 dark:border-dark-750 shadow-sm flex flex-col justify-between h-full">
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] font-mono font-bold text-slate-500 dark:text-slate-400">EVENT BUS</span>
+                <i data-lucide="bell" class="w-3.5 h-3.5 text-indigo-500"></i>
+              </div>
+              <div class="text-xs font-bold text-slate-900 dark:text-white truncate">Reminder EventBus</div>
+              <div class="text-[10px] font-mono text-slate-500 dark:text-slate-400">Topic: renewal-events</div>
+            </div>
+          </foreignObject>
+
+          <!-- NODE 3B: PostgreSQL RDS -->
+          <foreignObject x="760" y="130" width="180" height="80">
+            <div xmlns="http://www.w3.org/1999/xhtml" class="p-3 rounded-xl bg-slate-50 dark:bg-dark-850 border border-slate-200 dark:border-dark-750 shadow-sm flex flex-col justify-between h-full">
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] font-mono font-bold text-slate-500 dark:text-slate-400">DATABASE</span>
+                <i data-lucide="database" class="w-3.5 h-3.5 text-emerald-500"></i>
+              </div>
+              <div class="text-xs font-bold text-slate-900 dark:text-white truncate">NEURON_DB (RDS)</div>
+              <div class="text-[10px] font-mono text-slate-500 dark:text-slate-400">PostgreSQL 15 (ap-se-3)</div>
+            </div>
+          </foreignObject>
+        </svg>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- SECTION 3: INVENTORY CATALOG TABLE & VULNERABILITY TRIAGE -->
+    <!-- ========================================================================= -->
+    <section class="rounded-2xl border border-slate-200 dark:border-dark-800 bg-white dark:bg-dark-900/90 shadow-sm overflow-hidden transition-colors">
+      <div class="p-5 border-b border-slate-100 dark:border-dark-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white font-mono flex items-center gap-2">
+            <i data-lucide="table" class="w-4 h-4 text-brand-500"></i> Microservice Inventory & Security Audit
+          </h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Daftar service catalog dengan status real-time Trivy scan & pipeline sync</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <input type="text" placeholder="Search service..." class="px-3 py-1.5 text-xs rounded-xl bg-slate-50 dark:bg-dark-950 border border-slate-200 dark:border-dark-750 text-slate-900 dark:text-white font-mono focus:ring-2 focus:ring-brand-500 focus:outline-none">
+          <button class="px-3.5 py-1.5 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-bold font-mono transition-colors shadow-sm">
+            + Onboard Service
+          </button>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs">
+          <thead class="bg-slate-50 dark:bg-dark-950/80 text-slate-500 dark:text-slate-400 font-mono text-[11px] uppercase border-b border-slate-200 dark:border-dark-800">
+            <tr>
+              <th class="py-3 px-5 font-semibold">Service Name</th>
+              <th class="py-3 px-4 font-semibold">Shelf / Domain</th>
+              <th class="py-3 px-4 font-semibold">CI/CD Pipeline</th>
+              <th class="py-3 px-4 font-semibold">Vulnerability Status</th>
+              <th class="py-3 px-4 font-semibold">Scheduled Scan</th>
+              <th class="py-3 px-5 font-semibold text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 dark:divide-dark-800/80 text-slate-700 dark:text-slate-300">
+            
+            <!-- Row 1: Health Renewal Service -->
+            <tr class="hover:bg-slate-50/80 dark:hover:bg-dark-800/50 transition-colors">
+              <td class="py-3.5 px-5">
+                <div class="flex items-center gap-2.5">
+                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                  <div>
+                    <div class="font-bold text-slate-900 dark:text-white font-mono">health-renewal-svc-clone</div>
+                    <div class="text-[10px] text-slate-500 dark:text-slate-400 font-mono">lmd-oona-ph-integration-health-renewal-svc</div>
+                  </div>
+                </div>
+              </td>
+              <td class="py-3.5 px-4">
+                <span class="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-indigo-50 dark:bg-brand-500/10 text-brand-700 dark:text-brand-400 border border-indigo-200 dark:border-brand-500/20">
+                  ph:neuron
+                </span>
+              </td>
+              <td class="py-3.5 px-4">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-mono font-semibold bg-slate-100 dark:bg-dark-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-dark-750">
+                  <img src="/static/img/brands/jenkins.svg" class="w-3.5 h-3.5" alt="Jenkins">
+                  In Jenkins
+                </span>
+              </td>
+              <td class="py-3.5 px-4">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                  PASSED (4 High · 0 Crit)
+                </span>
+              </td>
+              <td class="py-3.5 px-4 font-mono text-[11px] text-slate-600 dark:text-slate-400">
+                Daily @ 01:30 WIB
+              </td>
+              <td class="py-3.5 px-5 text-right">
+                <a href="/catalog/health-renewal-svc-clone" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-dark-800 dark:hover:bg-dark-700 text-slate-700 dark:text-slate-200 font-mono text-xs font-semibold transition-colors">
+                  Detail →
+                </a>
+              </td>
+            </tr>
+
+            <!-- Row 2: Payment Aggregator -->
+            <tr class="hover:bg-slate-50/80 dark:hover:bg-dark-800/50 transition-colors">
+              <td class="py-3.5 px-5">
+                <div class="flex items-center gap-2.5">
+                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                  <div>
+                    <div class="font-bold text-slate-900 dark:text-white font-mono">policy-aggregation-trigger</div>
+                    <div class="text-[10px] text-slate-500 dark:text-slate-400 font-mono">lmd-oona-id-integration-coreplus-policy</div>
+                  </div>
+                </div>
+              </td>
+              <td class="py-3.5 px-4">
+                <span class="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20">
+                  id:coreplus
+                </span>
+              </td>
+              <td class="py-3.5 px-4">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-mono font-semibold bg-slate-100 dark:bg-dark-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-dark-750">
+                  <img src="/static/img/brands/jenkins.svg" class="w-3.5 h-3.5" alt="Jenkins">
+                  In Jenkins
+                </span>
+              </td>
+              <td class="py-3.5 px-4">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                  PASSED (0 Crit)
+                </span>
+              </td>
+              <td class="py-3.5 px-4 font-mono text-[11px] text-slate-600 dark:text-slate-400">
+                Daily @ 02:00 WIB
+              </td>
+              <td class="py-3.5 px-5 text-right">
+                <button class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-dark-800 dark:hover:bg-dark-700 text-slate-700 dark:text-slate-200 font-mono text-xs font-semibold transition-colors">
+                  Detail →
+                </button>
+              </td>
+            </tr>
+
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Theme Switcher Function
+    function toggleTheme() {
+      const html = document.documentElement;
+      const isDark = html.classList.contains('dark');
+      if (isDark) {
+        html.classList.remove('dark');
+        document.getElementById('themeIcon').textContent = '☀️';
+        document.getElementById('themeLabel').textContent = 'Light Mode';
+        localStorage.setItem('theme', 'light');
+      } else {
+        html.classList.add('dark');
+        document.getElementById('themeIcon').textContent = '🌙';
+        document.getElementById('themeLabel').textContent = 'Dark Mode';
+        localStorage.setItem('theme', 'dark');
+      }
+    }
+
+    // Variant Switcher Function
+    function switchVariant(variant) {
+      const btnA = document.getElementById('btnVarA');
+      const btnB = document.getElementById('btnVarB');
+      const cards = document.querySelectorAll('.metric-card');
+      
+      if (variant === 'A') {
+        btnA.className = "px-3 py-1.5 rounded-lg bg-white dark:bg-dark-700 text-slate-900 dark:text-white shadow-sm transition-all flex items-center gap-1.5";
+        btnB.className = "px-3 py-1.5 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all flex items-center gap-1.5";
+        cards.forEach(c => {
+          c.style.borderRadius = '1rem';
+          c.style.borderWidth = '1px';
+        });
+      } else {
+        btnB.className = "px-3 py-1.5 rounded-lg bg-white dark:bg-dark-700 text-slate-900 dark:text-white shadow-sm transition-all flex items-center gap-1.5";
+        btnA.className = "px-3 py-1.5 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all flex items-center gap-1.5";
+        cards.forEach(c => {
+          c.style.borderRadius = '0.5rem';
+          c.style.borderWidth = '2px';
+        });
+      }
+    }
+  </script>
+</body>
+</html>

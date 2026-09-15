@@ -6,6 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ .Title }} - Service Catalog Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class'
+        }
+    </script>
     <script src="/static/js/htmx.min.js"></script>
     <script src="/static/js/lucide.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -17,14 +22,421 @@
         .htmx-request .htmx-indicator { display: inline-block; }
         .htmx-request.htmx-indicator { display: inline-block; }
 
+        /* Supabase Dark Mode Global Standard (#121212 canvas, #171717 cards, #282828 borders) */
+        html:not(.light-mode) body,
+        html:not(.light-mode) #main-content {
+            background-color: #121212 !important;
+        }
+        html:not(.light-mode) .bg-slate-900,
+        html:not(.light-mode) .bg-slate-900\/90,
+        html:not(.light-mode) .bg-slate-900\/80,
+        html:not(.light-mode) .bg-slate-900\/60,
+        html:not(.light-mode) .bg-slate-900\/50,
+        html:not(.light-mode) .bg-slate-950,
+        html:not(.light-mode) .bg-slate-950\/70,
+        html:not(.light-mode) .bg-slate-950\/60,
+        html:not(.light-mode) .bg-slate-950\/50,
+        html:not(.light-mode) .bg-slate-950\/40,
+        html:not(.light-mode) .catalog-card,
+        html:not(.light-mode) .ticket-row {
+            background-color: #171717 !important;
+        }
+        html:not(.light-mode) .border-slate-800,
+        html:not(.light-mode) .border-slate-800\/80,
+        html:not(.light-mode) .border-slate-800\/60,
+        html:not(.light-mode) .border-slate-700,
+        html:not(.light-mode) .border-slate-700\/80,
+        html:not(.light-mode) .divide-slate-800,
+        html:not(.light-mode) .divide-slate-800\/60 {
+            border-color: #282828 !important;
+        }
+        html:not(.light-mode) .hover\:bg-slate-800\/40:hover,
+        html:not(.light-mode) .hover\:bg-slate-800\/60:hover,
+        html:not(.light-mode) .hover\:bg-slate-800:hover,
+        html:not(.light-mode) .hover\:bg-slate-700:hover {
+            background-color: #1f1f1f !important;
+        }
+        /* Indigo to Oona Purple Global Harmonization */
+        html:not(.light-mode) .bg-indigo-600 {
+            background-color: #7c3aed !important;
+        }
+        html:not(.light-mode) .hover\:bg-indigo-500:hover,
+        html:not(.light-mode) .hover\:bg-indigo-700:hover {
+            background-color: #6d28d9 !important;
+        }
+        html:not(.light-mode) .text-indigo-400 {
+            color: #a78bfa !important;
+        }
+        html:not(.light-mode) .border-indigo-500\/20,
+        html:not(.light-mode) .border-indigo-500\/30 {
+            border-color: rgba(124, 58, 237, 0.3) !important;
+        }
+        html:not(.light-mode) .bg-indigo-500\/10,
+        html:not(.light-mode) .bg-indigo-500\/15 {
+            background-color: rgba(124, 58, 237, 0.15) !important;
+        }
+
+        /* Supabase Dark Mode Overrides for Legacy White Cards across all pages */
+        html:not(.light-mode) #main-content .bg-white {
+            background-color: #171717 !important;
+            border-color: #282828 !important;
+            color: #f8fafc !important;
+        }
+        html:not(.light-mode) #main-content .text-gray-900 {
+            color: #f8fafc !important;
+        }
+        html:not(.light-mode) #main-content .text-gray-700,
+        html:not(.light-mode) #main-content .text-gray-600 {
+            color: #cbd5e1 !important;
+        }
+        html:not(.light-mode) #main-content .text-gray-500 {
+            color: #94a3b8 !important;
+        }
+        html:not(.light-mode) #main-content .divide-gray-300,
+        html:not(.light-mode) #main-content .divide-gray-200,
+        html:not(.light-mode) #main-content .border-gray-200,
+        html:not(.light-mode) #main-content .border-gray-300 {
+            border-color: #282828 !important;
+        }
+        html:not(.light-mode) #main-content .bg-slate-50,
+        html:not(.light-mode) #main-content .bg-gray-50,
+        html:not(.light-mode) #main-content .bg-slate-100 {
+            background-color: #141414 !important;
+            border-color: #282828 !important;
+            color: #f8fafc !important;
+        }
+        html:not(.light-mode) #main-content .ring-gray-900\/5,
+        html:not(.light-mode) #main-content .ring-gray-300 {
+            --tw-ring-color: #282828 !important;
+            border: 1px solid #282828 !important;
+        }
+        html:not(.light-mode) #main-content thead {
+            background-color: #141414 !important;
+        }
+        html:not(.light-mode) #main-content tr:hover {
+            background-color: #1e1e1e !important;
+        }
+
+        /* Light Mode High-Contrast Refinements */
+        html.light-mode #sidebar-collapse-btn {
+            background-color: #f1f5f9 !important;
+            border-color: #cbd5e1 !important;
+            color: #334155 !important;
+        }
+        html.light-mode .text-emerald-400 {
+            color: #15803d !important;
+        }
+        html.light-mode .bg-emerald-500\/10 {
+            background-color: #ecfdf5 !important;
+            border-color: #a7f3d0 !important;
+        }
+        html.light-mode #main-content textarea,
+        html.light-mode #main-content input {
+            color: #0f172a !important;
+        }
+
+        /* Light Mode Specific Overrides for Vulnerabilities & Trivy Report */
+        html.light-mode #panel-vulnerabilities .bg-\[\#171717\] {
+            background-color: #ffffff !important;
+            border-color: #e2e8f0 !important;
+            color: #0f172a !important;
+        }
+        html.light-mode #panel-vulnerabilities .bg-\[\#141414\] {
+            background-color: #f8fafc !important;
+            border-color: #e2e8f0 !important;
+        }
+        html.light-mode #panel-vulnerabilities .bg-\[\#121212\] {
+            background-color: #f8fafc !important;
+            border-color: #e2e8f0 !important;
+        }
+        html.light-mode #panel-vulnerabilities .border-\[\#282828\] {
+            border-color: #e2e8f0 !important;
+        }
+        html.light-mode #panel-vulnerabilities .text-white {
+            color: #0f172a !important;
+        }
+        html.light-mode #panel-vulnerabilities .text-slate-400 {
+            color: #64748b !important;
+        }
+        html.light-mode #panel-vulnerabilities thead {
+            background-color: #f8fafc !important;
+            color: #475569 !important;
+            border-bottom-color: #e2e8f0 !important;
+        }
+        html.light-mode #panel-vulnerabilities tr:hover {
+            background-color: #f8fafc !important;
+        }
+        html.light-mode #panel-vulnerabilities td {
+            border-bottom-color: #f1f5f9 !important;
+            color: #334155 !important;
+        }
+
+        /* Light Mode Specific Overrides for Topology Canvas & Cards */
+        html.light-mode #panel-topology .bg-\[\#171717\],
+        html.light-mode #panel-topology .bg-\[\#171717\]\/95,
+        html.light-mode #panel-topology .topology-card-surface {
+            background-color: #ffffff !important;
+            border-color: #e2e8f0 !important;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05) !important;
+            color: #0f172a !important;
+        }
+        html.light-mode #panel-topology #topologyViewport {
+            background-color: #f8fafc !important;
+        }
+        html.light-mode #panel-topology .topology-vignette {
+            background: linear-gradient(to bottom, rgba(248, 250, 252, 0.4), transparent, rgba(248, 250, 252, 0.8)) !important;
+        }
+        html.light-mode #panel-topology .bg-\[\#141414\] {
+            background-color: #ffffff !important;
+            border-color: #e2e8f0 !important;
+        }
+        html.light-mode #panel-topology .bg-\[\#121212\] {
+            background-color: #f8fafc !important;
+            border-color: #e2e8f0 !important;
+        }
+        html.light-mode #panel-topology .border-\[\#282828\],
+        html.light-mode #panel-topology .divide-\[\#282828\] {
+            border-color: #e2e8f0 !important;
+        }
+        html.light-mode #panel-topology .text-white {
+            color: #0f172a !important;
+        }
+        html.light-mode #panel-topology .text-slate-300 {
+            color: #334155 !important;
+        }
+        html.light-mode #panel-topology .text-slate-400 {
+            color: #64748b !important;
+        }
+        html.light-mode #panel-topology .text-slate-500 {
+            color: #94a3b8 !important;
+        }
+        html.light-mode #panel-topology .topology-badge-rect {
+            fill: #ffffff !important;
+        }
+        html.light-mode #panel-topology .topology-base-track {
+            stroke: #e2e8f0 !important;
+        }
+
+        /* Light Mode Specific Form Card & Inputs */
+        html.light-mode .ticket-form-card {
+            background-color: #ffffff !important;
+            border-color: #e2e8f0 !important;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05) !important;
+            color: #0f172a !important;
+        }
+        html.light-mode .ticket-form-card .form-section-title {
+            color: #1e293b !important;
+            border-color: #e2e8f0 !important;
+        }
+        html.light-mode .ticket-form-card label {
+            color: #334155 !important;
+        }
+        html.light-mode .ticket-form-card input:not([type="checkbox"]):not([type="radio"]),
+        html.light-mode .ticket-form-card select,
+        html.light-mode .ticket-form-card textarea {
+            background-color: #ffffff !important;
+            border-color: #cbd5e1 !important;
+            color: #0f172a !important;
+            box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05) !important;
+        }
+        html.light-mode .ticket-form-card input::placeholder,
+        html.light-mode .ticket-form-card textarea::placeholder {
+            color: #94a3b8 !important;
+        }
+        html.light-mode .ticket-form-card .env-checkbox-box {
+            background-color: #f8fafc !important;
+            border-color: #e2e8f0 !important;
+        }
+        html.light-mode .ticket-form-card .env-checkbox-box label {
+            color: #1e293b !important;
+        }
+        html.light-mode .ticket-form-card .pipeline-preview-box {
+            background-color: #f5f3ff !important;
+            border-color: #ddd6fe !important;
+            color: #5b21b6 !important;
+        }
+        html.light-mode .ticket-form-card .pipeline-preview-box span {
+            color: #5b21b6 !important;
+        }
+        html.light-mode .ticket-form-card .form-footer-bar {
+            background-color: #f8fafc !important;
+            border-color: #e2e8f0 !important;
+        }
+        html.light-mode .ticket-form-card .btn-cancel {
+            color: #64748b !important;
+        }
+        html.light-mode .ticket-form-card .btn-cancel:hover {
+            color: #0f172a !important;
+        }
+        html.light-mode input:not([type="checkbox"]):not([type="radio"]),
+        html.light-mode select,
+        html.light-mode textarea {
+            background-color: #ffffff !important;
+            border-color: #cbd5e1 !important;
+            color: #0f172a !important;
+        }
+        html.light-mode input::placeholder,
+        html.light-mode textarea::placeholder {
+            color: #94a3b8 !important;
+        }
+        html.light-mode .bg-\[\#171717\] {
+            background-color: #ffffff !important;
+            border-color: #e2e8f0 !important;
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.05) !important;
+        }
+        html.light-mode .bg-\[\#121212\] {
+            background-color: #f8fafc !important;
+            border-color: #e2e8f0 !important;
+        }
+        html.light-mode .bg-\[\#141414\] {
+            background-color: #f8fafc !important;
+            border-color: #e2e8f0 !important;
+        }
+        html.light-mode .border-\[\#282828\],
+        html.light-mode .divide-\[\#282828\] {
+            border-color: #e2e8f0 !important;
+        }
+        html.light-mode .text-white {
+            color: #0f172a !important;
+        }
+        html.light-mode .text-slate-200,
+        html.light-mode .text-slate-300 {
+            color: #334155 !important;
+        }
+        html.light-mode .text-slate-400 {
+            color: #64748b !important;
+        }
+        /* Handle secondary buttons, dark surfaces and borders in Light Mode */
+        html.light-mode .bg-\[\#1e1e1e\],
+        html.light-mode .bg-\[\#1f1f1f\] {
+            background-color: #ffffff !important;
+            border-color: #cbd5e1 !important;
+            color: #334155 !important;
+        }
+        html.light-mode .border-\[\#2e2e2e\] {
+            border-color: #cbd5e1 !important;
+        }
+        html.light-mode .hover\:bg-\[\#282828\]:hover,
+        html.light-mode .hover\:bg-\[\#1e1e1e\]:hover,
+        html.light-mode .hover\:bg-\[\#1f1f1f\]:hover {
+            background-color: #f1f5f9 !important;
+        }
+        html.light-mode button.bg-\[\#1e1e1e\]:hover,
+        html.light-mode a.bg-\[\#1e1e1e\]:hover {
+            background-color: #f8fafc !important;
+            border-color: #94a3b8 !important;
+            color: #0f172a !important;
+        }
+
+        /* Specific Button Enhancements for Light Mode */
+        html.light-mode .btn-secondary-action {
+            background-color: #ffffff !important;
+            border-color: #cbd5e1 !important;
+            color: #334155 !important;
+            box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05) !important;
+        }
+        html.light-mode .btn-secondary-action:hover {
+            background-color: #f8fafc !important;
+            border-color: #94a3b8 !important;
+            color: #0f172a !important;
+        }
+
+        html.light-mode .btn-jira-connect {
+            background-color: #f5f3ff !important;
+            border-color: #ddd6fe !important;
+            color: #6d28d9 !important;
+            box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05) !important;
+        }
+        html.light-mode .btn-jira-connect:hover {
+            background-color: #ede9fe !important;
+            border-color: #c4b5fd !important;
+            color: #5b21b6 !important;
+        }
+
+        /* Table header and row borders in Light Mode */
+        html.light-mode table thead.bg-\[\#121212\] {
+            background-color: #f8fafc !important;
+            color: #475569 !important;
+            border-bottom: 1px solid #e2e8f0 !important;
+        }
+        html.light-mode table thead th {
+            color: #475569 !important;
+        }
+        html.light-mode table tbody tr {
+            border-bottom-color: #f1f5f9 !important;
+        }
+        html.light-mode table tbody tr:hover {
+            background-color: #f8fafc !important;
+        }
+        html.light-mode .bg-purple-500\/10,
+        html.light-mode .bg-purple-500\/15 {
+            background-color: #f3e8ff !important;
+            border-color: #d8b4fe !important;
+        }
+        html.light-mode .text-\[\#a78bfa\] {
+            color: #6d28d9 !important;
+        }
+        html.light-mode .border-purple-500\/20,
+        html.light-mode .border-purple-500\/30 {
+            border-color: #d8b4fe !important;
+        }
+
+        /* Topology Canvas Grid Matrix & Flow Animation */
+        .bg-grid-matrix {
+            background-size: 28px 28px;
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+        }
+        html.light-mode .bg-grid-matrix {
+            background-size: 28px 28px;
+            background-image: 
+                linear-gradient(to right, rgba(0, 0, 0, 0.04) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+        }
+        .anim-line {
+            animation: dash 20s linear infinite;
+        }
+        @keyframes dash {
+            to {
+                stroke-dashoffset: -1000;
+            }
+        }
+        .glow-emerald { filter: none; }
+        .glow-blue { filter: none; }
+        .glow-amber { filter: none; }
+
+        /* Custom Dark & Light Scrollbar Standard */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #121212;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #282828;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #383838;
+        }
+        html.light-mode ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        html.light-mode ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
+        }
+
         /* Light mode full styling overrides */
         html.light-mode body {
-            background-color: #f8fafc;
+            background-color: #fafafa;
             color: #0f172a;
         }
         html.light-mode #sidebar {
             background-color: #ffffff;
-            border-color: #e2e8f0;
+            border-color: #e5e7eb;
             color: #334155;
         }
         html.light-mode #sidebar .text-white {
@@ -36,16 +448,18 @@
         html.light-mode #sidebar .text-slate-400 {
             color: #64748b !important;
         }
+        html.light-mode #sidebar .hover\:bg-\[\#242424\]:hover,
         html.light-mode #sidebar .hover\:bg-slate-800\/80:hover {
-            background-color: #f1f5f9 !important;
+            background-color: #f3f4f6 !important;
             color: #0f172a !important;
         }
+        html.light-mode #sidebar .border-\[\#282828\],
         html.light-mode #sidebar .border-slate-800\/80 {
-            border-color: #e2e8f0 !important;
+            border-color: #e5e7eb !important;
         }
         html.light-mode header {
             background-color: #ffffff !important;
-            border-color: #e2e8f0 !important;
+            border-color: #e5e7eb !important;
         }
         html.light-mode header .text-white {
             color: #0f172a !important;
@@ -53,16 +467,19 @@
         html.light-mode header .text-slate-400 {
             color: #64748b !important;
         }
+        html.light-mode header .hover\:bg-\[\#242424\]:hover,
         html.light-mode header .hover\:bg-slate-800:hover {
-            background-color: #f1f5f9 !important;
+            background-color: #f3f4f6 !important;
         }
-        html.light-mode header .ring-slate-800 {
-            --tw-ring-color: #e2e8f0 !important;
+        html.light-mode header .border-\[\#282828\],
+        html.light-mode header .border-\[\#2e2e2e\] {
+            border-color: #e5e7eb !important;
         }
         html.light-mode #main-content {
-            background-color: #f8fafc !important;
+            background-color: #fafafa !important;
             color: #0f172a !important;
         }
+        html.light-mode #main-content .bg-\[\#171717\],
         html.light-mode #main-content .bg-slate-900\/90,
         html.light-mode #main-content .bg-slate-900,
         html.light-mode #main-content .bg-slate-900\/60,
@@ -72,8 +489,16 @@
         html.light-mode #main-content .bg-slate-950\/60,
         html.light-mode #main-content .bg-slate-950\/40 {
             background-color: #ffffff !important;
-            border-color: #e2e8f0 !important;
-            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.05) !important;
+            border-color: #e5e7eb !important;
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.04) !important;
+        }
+        html.light-mode #main-content .border-\[\#282828\],
+        html.light-mode #main-content .border-slate-800,
+        html.light-mode #main-content .border-slate-800\/80,
+        html.light-mode #main-content .border-slate-800\/60,
+        html.light-mode #main-content .divide-\[\#282828\],
+        html.light-mode #main-content .divide-slate-800 {
+            border-color: #e5e7eb !important;
         }
         html.light-mode #main-content .text-white {
             color: #0f172a !important;
@@ -95,7 +520,37 @@
             color: #b45309 !important;
         }
         html.light-mode #main-content .text-rose-400 {
-            color: #be123c !important;
+            color: #b91c1c !important; /* Swiss Pure Red deep text (#b91c1c) */
+            font-weight: 700 !important;
+        }
+        html.light-mode #main-content .text-\[\#f87171\] {
+            color: #b91c1c !important;
+            font-weight: 700 !important;
+        }
+        html.light-mode #main-content .text-\[\#fb923c\] {
+            color: #c2410c !important;
+            font-weight: 700 !important;
+        }
+        html.light-mode #main-content .text-\[\#facc15\] {
+            color: #a16207 !important;
+            font-weight: 700 !important;
+        }
+        html.light-mode #main-content .text-\[\#34d399\] {
+            color: #047857 !important;
+            font-weight: 700 !important;
+        }
+        html.light-mode #main-content .bg-red-500\/10 {
+            background-color: #fef2f2 !important;
+            border-color: #fecaca !important;
+            color: #b91c1c !important;
+        }
+        html.light-mode #main-content .bg-red-500\/20 {
+            background-color: #fee2e2 !important;
+            border-color: #fca5a5 !important;
+            color: #991b1b !important;
+        }
+        html.light-mode #main-content .ring-red-500\/20 {
+            --tw-ring-color: #fecaca !important;
         }
         html.light-mode #main-content .text-blue-400 {
             color: #1d4ed8 !important;
@@ -321,7 +776,128 @@
         }
 
         html.light-mode #sidebar.collapsed-sidebar nav a .sidebar-tooltip::before {
-            border-color: transparent #1e293b transparent transparent;
+            border-color: transparent #ffffff transparent transparent;
+        }
+
+        /* ══════════════════════════════════════════════════════════
+           MINIMALIST SIDEBAR MICRO-ANIMATIONS (GPU ACCELERATED)
+           ══════════════════════════════════════════════════════════ */
+        .sidebar-nav-item {
+            position: relative;
+            transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease, color 0.2s ease;
+        }
+        #sidebar:not(.collapsed-sidebar) .sidebar-nav-item:hover {
+            transform: translateX(3px);
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        html.light-mode #sidebar:not(.collapsed-sidebar) .sidebar-nav-item:hover {
+            background-color: rgba(15, 23, 42, 0.04);
+        }
+        .sidebar-nav-item i,
+        .sidebar-nav-item svg {
+            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.2s ease, filter 0.25s ease;
+        }
+        .sidebar-nav-item:hover i,
+        .sidebar-nav-item:hover svg {
+            color: #ffffff;
+            
+        }
+
+        /* Semantic Kinetic Motions per Icon (Gaya 2) */
+        /* 1. Dashboard: Tilt 8° */
+        .sidebar-nav-item:hover .icon-dash {
+            transform: rotate(8deg) scale(1.15);
+            color: #a78bfa;
+        }
+        /* 2. Service Catalog: Floating Lift */
+        .sidebar-nav-item:hover .icon-server {
+            transform: translateY(-3px) scale(1.14);
+            color: #a78bfa;
+        }
+        /* 3. Ticket List: Ticket Stub Tilt -15° */
+        .sidebar-nav-item:hover .icon-ticket {
+            transform: rotate(-15deg) translateY(-2px) scale(1.16);
+            color: #60a5fa;
+            
+        }
+        /* 4. Onboard Service: Rotate 90° */
+        .sidebar-nav-item:hover .icon-plus {
+            transform: rotate(90deg) scale(1.18);
+            color: #a78bfa;
+        }
+        /* 5. Service Approvals: Spring Pop Jump */
+        @keyframes checkPop {
+            0%   { transform: scale(1); }
+            50%  { transform: scale(1.28) translateY(-3px); }
+            100% { transform: scale(1.15) translateY(0); }
+        }
+        .sidebar-nav-item:hover .icon-check {
+            animation: checkPop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            color: #3ecf8e;
+            
+        }
+        /* 6. User Management: Subtle Lift */
+        .sidebar-nav-item:hover .icon-users {
+            transform: translateY(-2px) scale(1.15);
+            color: #a78bfa;
+        }
+        /* 7. System Integrations: Interlocking Tilt */
+        .sidebar-nav-item:hover .icon-blocks {
+            transform: rotate(-10deg) scale(1.15);
+            color: #a78bfa;
+        }
+        /* 8. System Parameters: Slider Nudge */
+        .sidebar-nav-item:hover .icon-sliders {
+            transform: translateX(3px) scale(1.14);
+            color: #a78bfa;
+        }
+        /* 9. Backup & Restore: 360° Counter-Clockwise Spin */
+        .sidebar-nav-item:hover .icon-backup {
+            transform: rotate(-360deg) scale(1.18);
+            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            color: #818cf8;
+            
+        }
+        /* 10. Audit Logs: Scroll Lift */
+        .sidebar-nav-item:hover .icon-audit {
+            transform: translateY(-2px) scale(1.15);
+            color: #818cf8;
+        }
+
+        /* Active Glowing Indicator Bar (Left Edge) */
+        .sidebar-active-bar {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 18px;
+            border-radius: 9999px;
+            background: linear-gradient(to bottom, #a78bfa, #7c3aed);
+            box-shadow: none;
+        }
+        /* Brand Logo Interactive Spring Tilt */
+        .sidebar-brand-icon {
+            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+        }
+        .sidebar-brand-icon:hover {
+            transform: scale(1.08) translateY(-1px);
+            box-shadow: none;
+        }
+        html.light-mode .sidebar-brand-icon {
+            background-color: #f5f3ff !important;
+            border-color: #ddd6fe !important;
+        }
+        html.light-mode .sidebar-brand-icon i {
+            color: #7c3aed !important;
+        }
+        /* Category Header Hover Polish */
+        .sidebar-section-title {
+            letter-spacing: 0.08em;
+            transition: color 0.2s ease;
+        }
+        .sidebar-section-title:hover {
+            color: #94a3b8;
         }
     </style>
     <script>
@@ -335,55 +911,69 @@
         });
     </script>
 </head>
-<body class="bg-slate-950 text-slate-900 font-sans antialiased h-screen flex overflow-hidden">
+<body class="bg-[#121212] text-slate-100 font-sans antialiased h-screen flex overflow-hidden">
     <!-- Sidebar -->
-    <aside id="sidebar" class="w-64 bg-slate-900 border-r border-slate-800/80 text-slate-300 flex flex-col hidden sm:flex transition-all duration-300 relative">
+    <aside id="sidebar" class="w-64 bg-[#171717] border-r border-[#282828] text-slate-300 flex flex-col hidden sm:flex transition-all duration-300 relative">
         <!-- Collapse Button -->
         <button onclick="toggleSidebar()" 
-            class="absolute -right-3 top-5 bg-slate-800 hover:bg-slate-700 rounded-full p-1 shadow-md z-10 cursor-pointer text-slate-400 hover:text-white border border-slate-700 transition-colors">
+            class="absolute -right-3 top-5 bg-[#222222] hover:bg-[#2a2a2a] rounded-full p-1 shadow-md z-10 cursor-pointer text-slate-400 hover:text-white border border-[#333333] transition-colors">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path></svg>
         </button>
 
-        <!-- Brand Header -->
-        <div class="h-16 flex items-center px-5 border-b border-slate-800/80 gap-3">
-            <div class="h-9 w-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-md shadow-indigo-500/20 ring-1 ring-white/20 flex-shrink-0">
-                <i data-lucide="layers" class="h-5 w-5 text-white"></i>
-            </div>
-            <div class="sidebar-text overflow-hidden">
-                <h1 class="text-sm font-bold tracking-tight text-white leading-none">Service Catalog</h1>
-                <p class="text-[10px] text-indigo-400 font-semibold tracking-wider uppercase mt-1">Portal Platform</p>
-            </div>
+        <!-- Brand Header (Clickable to Dashboard) -->
+        <div class="h-16 flex items-center px-4 border-b border-[#282828]">
+            <a href="/dashboard" class="flex items-center gap-2.5 w-full p-1.5 rounded-xl hover:bg-white/5 transition-all group" hx-boost="true">
+                <div class="h-8 w-8 flex items-center justify-center flex-shrink-0">
+                    <img src="/static/img/risu_user_white.png" alt="Castan" class="w-5 h-5 object-contain block dark:block [html.light-mode_&]:hidden" />
+                    <img src="/static/img/risu_user_black.png" alt="Castan" class="w-5 h-5 object-contain hidden [html.light-mode_&]:block" />
+                </div>
+                <div class="sidebar-text overflow-hidden flex flex-col justify-center">
+                    <span class="text-sm font-bold tracking-tight text-white group-hover:text-purple-300 transition-colors leading-tight">Castan</span>
+                    <span class="text-[10px] text-slate-500 font-medium tracking-wide">Service Catalog</span>
+                </div>
+            </a>
         </div>
 
         <!-- Navigation Menu -->
         <nav class="flex-1 px-3 py-5 space-y-1 overflow-y-auto" hx-boost="true">
-            <a href="/dashboard" class="relative flex items-center px-3.5 py-2.5 text-slate-300 hover:bg-slate-800/80 hover:text-white rounded-xl transition-all group {{ if eq .Title "Dashboard" }}bg-indigo-600/15 text-indigo-400 font-semibold ring-1 ring-indigo-500/30{{ end }}">
-                <i data-lucide="layout-dashboard" class="w-5 h-5 flex-shrink-0 {{ if eq .Title "Dashboard" }}text-indigo-400{{ else }}text-slate-400 group-hover:text-white{{ end }}"></i>
+            <a href="/dashboard" class="sidebar-nav-item relative flex items-center px-3.5 py-2.5 text-slate-300 hover:text-white rounded-xl transition-all group {{ if eq .Title "Dashboard" }}bg-purple-500/15 text-purple-400 font-semibold ring-1 ring-purple-500/30{{ end }}">
+                {{ if eq .Title "Dashboard" }}<span class="sidebar-active-bar"></span>{{ end }}
+                <i data-lucide="layout-dashboard" class="icon-dash w-5 h-5 flex-shrink-0 {{ if eq .Title "Dashboard" }}text-purple-400{{ else }}text-slate-400 group-hover:text-white{{ end }}"></i>
                 <span class="ml-3 text-xs sidebar-text">Dashboard</span>
                 <span class="sidebar-tooltip">Dashboard</span>
             </a>
-            <a href="/catalog" class="relative flex items-center px-3.5 py-2.5 text-slate-300 hover:bg-slate-800/80 hover:text-white rounded-xl transition-all group {{ if eq .Title "Service Catalog" }}bg-indigo-600/15 text-indigo-400 font-semibold ring-1 ring-indigo-500/30{{ end }}">
-                <i data-lucide="server" class="w-5 h-5 flex-shrink-0 {{ if eq .Title "Service Catalog" }}text-indigo-400{{ else }}text-slate-400 group-hover:text-white{{ end }}"></i>
+            <a href="/catalog" class="sidebar-nav-item relative flex items-center px-3.5 py-2.5 text-slate-300 hover:text-white rounded-xl transition-all group {{ if eq .Title "Service Catalog" }}bg-purple-500/15 text-purple-400 font-semibold ring-1 ring-purple-500/30{{ end }}">
+                {{ if eq .Title "Service Catalog" }}<span class="sidebar-active-bar"></span>{{ end }}
+                <i data-lucide="server" class="icon-server w-5 h-5 flex-shrink-0 {{ if eq .Title "Service Catalog" }}text-purple-400{{ else }}text-slate-400 group-hover:text-white{{ end }}"></i>
                 <span class="ml-3 text-xs sidebar-text">Service Catalog</span>
                 <span class="sidebar-tooltip">Service Catalog</span>
             </a>
-            <a href="/tickets" class="relative flex items-center px-3.5 py-2.5 text-slate-300 hover:bg-slate-800/80 hover:text-white rounded-xl transition-all group {{ if eq .Title "Onboarding Tickets" }}bg-indigo-600/15 text-indigo-400 font-semibold ring-1 ring-indigo-500/30{{ end }}">
-                <i data-lucide="ticket" class="w-5 h-5 flex-shrink-0 {{ if eq .Title "Onboarding Tickets" }}text-indigo-400{{ else }}text-slate-400 group-hover:text-white{{ end }}"></i>
+            <a href="/service-map" class="sidebar-nav-item relative flex items-center px-3.5 py-2.5 text-slate-300 hover:text-white rounded-xl transition-all group {{ if eq .Title "Service Map" }}bg-purple-500/15 text-purple-400 font-semibold ring-1 ring-purple-500/30{{ end }}">
+                {{ if eq .Title "Service Map" }}<span class="sidebar-active-bar"></span>{{ end }}
+                <i data-lucide="network" class="icon-network w-5 h-5 flex-shrink-0 {{ if eq .Title "Service Map" }}text-purple-400{{ else }}text-slate-400 group-hover:text-white{{ end }}"></i>
+                <span class="ml-3 text-xs sidebar-text">Service Map</span>
+                <span class="sidebar-tooltip">Service Map</span>
+            </a>
+            <a href="/tickets" class="sidebar-nav-item relative flex items-center px-3.5 py-2.5 text-slate-300 hover:text-white rounded-xl transition-all group {{ if eq .Title "Onboarding Tickets" }}bg-purple-500/15 text-purple-400 font-semibold ring-1 ring-purple-500/30{{ end }}">
+                {{ if eq .Title "Onboarding Tickets" }}<span class="sidebar-active-bar"></span>{{ end }}
+                <i data-lucide="ticket" class="icon-ticket w-5 h-5 flex-shrink-0 {{ if eq .Title "Onboarding Tickets" }}text-purple-400{{ else }}text-slate-400 group-hover:text-white{{ end }}"></i>
                 <span class="ml-3 text-xs sidebar-text">Ticket List</span>
                 <span class="sidebar-tooltip">Ticket List</span>
             </a>
-            <a href="/tickets/new" class="relative flex items-center px-3.5 py-2.5 text-slate-300 hover:bg-slate-800/80 hover:text-white rounded-xl transition-all group">
-                <i data-lucide="plus-circle" class="w-5 h-5 flex-shrink-0 text-slate-400 group-hover:text-white"></i>
+            <a href="/tickets/new" class="sidebar-nav-item relative flex items-center px-3.5 py-2.5 text-slate-300 hover:text-white rounded-xl transition-all group {{ if eq .Title "New Service Ticket" }}bg-purple-500/15 text-purple-400 font-semibold ring-1 ring-purple-500/30{{ end }}">
+                {{ if eq .Title "New Service Ticket" }}<span class="sidebar-active-bar"></span>{{ end }}
+                <i data-lucide="plus-circle" class="icon-plus w-5 h-5 flex-shrink-0 text-slate-400 group-hover:text-white"></i>
                 <span class="ml-3 text-xs sidebar-text">Onboard Service</span>
                 <span class="sidebar-tooltip">Onboard Service</span>
             </a>
             
             {{ if or (eq .User.Role "devops") (eq .User.Role "admin") }}
                 <div class="pt-5 pb-1 px-3.5 sidebar-text">
-                    <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">DevOps Operations</p>
+                    <p class="sidebar-section-title text-[10px] font-bold text-slate-500 uppercase tracking-wider font-mono">DevOps Operations</p>
                 </div>
-                <a href="/approvals" class="relative flex items-center px-3.5 py-2.5 text-slate-300 hover:bg-slate-800/80 hover:text-white rounded-xl transition-all group {{ if eq .Title "Service Approvals" }}bg-indigo-600/15 text-indigo-400 font-semibold ring-1 ring-indigo-500/30{{ end }}">
-                    <i data-lucide="check-check" class="w-5 h-5 flex-shrink-0 text-slate-400 group-hover:text-white"></i>
+                <a href="/approvals" class="sidebar-nav-item relative flex items-center px-3.5 py-2.5 text-slate-300 hover:text-white rounded-xl transition-all group {{ if eq .Title "Service Approvals" }}bg-purple-500/15 text-purple-400 font-semibold ring-1 ring-purple-500/30{{ end }}">
+                    {{ if eq .Title "Service Approvals" }}<span class="sidebar-active-bar"></span>{{ end }}
+                    <i data-lucide="check-check" class="icon-check w-5 h-5 flex-shrink-0 text-slate-400 group-hover:text-white"></i>
                     <span class="ml-3 text-xs sidebar-text">Service Approvals</span>
                     <span class="sidebar-tooltip">Service Approvals</span>
                 </a>
@@ -391,30 +981,35 @@
 
             {{ if eq .User.Role "admin" }}
                 <div class="pt-5 pb-1 px-3.5 sidebar-text">
-                    <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Administration</p>
+                    <p class="sidebar-section-title text-[10px] font-bold text-slate-500 uppercase tracking-wider font-mono">Administration</p>
                 </div>
-                <a href="/admin/users" class="relative flex items-center px-3.5 py-2.5 text-slate-300 hover:bg-slate-800/80 hover:text-white rounded-xl transition-all group {{ if eq .Title "User Management" }}bg-indigo-600/15 text-indigo-400 font-semibold ring-1 ring-indigo-500/30{{ end }}">
-                    <i data-lucide="users" class="w-5 h-5 flex-shrink-0 text-slate-400 group-hover:text-white"></i>
+                <a href="/admin/users" class="sidebar-nav-item relative flex items-center px-3.5 py-2.5 text-slate-300 hover:text-white rounded-xl transition-all group {{ if eq .Title "User Management" }}bg-purple-500/15 text-purple-400 font-semibold ring-1 ring-purple-500/30{{ end }}">
+                    {{ if eq .Title "User Management" }}<span class="sidebar-active-bar"></span>{{ end }}
+                    <i data-lucide="users" class="icon-users w-5 h-5 flex-shrink-0 text-slate-400 group-hover:text-white"></i>
                     <span class="ml-3 text-xs sidebar-text">User Management</span>
                     <span class="sidebar-tooltip">User Management</span>
                 </a>
-                <a href="/admin/integrations" class="relative flex items-center px-3.5 py-2.5 text-slate-300 hover:bg-slate-800/80 hover:text-white rounded-xl transition-all group {{ if eq .Title "System Integrations" }}bg-indigo-600/15 text-indigo-400 font-semibold ring-1 ring-indigo-500/30{{ end }}">
-                    <i data-lucide="blocks" class="w-5 h-5 flex-shrink-0 text-slate-400 group-hover:text-white"></i>
+                <a href="/admin/integrations" class="sidebar-nav-item relative flex items-center px-3.5 py-2.5 text-slate-300 hover:text-white rounded-xl transition-all group {{ if eq .Title "System Integrations" }}bg-purple-500/15 text-purple-400 font-semibold ring-1 ring-purple-500/30{{ end }}">
+                    {{ if eq .Title "System Integrations" }}<span class="sidebar-active-bar"></span>{{ end }}
+                    <i data-lucide="blocks" class="icon-blocks w-5 h-5 flex-shrink-0 text-slate-400 group-hover:text-white"></i>
                     <span class="ml-3 text-xs sidebar-text">System Integrations</span>
                     <span class="sidebar-tooltip">System Integrations</span>
                 </a>
-                <a href="/admin/parameters" class="relative flex items-center px-3.5 py-2.5 text-slate-300 hover:bg-slate-800/80 hover:text-white rounded-xl transition-all group">
-                    <i data-lucide="sliders" class="w-5 h-5 flex-shrink-0 text-slate-400 group-hover:text-white"></i>
+                <a href="/admin/parameters" class="sidebar-nav-item relative flex items-center px-3.5 py-2.5 text-slate-300 hover:text-white rounded-xl transition-all group {{ if eq .Title "System Parameters" }}bg-purple-500/15 text-purple-400 font-semibold ring-1 ring-purple-500/30{{ end }}">
+                    {{ if eq .Title "System Parameters" }}<span class="sidebar-active-bar"></span>{{ end }}
+                    <i data-lucide="sliders" class="icon-sliders w-5 h-5 flex-shrink-0 text-slate-400 group-hover:text-white"></i>
                     <span class="ml-3 text-xs sidebar-text">System Parameters</span>
                     <span class="sidebar-tooltip">System Parameters</span>
                 </a>
-                <a href="/admin/backup" class="relative flex items-center px-3.5 py-2.5 text-slate-300 hover:bg-slate-800/80 hover:text-white rounded-xl transition-all group">
-                    <i data-lucide="database-backup" class="w-5 h-5 flex-shrink-0 text-indigo-400"></i>
+                <a href="/admin/backup" class="sidebar-nav-item relative flex items-center px-3.5 py-2.5 text-slate-300 hover:text-white rounded-xl transition-all group {{ if eq .Title "Backup & Restore" }}bg-purple-500/15 text-purple-400 font-semibold ring-1 ring-purple-500/30{{ end }}">
+                    {{ if eq .Title "Backup & Restore" }}<span class="sidebar-active-bar"></span>{{ end }}
+                    <i data-lucide="database-backup" class="icon-backup w-5 h-5 flex-shrink-0 text-indigo-400"></i>
                     <span class="ml-3 text-xs sidebar-text">Backup & Restore</span>
                     <span class="sidebar-tooltip">Backup & Restore</span>
                 </a>
-                <a href="/admin/audit-logs" class="relative flex items-center px-3.5 py-2.5 text-slate-300 hover:bg-slate-800/80 hover:text-white rounded-xl transition-all group {{ if eq .Title "Audit Logs" }}bg-indigo-600/15 text-indigo-400 font-semibold ring-1 ring-indigo-500/30{{ end }}">
-                    <i data-lucide="scroll-text" class="w-5 h-5 flex-shrink-0 {{ if eq .Title "Audit Logs" }}text-indigo-400{{ else }}text-slate-400 group-hover:text-white{{ end }}"></i>
+                <a href="/admin/audit-logs" class="sidebar-nav-item relative flex items-center px-3.5 py-2.5 text-slate-300 hover:text-white rounded-xl transition-all group {{ if eq .Title "Audit Logs" }}bg-indigo-600/15 text-indigo-400 font-semibold ring-1 ring-indigo-500/30{{ end }}">
+                    {{ if eq .Title "Audit Logs" }}<span class="sidebar-active-bar"></span>{{ end }}
+                    <i data-lucide="scroll-text" class="icon-audit w-5 h-5 flex-shrink-0 {{ if eq .Title "Audit Logs" }}text-indigo-400{{ else }}text-slate-400 group-hover:text-white{{ end }}"></i>
                     <span class="ml-3 text-xs sidebar-text">Audit Logs</span>
                     <span class="sidebar-tooltip">Audit Logs</span>
                 </a>
@@ -423,21 +1018,21 @@
     </aside>
 
     <!-- Main Content -->
-    <main class="flex-1 flex flex-col h-full bg-slate-900/50 overflow-hidden" hx-history-elt>
+    <main class="flex-1 flex flex-col h-full bg-[#121212] overflow-hidden" hx-history-elt>
         
         <!-- Toast Notification Container -->
         <div id="toast-container" class="fixed top-5 right-8 z-[9999] flex flex-col gap-3 pointer-events-none max-w-md w-96"></div>
 
         <!-- Top Navigation Bar (Header) -->
-        <header class="h-16 bg-slate-900 border-b border-slate-800/80 flex items-center justify-between px-4 sm:px-6 z-10">
+        <header class="h-16 bg-[#171717] border-b border-[#282828] flex items-center justify-between px-4 sm:px-6 z-10">
             <!-- Left side: Mobile menu button (visible only on mobile) & Status Badge -->
             <div class="flex items-center gap-3">
                 <button onclick="document.getElementById('sidebar').classList.toggle('hidden')" class="sm:hidden text-slate-400 hover:text-white p-1 rounded-lg">
                     <i data-lucide="menu" class="w-6 h-6"></i>
                 </button>
                 <div class="flex items-center gap-2 text-xs text-slate-400">
-                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 text-[#3ecf8e] border border-[#3ecf8e]/30 font-medium">
+                        <span class="w-1.5 h-1.5 rounded-full bg-[#3ecf8e] animate-pulse"></span>
                         Production Ready
                     </span>
                 </div>
@@ -446,21 +1041,21 @@
             <!-- Right side: Theme Toggle, Notifications & User Profile -->
             <div class="flex items-center space-x-3 sm:space-x-4">
                 <!-- Theme Toggle Button (Light/Dark Mode) -->
-                <button id="theme-toggle" onclick="toggleTheme()" type="button" class="p-2 text-slate-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded-xl hover:bg-slate-800 transition-all cursor-pointer ring-1 ring-slate-800" title="Toggle Light/Dark Theme">
+                <button id="theme-toggle" onclick="toggleTheme()" type="button" class="p-2 text-slate-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-purple-500 rounded-xl hover:bg-[#242424] transition-all cursor-pointer border border-[#2e2e2e]" title="Toggle Light/Dark Theme">
                     <i id="theme-icon-sun" data-lucide="sun" class="h-5 w-5"></i>
                     <i id="theme-icon-moon" data-lucide="moon" class="h-5 w-5 hidden"></i>
                 </button>
 
                 <!-- Notification Bell -->
                 <div class="relative inline-block text-left" id="notification-dropdown">
-                    <button onclick="toggleNotifications()" type="button" class="relative p-2 text-slate-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded-xl hover:bg-slate-800 transition-all cursor-pointer ring-1 ring-slate-800">
+                    <button onclick="toggleNotifications()" type="button" class="relative p-2 text-slate-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-purple-500 rounded-xl hover:bg-[#242424] transition-all cursor-pointer border border-[#2e2e2e]">
                         <span class="sr-only">View notifications</span>
                         <i data-lucide="bell" class="h-5 w-5"></i>
-                        <span id="unread-dot" class="absolute top-1.5 right-1.5 block h-2 w-2 rounded-full bg-indigo-500 ring-2 ring-slate-900"></span>
+                        <span id="unread-dot" class="absolute top-1.5 right-1.5 block h-2 w-2 rounded-full bg-purple-500 ring-2 ring-[#171717]"></span>
                     </button>
 
                     <!-- Notification Popover Menu -->
-                    <div id="notification-menu" class="hidden absolute right-0 z-50 mt-2 w-80 sm:w-96 origin-top-right rounded-2xl bg-slate-900 shadow-2xl ring-1 ring-slate-800 divide-y divide-slate-800 transition-all">
+                    <div id="notification-menu" class="hidden absolute right-0 z-50 mt-2 w-80 sm:w-96 origin-top-right rounded-2xl bg-[#171717] shadow-2xl border border-[#282828] divide-y divide-[#282828] transition-all">
                         <!-- Header -->
                         <div class="px-4 py-3 flex items-center justify-between bg-slate-950 text-white rounded-t-2xl">
                             <div class="flex items-center space-x-2">
@@ -521,7 +1116,7 @@
                 {{ if .User }}
                 <div class="relative inline-block text-left" id="profile-dropdown">
                     <button onclick="toggleProfileMenu()" type="button" class="flex items-center space-x-3 p-1.5 rounded-xl hover:bg-slate-800 transition-all focus:outline-none ring-1 ring-slate-800 cursor-pointer">
-                        <div class="h-8 w-8 rounded-lg bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white font-bold text-xs shadow-md shadow-indigo-500/20">
+                        <div class="h-8 w-8 rounded-lg bg-purple-600 flex items-center justify-center text-white font-bold text-xs shadow-md shadow-sm">
                             {{ printf "%.1s" .User.Email }}
                         </div>
                         <div class="hidden md:block text-left mr-1">
@@ -552,7 +1147,7 @@
         </header>
 
         <!-- Page Content -->
-        <div id="main-content" class="flex-1 overflow-y-auto p-6 sm:p-8 bg-slate-950 text-slate-100">
+        <div id="main-content" class="flex-1 overflow-y-auto p-6 sm:p-8 bg-[#121212] text-slate-100">
             {{ template "content" . }}
         </div>
     </main>
@@ -566,6 +1161,7 @@
             const mainContent = document.getElementById('main-content');
             
             if (theme === 'light') {
+                html.classList.remove('dark');
                 html.classList.add('light-mode');
                 if (sunIcon) sunIcon.classList.add('hidden');
                 if (moonIcon) moonIcon.classList.remove('hidden');
@@ -574,6 +1170,7 @@
                     mainContent.classList.add('bg-slate-50', 'text-slate-900');
                 }
             } else {
+                html.classList.add('dark');
                 html.classList.remove('light-mode');
                 if (sunIcon) sunIcon.classList.remove('hidden');
                 if (moonIcon) moonIcon.classList.add('hidden');

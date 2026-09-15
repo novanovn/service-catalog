@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oona Sidebar — Kinetic Animated Icons Showcase</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            background-color: #0d0d0d;
+            color: #f8fafc;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        /* ══════════════════════════════════════════════════════════
+           GAYA 1: UNIVERSAL SPRING WIGGLE & BOUNCE
+           ══════════════════════════════════════════════════════════ */
+        @keyframes iconWiggle {
+            0%   { transform: scale(1) rotate(0deg); }
+            20%  { transform: scale(1.18) rotate(-12deg) translateY(-2px); }
+            40%  { transform: scale(1.18) rotate(10deg) translateY(-2px); }
+            60%  { transform: scale(1.14) rotate(-6deg) translateY(-1px); }
+            80%  { transform: scale(1.12) rotate(3deg); }
+            100% { transform: scale(1.12) rotate(0deg); }
+        }
+        .icon-wiggle-box:hover i,
+        .icon-wiggle-box:hover svg {
+            animation: iconWiggle 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            color: #ffffff;
+            filter: drop-shadow(0 0 8px rgba(167, 139, 250, 0.6));
+        }
+
+        /* ══════════════════════════════════════════════════════════
+           GAYA 2: SEMANTIC KINETIC MOTION (GERAK KHUSUS PER IKON)
+           ══════════════════════════════════════════════════════════ */
+        /* Plus icon spins 90 degrees */
+        .icon-semantic-box:hover .icon-plus {
+            transform: rotate(90deg) scale(1.15);
+            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            color: #a78bfa;
+            filter: drop-shadow(0 0 8px rgba(167, 139, 250, 0.6));
+        }
+        /* Backup icon spins 360 degrees counter-clockwise */
+        .icon-semantic-box:hover .icon-backup {
+            transform: rotate(-360deg) scale(1.15);
+            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            color: #818cf8;
+            filter: drop-shadow(0 0 8px rgba(129, 140, 248, 0.6));
+        }
+        /* Ticket icon tilts 15 degrees like a ticket stub */
+        .icon-semantic-box:hover .icon-ticket {
+            transform: rotate(-15deg) translateY(-2px) scale(1.15);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            color: #60a5fa;
+            filter: drop-shadow(0 0 8px rgba(96, 165, 250, 0.6));
+        }
+        /* Check icon jumps up with spring pop */
+        @keyframes checkPop {
+            0%   { transform: scale(1); }
+            50%  { transform: scale(1.28) translateY(-3px); }
+            100% { transform: scale(1.15) translateY(0); }
+        }
+        .icon-semantic-box:hover .icon-check {
+            animation: checkPop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            color: #3ecf8e;
+            filter: drop-shadow(0 0 8px rgba(62, 207, 142, 0.6));
+        }
+        /* Server icon floats up */
+        .icon-semantic-box:hover .icon-server {
+            transform: translateY(-3px) scale(1.12);
+            transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            color: #a78bfa;
+            filter: drop-shadow(0 0 8px rgba(167, 139, 250, 0.6));
+        }
+        /* Dashboard icon pulse-rotates */
+        .icon-semantic-box:hover .icon-dash {
+            transform: rotate(8deg) scale(1.15);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            color: #a78bfa;
+            filter: drop-shadow(0 0 8px rgba(167, 139, 250, 0.6));
+        }
+        /* Sliders / Parameters nudge */
+        .icon-semantic-box:hover .icon-sliders {
+            transform: translateX(3px) scale(1.12);
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+            color: #a78bfa;
+            filter: drop-shadow(0 0 8px rgba(167, 139, 250, 0.6));
+        }
+
+        /* ══════════════════════════════════════════════════════════
+           GAYA 3: CONTINUOUS GENTLE FLOAT / WAVE SAAT HOVER
+           ══════════════════════════════════════════════════════════ */
+        @keyframes continuousFloat {
+            0%, 100% { transform: translateY(0) scale(1.12); }
+            50%      { transform: translateY(-4px) scale(1.14); }
+        }
+        .icon-float-box:hover i,
+        .icon-float-box:hover svg {
+            animation: continuousFloat 0.8s ease-in-out infinite;
+            color: #a78bfa;
+            filter: drop-shadow(0 0 8px rgba(167, 139, 250, 0.6));
+        }
+
+        .nav-card {
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .nav-card:hover {
+            transform: translateX(4px);
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+<body class="p-8 max-w-6xl mx-auto space-y-10">
+
+    <!-- Header Section -->
+    <div class="border-b border-[#282828] pb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <div class="flex items-center gap-2">
+                <span class="px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold bg-purple-500/15 text-[#a78bfa] border border-purple-500/30">Interactive Showcase</span>
+                <span class="text-xs text-slate-400 font-mono">Sidebar Kinetic Icons</span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-black text-white mt-1">Sidebar Icons Kinetic Motion Preview</h1>
+            <p class="text-xs sm:text-sm text-slate-400 mt-1">Arahkan kursor mouse Anda ke setiap menu di bawah untuk merasakan perbedaan gerakan kinetik ikonnya!</p>
+        </div>
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-[#3ecf8e] border border-emerald-500/20 text-xs font-mono font-bold self-start sm:self-auto">
+            <span class="w-2 h-2 rounded-full bg-[#3ecf8e] animate-pulse"></span>
+            100% CSS Kinetic Physics
+        </span>
+    </div>
+
+    <!-- 3 Kinetic Options Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+        <!-- GAYA 1: Universal Spring Wiggle & Bounce -->
+        <div class="p-5 rounded-2xl bg-[#171717] border border-[#282828] space-y-4">
+            <div class="border-b border-[#282828] pb-3">
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-purple-400"></span>
+                    <h2 class="text-xs font-bold uppercase tracking-wider text-white font-mono">Gaya 1: Spring Wiggle</h2>
+                </div>
+                <p class="text-[11px] text-slate-400 mt-1">Ikon membal dan bergoyang elastis (kiri-kanan) saat di-hover. Sangat lincah dan berenergi.</p>
+            </div>
+
+            <nav class="space-y-1.5 font-mono text-xs">
+                <div class="nav-card icon-wiggle-box p-3 rounded-xl flex items-center gap-3 cursor-pointer text-slate-300">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5 text-slate-400 transition-all"></i>
+                    <span>Dashboard</span>
+                </div>
+                <div class="nav-card icon-wiggle-box p-3 rounded-xl flex items-center gap-3 cursor-pointer text-slate-300">
+                    <i data-lucide="server" class="w-5 h-5 text-slate-400 transition-all"></i>
+                    <span>Service Catalog</span>
+                </div>
+                <div class="nav-card icon-wiggle-box p-3 rounded-xl flex items-center gap-3 cursor-pointer text-slate-300">
+                    <i data-lucide="ticket" class="w-5 h-5 text-slate-400 transition-all"></i>
+                    <span>Ticket List</span>
+                </div>
+                <div class="nav-card icon-wiggle-box p-3 rounded-xl flex items-center gap-3 cursor-pointer text-slate-300">
+                    <i data-lucide="plus-circle" class="w-5 h-5 text-slate-400 transition-all"></i>
+                    <span>Onboard Service</span>
+                </div>
+                <div class="nav-card icon-wiggle-box p-3 rounded-xl flex items-center gap-3 cursor-pointer text-slate-300">
+                    <i data-lucide="database-backup" class="w-5 h-5 text-slate-400 transition-all"></i>
+                    <span>Backup & Restore</span>
+                </div>
+            </nav>
+        </div>
+
+        <!-- GAYA 2: Semantic Kinetic Motion (⭐ REKOMENDASI TERBAIK) -->
+        <div class="p-5 rounded-2xl bg-[#171717] border border-purple-500/40 shadow-lg shadow-purple-500/10 space-y-4 relative">
+            <div class="absolute -top-2.5 right-4 bg-[#7c3aed] text-white text-[9px] font-mono font-black uppercase px-2 py-0.5 rounded-full shadow">
+                Rekomendasi Utama
+            </div>
+
+            <div class="border-b border-[#282828] pb-3">
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                    <h2 class="text-xs font-bold uppercase tracking-wider text-white font-mono">Gaya 2: Semantic Motion</h2>
+                </div>
+                <p class="text-[11px] text-slate-400 mt-1">Setiap ikon bergerak sesuai karakternya: Plus berputar 90°, Backup berputar 360°, Ticket miring 15°, Server melayang, Check melompat.</p>
+            </div>
+
+            <nav class="space-y-1.5 font-mono text-xs">
+                <div class="nav-card icon-semantic-box p-3 rounded-xl flex items-center gap-3 cursor-pointer text-slate-300">
+                    <i data-lucide="layout-dashboard" class="icon-dash w-5 h-5 text-slate-400 transition-all"></i>
+                    <span>Dashboard (Tilt 8°)</span>
+                </div>
+                <div class="nav-card icon-semantic-box p-3 rounded-xl flex items-center gap-3 cursor-pointer text-slate-300">
+                    <i data-lucide="server" class="icon-server w-5 h-5 text-slate-400 transition-all"></i>
+                    <span>Service Catalog (Float)</span>
+                </div>
+                <div class="nav-card icon-semantic-box p-3 rounded-xl flex items-center gap-3 cursor-pointer text-slate-300">
+                    <i data-lucide="ticket" class="icon-ticket w-5 h-5 text-slate-400 transition-all"></i>
+                    <span>Ticket List (Tilt 15°)</span>
+                </div>
+                <div class="nav-card icon-semantic-box p-3 rounded-xl flex items-center gap-3 cursor-pointer text-slate-300">
+                    <i data-lucide="plus-circle" class="icon-plus w-5 h-5 text-slate-400 transition-all"></i>
+                    <span>Onboard Service (Rotate 90°)</span>
+                </div>
+                <div class="nav-card icon-semantic-box p-3 rounded-xl flex items-center gap-3 cursor-pointer text-slate-300">
+                    <i data-lucide="check-check" class="icon-check w-5 h-5 text-slate-400 transition-all"></i>
+                    <span>Approvals (Spring Pop)</span>
+                </div>
+                <div class="nav-card icon-semantic-box p-3 rounded-xl flex items-center gap-3 cursor-pointer text-slate-300">
+                    <i data-lucide="database-backup" class="icon-backup w-5 h-5 text-slate-400 transition-all"></i>
+                    <span>Backup (Spin 360°)</span>
+                </div>
+            </nav>
+        </div>
+
+        <!-- GAYA 3: Continuous Floating Wave -->
+        <div class="p-5 rounded-2xl bg-[#171717] border border-[#282828] space-y-4">
+            <div class="border-b border-[#282828] pb-3">
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+                    <h2 class="text-xs font-bold uppercase tracking-wider text-white font-mono">Gaya 3: Gentle Floating</h2>
+                </div>
+                <p class="text-[11px] text-slate-400 mt-1">Saat mouse ditahan di atas menu, ikon melayang naik-turun secara halus dan berulang (floating loop).</p>
+            </div>
+
+            <nav class="space-y-1.5 font-mono text-xs">
+                <div class="nav-card icon-float-box p-3 rounded-xl flex items-center gap-3 cursor-pointer text-slate-300">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5 text-slate-400 transition-all"></i>
+                    <span>Dashboard</span>
+                </div>
+                <div class="nav-card icon-float-box p-3 rounded-xl flex items-center gap-3 cursor-pointer text-slate-300">
+                    <i data-lucide="server" class="w-5 h-5 text-slate-400 transition-all"></i>
+                    <span>Service Catalog</span>
+                </div>
+                <div class="nav-card icon-float-box p-3 rounded-xl flex items-center gap-3 cursor-pointer text-slate-300">
+                    <i data-lucide="ticket" class="w-5 h-5 text-slate-400 transition-all"></i>
+                    <span>Ticket List</span>
+                </div>
+                <div class="nav-card icon-float-box p-3 rounded-xl flex items-center gap-3 cursor-pointer text-slate-300">
+                    <i data-lucide="plus-circle" class="w-5 h-5 text-slate-400 transition-all"></i>
+                    <span>Onboard Service</span>
+                </div>
+                <div class="nav-card icon-float-box p-3 rounded-xl flex items-center gap-3 cursor-pointer text-slate-300">
+                    <i data-lucide="database-backup" class="w-5 h-5 text-slate-400 transition-all"></i>
+                    <span>Backup & Restore</span>
+                </div>
+            </nav>
+        </div>
+
+    </div>
+
+    <!-- Comparison Summary -->
+    <div class="p-5 rounded-2xl bg-[#141414] border border-[#282828] font-mono text-xs text-slate-300 space-y-2">
+        <span class="text-[11px] font-bold uppercase text-white tracking-wider">Catatan Implementasi Produksi:</span>
+        <p>• <strong>Gaya 2 (Semantic Motion)</strong> adalah standar yang paling banyak disukai di platform modern (Linear, Raycast, GitHub): Ikon `+` berputar 90°, Ikon `Backup` berputar 360°, Ikon `Ticket` miring 15°, dan Ikon `Approvals` melompat.</p>
+        <p>• <strong>Gaya 1 (Spring Wiggle)</strong> memberikan kesan interaktif langsung di mana semua ikon bergoyang membal ceria saat disentuh.</p>
+    </div>
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>

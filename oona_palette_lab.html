@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="id" class="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Oona Dev Portal — Oona Purple Brand Placement & 4-Tier Severity Palette</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Inter"', '"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            // OONA SIGNATURE PURPLE SCALE
+            oona: {
+              50: '#f5f3ff',
+              100: '#ede9fe',
+              200: '#ddd6fe',
+              300: '#c4b5fd',
+              400: '#a78bfa',
+              500: '#8b5cf6',
+              600: '#7c3aed', // Oona Main Brand Purple
+              700: '#6d28d9',
+              800: '#5b21b6',
+              900: '#4c1d95',
+              950: '#2e1065',
+              deepDark: '#0e0b16', // Violet-tinted deepest obsidian
+            },
+            // SEVERITY TOKENS (HIGH CONTRAST)
+            sev: {
+              critBg: '#fef2f2',
+              critText: '#b91c1c',
+              critBorder: '#fecaca',
+              highBg: '#fff7ed',
+              highText: '#c2410c',
+              highBorder: '#fed7aa',
+              medBg: '#fefce8',
+              medText: '#a16207',
+              medBorder: '#fef08a',
+              lowBg: '#eff6ff',
+              lowText: '#1d4ed8',
+              lowBorder: '#bfdbfe',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f8fafc; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+    .dark ::-webkit-scrollbar-track { background: #121212; }
+    .dark ::-webkit-scrollbar-thumb { background: #282828; border-radius: 3px; }
+
+    /* Animated SVG Stream */
+    @keyframes dashMove { to { stroke-dashoffset: -24; } }
+    .animate-dash { animation: dashMove 1.2s linear infinite; }
+  </style>
+</head>
+<body class="bg-[#f8fafc] text-slate-800 font-sans antialiased min-h-screen transition-colors duration-200" id="bodyRoot">
+
+  <!-- TOP HEADER & CONTROLLER -->
+  <header class="sticky top-0 z-50 backdrop-blur-xl bg-white/90 border-b border-slate-200 px-4 sm:px-8 py-3.5 shadow-sm transition-colors" id="siteHeader">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+      
+      <!-- Brand Logo (Oona Identity) -->
+      <div class="flex items-center gap-3">
+        <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-[#6d28d9] via-[#7c3aed] to-[#a78bfa] p-[1.5px] shadow-md shadow-purple-500/25">
+          <div class="h-full w-full bg-white dark:bg-[#121212] rounded-[10px] flex items-center justify-center">
+            <!-- Oona Monogram / Diamond Logo -->
+            <svg class="w-5 h-5 text-[#7c3aed]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 2 7 12 12 22 7 12 2" />
+              <polyline points="2 17 12 22 22 17" />
+              <polyline points="2 12 12 17 22 12" />
+            </svg>
+          </div>
+        </div>
+        <div>
+          <h1 class="text-sm font-bold tracking-tight text-slate-900 flex items-center gap-2" id="brandTitle">
+            Oona Service Catalog
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 border border-purple-200 font-bold" id="brandTag">
+              Oona Purple &amp; Severity Lab
+            </span>
+          </h1>
+          <p class="text-xs text-slate-500" id="brandSub">Uji peletakan warna UNGU Oona &amp; ketajaman warna Critical, High, Medium, Low</p>
+        </div>
+      </div>
+
+      <!-- Controls: Purple Placement Options & Dark Switch -->
+      <div class="flex items-center gap-3 flex-wrap">
+        
+        <!-- Purple Placement Toggle -->
+        <div class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-semibold" id="purplePlacementGroup">
+          <span class="px-2 text-[10px] uppercase font-mono font-bold text-slate-400">Ungu di mana?</span>
+          <button onclick="setPurpleOption('optA')" id="btnOptA" class="px-2.5 py-1.5 rounded-lg bg-white text-slate-900 shadow-sm transition-all flex items-center gap-1.5 font-bold">
+            <span class="w-2 h-2 rounded-full bg-[#7c3aed]"></span> Opsi A: Aksen &amp; Tombol
+          </button>
+          <button onclick="setPurpleOption('optB')" id="btnOptB" class="px-2.5 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-[#4c1d95]"></span> Opsi B: Sidebar Signature
+          </button>
+          <button onclick="setPurpleOption('optC')" id="btnOptC" class="px-2.5 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-[#a78bfa]"></span> Opsi C: Hybrid Clean
+          </button>
+        </div>
+
+        <!-- Master Theme Switcher (Light vs Supabase Dark) -->
+        <button onclick="toggleMasterMode()" id="masterThemeBtn" class="flex items-center gap-2 px-3.5 py-1.5 rounded-xl border border-slate-300 bg-white text-slate-800 hover:border-purple-400 shadow-sm transition-all text-xs font-bold cursor-pointer">
+          <span id="masterThemeIcon">☀️</span>
+          <span id="masterThemeLabel">Light Mode</span>
+        </button>
+
+      </div>
+
+    </div>
+  </header>
+
+  <!-- LAYOUT WITH SIDEBAR + MAIN CONTENT TO DEMO PURPLE SIDEBAR -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-8 py-6 flex flex-col md:flex-row gap-6">
+
+    <!-- DEMO SIDEBAR -->
+    <aside class="w-full md:w-60 shrink-0 rounded-2xl border p-4 transition-all duration-200 flex flex-col justify-between" id="sidebarContainer">
+      <div class="space-y-4">
+        <!-- Sidebar Brand Sub-header -->
+        <div class="pb-3 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between" id="sidebarHeader">
+          <span class="text-xs font-bold uppercase font-mono tracking-wider text-slate-400">Platform Portal</span>
+          <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-600 dark:text-purple-400 font-bold">PROD</span>
+        </div>
+
+        <!-- Nav Items -->
+        <nav class="space-y-1 text-xs font-medium" id="sidebarNav">
+          <a href="#" class="sidebar-item-active flex items-center gap-2.5 px-3 py-2 rounded-xl transition-all font-semibold">
+            <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+            <span>Dashboard</span>
+          </a>
+          <a href="#" class="sidebar-item flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 transition-all">
+            <i data-lucide="server" class="w-4 h-4"></i>
+            <span>Service Catalog</span>
+          </a>
+          <a href="#" class="sidebar-item flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 transition-all">
+            <i data-lucide="ticket" class="w-4 h-4"></i>
+            <span>DevOps Tickets</span>
+          </a>
+          <a href="#" class="sidebar-item flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 transition-all">
+            <i data-lucide="check-check" class="w-4 h-4"></i>
+            <span>Approvals (Diff)</span>
+          </a>
+          <a href="#" class="sidebar-item flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 transition-all">
+            <i data-lucide="shield-alert" class="w-4 h-4"></i>
+            <span>Security &amp; Trivy</span>
+          </a>
+        </nav>
+      </div>
+
+      <!-- Sidebar Footer Status -->
+      <div class="pt-4 border-t border-slate-200 dark:border-slate-800 text-[11px] font-mono text-slate-400 space-y-1" id="sidebarFooter">
+        <div class="flex justify-between">
+          <span>Region:</span>
+          <strong class="text-slate-700 dark:text-slate-200">Jakarta (ap-se-3)</strong>
+        </div>
+        <div class="flex justify-between">
+          <span>Schedule:</span>
+          <span class="text-emerald-600 font-semibold">01:30 WIB</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN AREA -->
+    <div class="flex-1 space-y-6">
+
+      <!-- RECOMMENDATION ADVISORY BANNER ON PURPLE PLACEMENT -->
+      <div id="placementExplanationCard" class="p-5 rounded-2xl border transition-all duration-200 bg-white shadow-sm">
+        <!-- Injected via JS -->
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- 1. FULL 4-TIER SEVERITY CARDS (CRITICAL, HIGH, MEDIUM, LOW) -->
+      <!-- ========================================================================= -->
+      <section>
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <h3 class="text-xs font-extrabold uppercase tracking-wider font-mono flex items-center gap-2 text-slate-700" id="secTitle1">
+              <i data-lucide="shield" class="w-4 h-4 text-purple-600"></i> Trivy Vulnerability 4-Tier Severity Cards
+            </h3>
+            <p class="text-xs text-slate-500">Bandingkan bagaimana warna Merah (Critical), Oranye (High), Kuning-Kuningan (Medium), dan Biru (Low) tampil dengan kontras tinggi tanpa pudar</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+          
+          <!-- SEVERITY 1: CRITICAL (SWISS PURE RED / CRIMSON) -->
+          <div class="sev-card p-4.5 rounded-2xl border bg-white shadow-sm transition-all relative overflow-hidden" id="cardCrit">
+            <div class="absolute top-0 left-0 right-0 h-1 bg-[#d92d20]"></div>
+            <div class="flex items-center justify-between text-xs font-bold text-[#b42318]">
+              <span class="flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-[#d92d20] animate-ping"></span>
+                CRITICAL
+              </span>
+              <span class="px-2 py-0.5 rounded-md text-[10px] font-mono bg-red-50 text-[#b42318] border border-red-200 font-bold">
+                CVSS &ge; 9.0
+              </span>
+            </div>
+            <div class="mt-2.5 flex items-baseline gap-2">
+              <span class="text-3xl font-extrabold tracking-tight font-mono text-[#d92d20]">2</span>
+              <span class="text-[11px] font-bold text-[#b42318] font-mono">Findings</span>
+            </div>
+            <p class="text-[11px] text-slate-500 mt-1 line-clamp-1">SSRF AWS Metadata, Code Exec</p>
+            <div class="mt-3 pt-2 border-t border-slate-100 flex justify-between text-[11px] font-mono font-semibold text-[#b42318]">
+              <span>Gate: REJECTED</span>
+              <span>Deploy Blocked</span>
+            </div>
+          </div>
+
+          <!-- SEVERITY 2: HIGH (VIVID BURNT ORANGE) -->
+          <div class="sev-card p-4.5 rounded-2xl border bg-white shadow-sm transition-all relative overflow-hidden" id="cardHigh">
+            <div class="absolute top-0 left-0 right-0 h-1 bg-[#ea580c]"></div>
+            <div class="flex items-center justify-between text-xs font-bold text-[#c2410c]">
+              <span class="flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-[#ea580c]"></span>
+                HIGH
+              </span>
+              <span class="px-2 py-0.5 rounded-md text-[10px] font-mono bg-orange-50 text-[#c2410c] border border-orange-200 font-bold">
+                CVSS 7.0 - 8.9
+              </span>
+            </div>
+            <div class="mt-2.5 flex items-baseline gap-2">
+              <span class="text-3xl font-extrabold tracking-tight font-mono text-[#ea580c]">4</span>
+              <span class="text-[11px] font-bold text-[#c2410c] font-mono">Findings</span>
+            </div>
+            <p class="text-[11px] text-slate-500 mt-1 line-clamp-1">Buffer bounds in uuid, fast-uri</p>
+            <div class="mt-3 pt-2 border-t border-slate-100 flex justify-between text-[11px] font-mono font-semibold text-[#c2410c]">
+              <span>Policy Limit: &le; 5</span>
+              <span>Needs Review</span>
+            </div>
+          </div>
+
+          <!-- SEVERITY 3: MEDIUM (WARM OCHRE AMBER — ANTI-WASHED-OUT) -->
+          <div class="sev-card p-4.5 rounded-2xl border bg-white shadow-sm transition-all relative overflow-hidden" id="cardMed">
+            <div class="absolute top-0 left-0 right-0 h-1 bg-[#d97706]"></div>
+            <div class="flex items-center justify-between text-xs font-bold text-[#b45309]">
+              <span class="flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-[#d97706]"></span>
+                MEDIUM
+              </span>
+              <span class="px-2 py-0.5 rounded-md text-[10px] font-mono bg-amber-50 text-[#b45309] border border-amber-200 font-bold">
+                CVSS 4.0 - 6.9
+              </span>
+            </div>
+            <div class="mt-2.5 flex items-baseline gap-2">
+              <span class="text-3xl font-extrabold tracking-tight font-mono text-[#d97706]">1</span>
+              <span class="text-[11px] font-bold text-[#b45309] font-mono">Finding</span>
+            </div>
+            <p class="text-[11px] text-slate-500 mt-1 line-clamp-1">Insecure regex backtracking</p>
+            <div class="mt-3 pt-2 border-t border-slate-100 flex justify-between text-[11px] font-mono font-semibold text-[#b45309]">
+              <span>Advisory Notice</span>
+              <span>Next Sprint Fix</span>
+            </div>
+          </div>
+
+          <!-- SEVERITY 4: LOW (SLATE COBALT BLUE) -->
+          <div class="sev-card p-4.5 rounded-2xl border bg-white shadow-sm transition-all relative overflow-hidden" id="cardLow">
+            <div class="absolute top-0 left-0 right-0 h-1 bg-[#2563eb]"></div>
+            <div class="flex items-center justify-between text-xs font-bold text-[#1d4ed8]">
+              <span class="flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-[#2563eb]"></span>
+                LOW
+              </span>
+              <span class="px-2 py-0.5 rounded-md text-[10px] font-mono bg-blue-50 text-[#1d4ed8] border border-blue-200 font-bold">
+                CVSS 0.1 - 3.9
+              </span>
+            </div>
+            <div class="mt-2.5 flex items-baseline gap-2">
+              <span class="text-3xl font-extrabold tracking-tight font-mono text-[#2563eb]">0</span>
+              <span class="text-[11px] font-bold text-[#1d4ed8] font-mono">Findings</span>
+            </div>
+            <p class="text-[11px] text-slate-500 mt-1 line-clamp-1">Info disclosures, license alerts</p>
+            <div class="mt-3 pt-2 border-t border-slate-100 flex justify-between text-[11px] font-mono font-semibold text-[#1d4ed8]">
+              <span>Tolerated</span>
+              <span>Clean</span>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- 2. AUDIT TABLE WITH FULL COLOR SEVERITY PILLS & OONA SHELF BADGES -->
+      <!-- ========================================================================= -->
+      <section class="p-5 rounded-2xl border bg-white shadow-sm space-y-4" id="tableWrapper">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h3 class="text-sm font-bold font-mono flex items-center gap-2 text-slate-900" id="tableHead">
+              <i data-lucide="table" class="w-4 h-4 text-purple-600"></i> Microservice Vulnerability Matrix
+            </h3>
+            <p class="text-xs text-slate-500">Perhatikan kontras badge warna per level keparahan dan badge shelf Oona (ph:neuron, id:coreplus, all:devops)</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button class="primary-action-btn px-4 py-1.5 text-xs font-bold font-mono rounded-xl shadow-sm text-white transition-all flex items-center gap-1.5">
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Run Scan All
+            </button>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-50 text-slate-600 font-mono text-[11px] uppercase border-b border-slate-200" id="theadRow">
+              <tr>
+                <th class="py-3 px-4 font-semibold">Service Name</th>
+                <th class="py-3 px-3 font-semibold">Oona Shelf</th>
+                <th class="py-3 px-3 font-semibold">Critical</th>
+                <th class="py-3 px-3 font-semibold">High</th>
+                <th class="py-3 px-3 font-semibold">Medium</th>
+                <th class="py-3 px-3 font-semibold">Status Gate</th>
+                <th class="py-3 px-4 font-semibold text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200 text-slate-700" id="tbodyRows">
+              
+              <!-- ROW 1: ALERT (CRITICAL + HIGH) -->
+              <tr class="hover:bg-slate-50/80 transition-colors">
+                <td class="py-3.5 px-4">
+                  <div class="font-bold font-mono text-slate-900 flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-red-600 animate-ping"></span>
+                    <span>health-renewal-svc-clone</span>
+                  </div>
+                  <div class="text-[10px] text-slate-500 font-mono">lmd-oona-ph-integration-health-renewal-svc</div>
+                </td>
+                <td class="py-3.5 px-3">
+                  <!-- OONA PURPLE SHELF BADGE -->
+                  <span class="px-2.5 py-0.5 rounded-md text-[11px] font-mono font-bold bg-purple-50 text-purple-700 border border-purple-200">
+                    ph:neuron
+                  </span>
+                </td>
+                <td class="py-3.5 px-3">
+                  <!-- RED CRITICAL PILL -->
+                  <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold font-mono bg-red-50 text-[#b42318] border border-red-200">
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#d92d20]"></span> 2 Crit
+                  </span>
+                </td>
+                <td class="py-3.5 px-3">
+                  <!-- ORANGE HIGH PILL -->
+                  <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold font-mono bg-orange-50 text-[#c2410c] border border-orange-200">
+                    4 High
+                  </span>
+                </td>
+                <td class="py-3.5 px-3">
+                  <!-- YELLOW/OCHRE MEDIUM PILL -->
+                  <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold font-mono bg-amber-50 text-[#b45309] border border-amber-200">
+                    1 Med
+                  </span>
+                </td>
+                <td class="py-3.5 px-3">
+                  <span class="px-2.5 py-1 rounded-full text-[11px] font-black font-mono bg-red-100 text-red-800 border border-red-300 flex items-center gap-1 w-fit">
+                    <i data-lucide="x-circle" class="w-3.5 h-3.5"></i> FAILED
+                  </span>
+                </td>
+                <td class="py-3.5 px-4 text-right">
+                  <button class="px-3 py-1 rounded-lg text-xs font-bold font-mono bg-red-600 hover:bg-red-700 text-white shadow-sm transition-all">
+                    Resolve →
+                  </button>
+                </td>
+              </tr>
+
+              <!-- ROW 2: PASSED SERVICE -->
+              <tr class="hover:bg-slate-50/80 transition-colors">
+                <td class="py-3.5 px-4">
+                  <div class="font-bold font-mono text-slate-900 flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    <span>policy-aggregation-trigger</span>
+                  </div>
+                  <div class="text-[10px] text-slate-500 font-mono">lmd-oona-id-integration-coreplus-policy</div>
+                </td>
+                <td class="py-3.5 px-3">
+                  <span class="px-2.5 py-0.5 rounded-md text-[11px] font-mono font-bold bg-purple-50 text-purple-700 border border-purple-200">
+                    id:coreplus
+                  </span>
+                </td>
+                <td class="py-3.5 px-3">
+                  <span class="text-slate-400 font-mono font-semibold">0</span>
+                </td>
+                <td class="py-3.5 px-3">
+                  <span class="text-slate-400 font-mono font-semibold">0</span>
+                </td>
+                <td class="py-3.5 px-3">
+                  <span class="text-slate-400 font-mono font-semibold">0</span>
+                </td>
+                <td class="py-3.5 px-3">
+                  <span class="px-2.5 py-1 rounded-full text-[11px] font-bold font-mono bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1 w-fit">
+                    <i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-600"></i> PASSED
+                  </span>
+                </td>
+                <td class="py-3.5 px-4 text-right">
+                  <button class="px-3 py-1 rounded-lg text-xs font-semibold font-mono bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-all">
+                    Detail →
+                  </button>
+                </td>
+              </tr>
+
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- 3. TOPOLOGY & RUNTIME (DEMO OONA ACCENT & SEVERITY STREAM) -->
+      <!-- ========================================================================= -->
+      <section class="p-6 rounded-2xl border bg-white shadow-sm space-y-4" id="topoSection">
+        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+          <div>
+            <h3 class="text-sm font-bold font-mono text-slate-900 flex items-center gap-2" id="topoHeading">
+              <i data-lucide="network" class="w-4 h-4 text-purple-600"></i> Service Mesh Execution &amp; IaC Binding
+            </h3>
+            <p class="text-xs text-slate-500">Node Ingress, Core Lambda, dan RDS dengan penanda status yang selaras</p>
+          </div>
+          <!-- OONA PURPLE TFVARS PILL -->
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-mono font-semibold bg-purple-50 text-purple-700 border border-purple-200">
+            <img src="/static/img/brands/terraform.svg" class="w-3.5 h-3.5" alt="TF"> Bound from terraform.tfvars
+          </span>
+        </div>
+
+        <div class="relative w-full overflow-x-auto py-2">
+          <svg viewBox="0 0 800 130" class="w-full min-w-[650px] h-32 select-none">
+            <defs>
+              <linearGradient id="alertGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#ea580c" stop-opacity="0.9"/>
+                <stop offset="100%" stop-color="#d92d20" stop-opacity="0.9"/>
+              </linearGradient>
+            </defs>
+
+            <!-- Line 1: Ingress to Lambda -->
+            <line x1="160" y1="65" x2="320" y2="65" stroke="url(#alertGrad)" stroke-width="2.5" stroke-dasharray="6,6" class="animate-dash" />
+            <!-- Line 2: Lambda to DB -->
+            <line x1="500" y1="65" x2="640" y2="65" stroke="#10b981" stroke-width="2" stroke-dasharray="4,4" class="animate-dash" />
+
+            <!-- NODE 1 -->
+            <foreignObject x="10" y="20" width="150" height="90">
+              <div xmlns="http://www.w3.org/1999/xhtml" class="p-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 flex flex-col justify-between h-full shadow-sm">
+                <div class="flex items-center justify-between">
+                  <span class="text-[9px] font-mono font-bold uppercase text-slate-500">INGRESS</span>
+                  <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                </div>
+                <div class="text-xs font-bold truncate">Care Router</div>
+                <div class="text-[10px] font-mono text-slate-500">HTTP/2 POST /renew</div>
+              </div>
+            </foreignObject>
+
+            <!-- NODE 2: HERO LAMBDA -->
+            <foreignObject x="320" y="10" width="180" height="110">
+              <div xmlns="http://www.w3.org/1999/xhtml" class="p-3.5 rounded-xl border-2 border-red-500 bg-white shadow-md flex flex-col justify-between h-full relative" id="heroNodeBox">
+                <div class="flex items-center justify-between">
+                  <span class="text-[9px] font-mono font-bold px-2 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-200 flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping"></span>
+                    2 CRIT CVE
+                  </span>
+                  <img src="/static/img/brands/lambda.svg" class="w-4 h-4" alt="Lambda">
+                </div>
+                <div>
+                  <div class="text-xs font-extrabold truncate text-slate-900">health-renewal-svc</div>
+                  <div class="text-[10px] font-mono text-red-600 font-semibold">SSRF Vulnerable</div>
+                </div>
+                <div class="text-[9px] font-mono flex items-center justify-between pt-1 border-t border-slate-100 text-slate-500">
+                  <span>ph:neuron</span>
+                  <span class="font-bold text-red-600">DEPLOY BLOCKED</span>
+                </div>
+              </div>
+            </foreignObject>
+
+            <!-- NODE 3 -->
+            <foreignObject x="640" y="20" width="150" height="90">
+              <div xmlns="http://www.w3.org/1999/xhtml" class="p-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 flex flex-col justify-between h-full shadow-sm">
+                <div class="flex items-center justify-between">
+                  <span class="text-[9px] font-mono font-bold uppercase text-slate-500">NEURON_DB</span>
+                  <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                </div>
+                <div class="text-xs font-bold truncate">RDS PostgreSQL</div>
+                <div class="text-[10px] font-mono text-emerald-600 font-semibold">12ms · Healthy</div>
+              </div>
+            </foreignObject>
+
+          </svg>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    let isDark = false;
+    let currentOption = 'optA';
+
+    // 3 PURPLE PLACEMENT OPTIONS
+    const purpleOptions = {
+      // OPTION A: Linear / Raycast Style (Purple as Interaction Focus)
+      optA: {
+        name: 'Opsi A: Linear Style (Ungu Sebagai Focus & Interaction)',
+        desc: 'Sidebar tetap netral (putih/slate gelap), namun UNGU Oona (#7c3aed) menjadi warna utama interaksi: Menu aktif di sidebar berlatar ungu lembut, tombol aksi utama berwarna ungu solid, dan badge Oona Shelf beraksen ungu. Bersih, elegan, dan tidak membuat mata lelah.',
+        sidebarClass: 'bg-white border-slate-200',
+        sidebarItemActive: 'bg-purple-50 text-[#7c3aed] font-bold border-l-4 border-l-[#7c3aed] dark:bg-purple-950/30 dark:text-purple-400 dark:border-l-purple-500',
+        primaryBtn: 'bg-[#7c3aed] hover:bg-[#6d28d9] text-white',
+        bannerBorder: 'border-purple-200 bg-purple-50/50'
+      },
+      // OPTION B: Deep Violet Signature Sidebar
+      optB: {
+        name: 'Opsi B: Deep Violet Signature Sidebar',
+        desc: 'Sidebar menggunakan warna ungu gelap pekat Oona (#2e1065 / #1e0a45 di mode gelap; atau #4c1d95 gelap di mode terang) dengan teks putih/emas. Memberikan identitas kuat "Ini portal Oona" begitu dibuka, sementara area konten utama tetap putih bersih/kontras.',
+        sidebarClass: 'bg-[#2e1065] text-white border-[#4c1d95] shadow-lg',
+        sidebarItemActive: 'bg-white/15 text-white font-bold border-l-4 border-l-[#a78bfa]',
+        primaryBtn: 'bg-[#7c3aed] hover:bg-[#6d28d9] text-white',
+        bannerBorder: 'border-purple-200 bg-purple-50/50'
+      },
+      // OPTION C: Hybrid Clean (Purple Subtle Ambient & Data Badges)
+      optC: {
+        name: 'Opsi C: Hybrid Clean (Ungu untuk Identitas & Data Shelf)',
+        desc: 'Ungu dikhususkan sebagai warna identitas brand: Header Logo, Shelf grouping pills (ph:neuron, id:coreplus, all:devops), dan Terraform IaC binding tags. Tombol dan navigasi tetap slate-dark / emerald, menjaga pemisahan tegas antara "Brand Oona (Ungu)", "Security Status (Merah/Kuning/Hijau)", dan "Aksi (Hitam/Netral)".',
+        sidebarClass: 'bg-white border-slate-200',
+        sidebarItemActive: 'bg-slate-100 text-slate-900 font-bold border-l-4 border-l-slate-800 dark:bg-slate-800 dark:text-white dark:border-l-slate-300',
+        primaryBtn: 'bg-slate-900 hover:bg-slate-800 text-white',
+        bannerBorder: 'border-slate-200 bg-slate-50'
+      }
+    };
+
+    function setPurpleOption(optKey) {
+      currentOption = optKey;
+      const opt = purpleOptions[optKey];
+
+      // Update toggle buttons
+      ['optA', 'optB', 'optC'].forEach(k => {
+        const b = document.getElementById('btn' + k.charAt(0).toUpperCase() + k.slice(1));
+        if (k === optKey) {
+          b.className = "px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm transition-all flex items-center gap-1.5 font-bold border border-slate-300";
+        } else {
+          b.className = "px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all flex items-center gap-1.5";
+        }
+      });
+
+      // Update Explanation Card
+      const card = document.getElementById('placementExplanationCard');
+      card.innerHTML = `
+        <div class="flex items-start gap-3.5">
+          <div class="p-2.5 rounded-xl bg-purple-100 text-[#7c3aed] shrink-0 mt-0.5">
+            <i data-lucide="sparkles" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-sm font-bold tracking-tight text-slate-900 dark:text-white">${opt.name}</h2>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 font-bold border border-purple-200">
+                Oona Brand Identity
+              </span>
+            </div>
+            <p class="text-xs text-slate-600 dark:text-slate-300 mt-1 leading-relaxed">${opt.desc}</p>
+          </div>
+        </div>
+      `;
+
+      // Apply to Sidebar
+      const sb = document.getElementById('sidebarContainer');
+      const sbItems = document.querySelectorAll('.sidebar-item-active');
+      const pBtns = document.querySelectorAll('.primary-action-btn');
+
+      if (!isDark) {
+        if (optKey === 'optB') {
+          sb.className = `w-full md:w-60 shrink-0 rounded-2xl p-4 transition-all duration-200 flex flex-col justify-between ${opt.sidebarClass}`;
+          document.querySelectorAll('.sidebar-item').forEach(i => {
+            i.className = "sidebar-item flex items-center gap-2.5 px-3 py-2 rounded-xl text-purple-200 hover:bg-white/10 hover:text-white transition-all";
+          });
+          document.getElementById('sidebarHeader').className = "pb-3 border-b border-purple-800 flex items-center justify-between text-purple-300";
+          document.getElementById('sidebarFooter').className = "pt-4 border-t border-purple-800 text-[11px] font-mono text-purple-300 space-y-1";
+        } else {
+          sb.className = `w-full md:w-60 shrink-0 rounded-2xl border p-4 transition-all duration-200 flex flex-col justify-between bg-white border-slate-200`;
+          document.querySelectorAll('.sidebar-item').forEach(i => {
+            i.className = "sidebar-item flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-100 transition-all";
+          });
+          document.getElementById('sidebarHeader').className = "pb-3 border-b border-slate-200 flex items-center justify-between text-slate-400";
+          document.getElementById('sidebarFooter').className = "pt-4 border-t border-slate-200 text-[11px] font-mono text-slate-400 space-y-1";
+        }
+
+        sbItems.forEach(i => {
+          i.className = `sidebar-item-active flex items-center gap-2.5 px-3 py-2 rounded-xl transition-all ${opt.sidebarItemActive}`;
+        });
+
+        pBtns.forEach(b => {
+          b.className = `primary-action-btn px-4 py-1.5 text-xs font-bold font-mono rounded-xl shadow-sm text-white transition-all flex items-center gap-1.5 ${opt.primaryBtn}`;
+        });
+      }
+
+      lucide.createIcons();
+    }
+
+    function toggleMasterMode() {
+      const html = document.documentElement;
+      isDark = !isDark;
+
+      if (isDark) {
+        html.classList.add('dark');
+        document.getElementById('bodyRoot').className = "bg-[#121212] text-[#ededed] font-sans antialiased min-h-screen transition-colors";
+        document.getElementById('masterThemeIcon').textContent = '🌙';
+        document.getElementById('masterThemeLabel').textContent = 'Dark: Supabase';
+        
+        // Header
+        document.getElementById('siteHeader').className = "sticky top-0 z-50 backdrop-blur-xl bg-[#171717]/95 border-b border-[#282828] px-4 sm:px-8 py-3.5 shadow-sm transition-colors";
+        document.getElementById('brandTitle').className = "text-sm font-bold tracking-tight text-white flex items-center gap-2";
+        document.getElementById('brandSub').className = "text-xs text-slate-400";
+
+        // Sidebar in dark
+        document.getElementById('sidebarContainer').className = "w-full md:w-60 shrink-0 rounded-2xl border border-[#282828] bg-[#171717] p-4 transition-all duration-200 flex flex-col justify-between";
+        document.getElementById('sidebarHeader').className = "pb-3 border-b border-[#282828] flex items-center justify-between text-slate-400";
+        document.getElementById('sidebarFooter').className = "pt-4 border-t border-[#282828] text-[11px] font-mono text-slate-400 space-y-1";
+        document.querySelectorAll('.sidebar-item-active').forEach(i => {
+          i.className = "sidebar-item-active flex items-center gap-2.5 px-3 py-2 rounded-xl transition-all bg-purple-950/40 text-purple-300 font-bold border-l-4 border-l-purple-500";
+        });
+        document.querySelectorAll('.sidebar-item').forEach(i => {
+          i.className = "sidebar-item flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-400 hover:bg-slate-800 transition-all";
+        });
+
+        // Cards dark
+        document.querySelectorAll('.sev-card').forEach(c => {
+          c.className = "sev-card p-4.5 rounded-2xl border border-[#282828] bg-[#171717] shadow-sm transition-all relative overflow-hidden";
+        });
+        document.getElementById('tableWrapper').className = "p-5 rounded-2xl border border-[#282828] bg-[#171717] shadow-sm space-y-4";
+        document.getElementById('tableHead').className = "text-sm font-bold font-mono flex items-center gap-2 text-white";
+        document.getElementById('theadRow').className = "bg-[#141414] text-slate-400 font-mono text-[11px] uppercase border-b border-[#282828]";
+        document.getElementById('tbodyRows').className = "divide-y divide-[#282828] text-slate-300";
+
+        document.getElementById('topoSection').className = "p-6 rounded-2xl border border-[#282828] bg-[#171717] shadow-sm space-y-4";
+        document.getElementById('topoHeading').className = "text-sm font-bold font-mono text-white flex items-center gap-2";
+        document.getElementById('heroNodeBox').className = "p-3.5 rounded-xl border-2 border-red-500 bg-[#1e1e1e] shadow-md flex flex-col justify-between h-full relative";
+
+        document.getElementById('placementExplanationCard').className = "p-5 rounded-2xl border border-[#282828] bg-[#171717] shadow-sm transition-all";
+
+      } else {
+        html.classList.remove('dark');
+        document.getElementById('bodyRoot').className = "bg-[#f8fafc] text-slate-800 font-sans antialiased min-h-screen transition-colors";
+        document.getElementById('masterThemeIcon').textContent = '☀️';
+        document.getElementById('masterThemeLabel').textContent = 'Light Mode';
+
+        document.getElementById('siteHeader').className = "sticky top-0 z-50 backdrop-blur-xl bg-white/90 border-b border-slate-200 px-4 sm:px-8 py-3.5 shadow-sm transition-colors";
+        document.getElementById('brandTitle').className = "text-sm font-bold tracking-tight text-slate-900 flex items-center gap-2";
+        document.getElementById('brandSub').className = "text-xs text-slate-500";
+
+        document.querySelectorAll('.sev-card').forEach(c => {
+          c.className = "sev-card p-4.5 rounded-2xl border border-slate-200 bg-white shadow-sm transition-all relative overflow-hidden";
+        });
+        document.getElementById('tableWrapper').className = "p-5 rounded-2xl border border-slate-200 bg-white shadow-sm space-y-4";
+        document.getElementById('tableHead').className = "text-sm font-bold font-mono flex items-center gap-2 text-slate-900";
+        document.getElementById('theadRow').className = "bg-slate-50 text-slate-600 font-mono text-[11px] uppercase border-b border-slate-200";
+        document.getElementById('tbodyRows').className = "divide-y divide-slate-200 text-slate-700";
+
+        document.getElementById('topoSection').className = "p-6 rounded-2xl border border-slate-200 bg-white shadow-sm space-y-4";
+        document.getElementById('topoHeading').className = "text-sm font-bold font-mono text-slate-900 flex items-center gap-2";
+        document.getElementById('heroNodeBox').className = "p-3.5 rounded-xl border-2 border-red-500 bg-white shadow-md flex flex-col justify-between h-full relative";
+
+        document.getElementById('placementExplanationCard').className = "p-5 rounded-2xl border border-slate-200 bg-white shadow-sm transition-all";
+
+        setPurpleOption(currentOption);
+      }
+      lucide.createIcons();
+    }
+
+    // Default startup Option A
+    setPurpleOption('optA');
+  </script>
+</body>
+</html>

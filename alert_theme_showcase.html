@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Oona Dev Portal — Supabase Dark + 3 Light Mode Alert Explorations</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Source+Code+Pro:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Inter"', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', '"Source Code Pro"', 'monospace'],
+          },
+          colors: {
+            supabase: {
+              green: '#3ecf8e',
+              greenDark: '#2bb375',
+              bgDark: '#121212',
+              cardDark: '#171717',
+              borderDark: '#282828',
+              borderLighter: '#333333'
+            }
+          },
+          animation: {
+            'dash-flow': 'dash 15s linear infinite',
+            'pulse-subtle': 'pulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+          },
+          keyframes: {
+            dash: {
+              to: { strokeDashoffset: '-1000' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    .dark ::-webkit-scrollbar-track { background: #121212; }
+    .dark ::-webkit-scrollbar-thumb { background: #2e2e2e; border-radius: 3px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+    /* Animated SVG Stream */
+    @keyframes dashMove { to { stroke-dashoffset: -24; } }
+    .animate-dash { animation: dashMove 1.2s linear infinite; }
+
+    /* Subtle grid pattern */
+    .dark .canvas-grid {
+      background-size: 32px 32px;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    }
+    .canvas-grid {
+      background-size: 32px 32px;
+      background-image: 
+        linear-gradient(to right, rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+    }
+  </style>
+</head>
+<body class="bg-supabase-bgDark text-[#ededed] font-sans antialiased min-h-screen transition-colors duration-200">
+
+  <!-- TOP HEADER & CONTROLLER -->
+  <header class="sticky top-0 z-50 backdrop-blur-xl border-b px-4 sm:px-8 py-3.5 shadow-sm transition-colors" id="siteHeader">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+      
+      <!-- Brand Logo -->
+      <div class="flex items-center gap-3">
+        <div class="h-9 w-9 rounded-xl bg-gradient-to-tr from-[#3ecf8e] to-emerald-300 p-[1px] shadow-md shadow-[#3ecf8e]/20">
+          <div class="h-full w-full bg-[#121212] dark:bg-[#121212] rounded-[11px] flex items-center justify-center">
+            <svg class="w-5 h-5 text-[#3ecf8e]" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M21.362 9.354H12V.396a.396.396 0 0 0-.716-.233L.17 14.282a.396.396 0 0 0 .307.632H9.64v8.958a.396.396 0 0 0 .716.233l11.114-14.12a.396.396 0 0 0-.308-.631z"/>
+            </svg>
+          </div>
+        </div>
+        <div>
+          <h1 class="text-sm font-bold tracking-tight flex items-center gap-2" id="brandTitle">
+            Oona Service Catalog
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-rose-500/10 dark:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/30 flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>
+              Live Alert Scenario (2 Critical CVEs)
+            </span>
+          </h1>
+          <p class="text-xs text-slate-400" id="brandSub">Bandingkan Dark Mode (Supabase) vs 3 Varian Light Mode dengan Temuan Keamanan (Warna Merah)</p>
+        </div>
+      </div>
+
+      <!-- Theme Controls -->
+      <div class="flex items-center gap-3">
+        
+        <!-- Light Mode Sub-variant Selector (Only when in Light Mode) -->
+        <div id="lightVariantGroup" class="hidden flex items-center bg-slate-200/80 p-1 rounded-xl border border-slate-300 text-xs font-semibold">
+          <button onclick="setLightStyle('L1')" id="btnL1" class="px-2.5 py-1.5 rounded-lg text-slate-800 bg-white shadow-sm transition-all flex items-center gap-1.5 font-bold">
+            <span>L1: Supabase Clean</span>
+          </button>
+          <button onclick="setLightStyle('L2')" id="btnL2" class="px-2.5 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all flex items-center gap-1.5">
+            <span>L2: GitHub Security (High-Contrast)</span>
+          </button>
+          <button onclick="setLightStyle('L3')" id="btnL3" class="px-2.5 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all flex items-center gap-1.5">
+            <span>L3: Datadog Ops (Alert Accent Bar)</span>
+          </button>
+        </div>
+
+        <!-- Master Mode Switcher: Dark (Supabase) vs Light -->
+        <button onclick="toggleMasterMode()" id="masterThemeBtn" class="flex items-center gap-2 px-3.5 py-1.5 rounded-xl border border-[#333] bg-[#1a1a1a] text-white hover:border-[#3ecf8e] shadow-sm transition-all text-xs font-bold cursor-pointer">
+          <span id="masterThemeIcon">🌙</span>
+          <span id="masterThemeLabel">Dark: Supabase</span>
+        </button>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-8 py-8 space-y-8 canvas-grid" id="mainWrapper">
+
+    <!-- ALERT BANNER: CRITICAL SECURITY GATE FAILED -->
+    <div id="alertBanner" class="p-4 rounded-2xl border transition-all duration-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div class="flex items-start md:items-center gap-3.5">
+        <div class="p-2.5 rounded-xl bg-rose-500/10 text-rose-500 border border-rose-500/20 shrink-0 mt-0.5 md:mt-0">
+          <i data-lucide="alert-octagon" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <h2 class="text-xs font-bold uppercase tracking-wider font-mono text-rose-600 dark:text-rose-400">
+              Shift-Left Security Gate: FAILED (2 Critical CVEs Detected)
+            </h2>
+            <span class="text-[10px] font-mono px-2 py-0.2 rounded bg-rose-500/15 text-rose-600 dark:text-rose-300 border border-rose-500/30 font-bold">
+              Deployment Blocked
+            </span>
+          </div>
+          <p class="text-xs mt-1 leading-relaxed" id="bannerDesc">
+            Trivy scanner menemukan <strong>2 kerentanan CRITICAL</strong> (SSRF AWS Metadata & Arbitrary Code Execution) pada <code>lmd-oona-ph-integration-health-renewal-svc</code> branch <code>main</code>. Developer wajib melakukan patch sebelum approval ticket diizinkan.
+          </p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 shrink-0">
+        <a href="#vulnerability-section" class="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-bold font-mono transition-colors shadow-sm flex items-center gap-1.5">
+          <i data-lucide="shield-alert" class="w-3.5 h-3.5"></i> Inspect CVEs
+        </a>
+      </div>
+    </div>
+
+    <!-- 1. KPI CARDS SECTION (INCLUDING ALERT STATES) -->
+    <section>
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="text-xs font-extrabold uppercase tracking-wider font-mono flex items-center gap-2 text-slate-400" id="kpiHeading">
+            <i data-lucide="activity" class="w-4 h-4 text-[#3ecf8e]"></i> Platform Pulse & Telemetry
+          </h3>
+          <p class="text-xs text-slate-500" id="kpiSub">Menampilkan indikator normal vs indikator merah (Alert/Incident)</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <!-- Metric 1: Total Microservices (NORMAL STATE) -->
+        <div class="kpi-card p-5 rounded-2xl border transition-all">
+          <div class="flex items-center justify-between text-xs font-medium text-slate-400">
+            <span>Total Microservices</span>
+            <span class="p-1.5 rounded-md bg-[#3ecf8e]/10 text-[#3ecf8e]">
+              <i data-lucide="server" class="w-4 h-4"></i>
+            </span>
+          </div>
+          <div class="mt-3 flex items-baseline gap-2">
+            <span class="text-3xl font-bold tracking-tight font-mono">14</span>
+            <span class="text-xs font-semibold text-[#3ecf8e] flex items-center font-mono">
+              ↗ 100% Uptime
+            </span>
+          </div>
+          <div class="mt-3 text-[11px] text-slate-400 border-t pt-2.5 flex justify-between card-footer">
+            <span>7 Shelves (PH & ID)</span>
+            <span class="font-mono font-semibold">1 LIVE In Prod</span>
+          </div>
+        </div>
+
+        <!-- Metric 2: Security Gate (ALERT STATE — RED / CRIMSON) -->
+        <div class="kpi-card-alert p-5 rounded-2xl border-2 transition-all relative overflow-hidden">
+          <!-- Top subtle glow / indicator -->
+          <div class="absolute top-0 left-0 right-0 h-1 bg-rose-500"></div>
+
+          <div class="flex items-center justify-between text-xs font-bold text-rose-500">
+            <span class="flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
+              Security Policy Gate
+            </span>
+            <span class="p-1.5 rounded-md bg-rose-500/10 text-rose-500">
+              <i data-lucide="shield-x" class="w-4 h-4"></i>
+            </span>
+          </div>
+          <div class="mt-3 flex items-baseline gap-2">
+            <span class="text-3xl font-black tracking-tight font-mono text-rose-600 dark:text-rose-400">2</span>
+            <span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-600 dark:text-rose-300 border border-rose-500/30">
+              FAILED (2 Critical)
+            </span>
+          </div>
+          <div class="mt-3 text-[11px] border-t pt-2.5 flex justify-between card-footer-alert text-rose-700/80 dark:text-rose-300/80">
+            <span>4 High · 1 Med</span>
+            <span class="font-mono font-bold text-rose-600 dark:text-rose-400">Action Required</span>
+          </div>
+        </div>
+
+        <!-- Metric 3: CI/CD Pipeline (WARNING STATE — AMBER) -->
+        <div class="kpi-card p-5 rounded-2xl border transition-all">
+          <div class="flex items-center justify-between text-xs font-medium text-slate-400">
+            <span>Jenkins CI Pipeline</span>
+            <span class="p-1.5 rounded-md bg-amber-500/10 text-amber-500">
+              <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            </span>
+          </div>
+          <div class="mt-3 flex items-baseline gap-2">
+            <span class="text-3xl font-bold tracking-tight font-mono">1</span>
+            <span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30 font-mono">
+              Job Missing (404)
+            </span>
+          </div>
+          <div class="mt-3 text-[11px] text-slate-400 border-t pt-2.5 flex justify-between card-footer">
+            <span>Live Probe: 45s</span>
+            <span class="font-mono font-bold text-indigo-500">Recreate Available</span>
+          </div>
+        </div>
+
+        <!-- Metric 4: Scheduled Scan Queue (NORMAL / HEALTHY STATE) -->
+        <div class="kpi-card p-5 rounded-2xl border transition-all">
+          <div class="flex items-center justify-between text-xs font-medium text-slate-400">
+            <span>Nightly Trivy Queue</span>
+            <span class="p-1.5 rounded-md bg-[#3ecf8e]/10 text-[#3ecf8e]">
+              <i data-lucide="clock" class="w-4 h-4"></i>
+            </span>
+          </div>
+          <div class="mt-3 flex items-baseline gap-2">
+            <span class="text-3xl font-bold tracking-tight font-mono">01:30</span>
+            <span class="text-xs font-bold font-mono text-slate-400">WIB (UTC+7)</span>
+          </div>
+          <div class="mt-3 text-[11px] text-slate-400 border-t pt-2.5 flex justify-between card-footer">
+            <span>Target: main, uat</span>
+            <span class="font-mono text-[#3ecf8e] font-semibold">Active FIFO</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 2. TOPOLOGY WITH CRITICAL NODE ALERT -->
+    <section class="topology-section p-6 rounded-2xl border transition-all">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 mb-4 border-b gap-2" id="topoHeader">
+        <div class="flex items-center gap-2.5">
+          <div class="p-2 rounded-lg bg-rose-500/10 text-rose-500 border border-rose-500/20">
+            <i data-lucide="network" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold flex items-center gap-2" id="topoTitle">
+              Execution Topology with Failure/Alert Node
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30 font-bold">
+                Lambda Health Check Degraded
+              </span>
+            </h3>
+            <p class="text-xs text-slate-400" id="topoSub">Node yang memiliki temuan kritis akan mendapat highlight merah berdenyut</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 text-xs font-mono">
+          <span class="flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-slate-400" id="chipRegion">
+            <img src="/static/img/brands/lambda.svg" class="w-3.5 h-3.5" alt="Lambda"> AWS Jakarta
+          </span>
+          <span class="flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-slate-400" id="chipIac">
+            <img src="/static/img/brands/terraform.svg" class="w-3.5 h-3.5" alt="TF"> 02-app-setup
+          </span>
+        </div>
+      </div>
+
+      <!-- SVG Canvas -->
+      <div class="relative w-full overflow-x-auto py-2">
+        <svg viewBox="0 0 1000 240" class="w-full min-w-[760px] h-60 select-none">
+          <defs>
+            <!-- Normal Stream -->
+            <linearGradient id="streamNorm" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#3ecf8e" stop-opacity="0.8"/>
+              <stop offset="100%" stop-color="#3ecf8e" stop-opacity="0.8"/>
+            </linearGradient>
+            <!-- Alert Stream (Red) -->
+            <linearGradient id="streamAlert" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#f43f5e" stop-opacity="0.9"/>
+              <stop offset="50%" stop-color="#fb7185" stop-opacity="1"/>
+              <stop offset="100%" stop-color="#f43f5e" stop-opacity="0.9"/>
+            </linearGradient>
+          </defs>
+
+          <!-- Ingress to Lambda (Connected Alert Line) -->
+          <line x1="200" y1="120" x2="380" y2="120" stroke="url(#streamAlert)" stroke-width="2.5" stroke-dasharray="6,6" class="animate-dash" />
+          <!-- Lambda to EventBus -->
+          <line x1="580" y1="120" x2="760" y2="80" stroke="url(#streamNorm)" stroke-width="2" stroke-dasharray="4,4" class="animate-dash" />
+          <!-- Lambda to DB (Alert) -->
+          <line x1="580" y1="120" x2="760" y2="170" stroke="url(#streamAlert)" stroke-width="2.5" stroke-dasharray="6,6" class="animate-dash" />
+
+          <!-- NODE 1: Ingress -->
+          <foreignObject x="40" y="75" width="160" height="90">
+            <div xmlns="http://www.w3.org/1999/xhtml" class="topo-node p-3.5 rounded-xl border flex flex-col justify-between h-full">
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] font-mono font-bold uppercase text-slate-400">INGRESS</span>
+                <span class="w-2 h-2 rounded-full bg-[#3ecf8e]"></span>
+              </div>
+              <div class="text-xs font-bold truncate">Care Router Gateway</div>
+              <div class="text-[10px] font-mono text-slate-400">HTTP/2 POST /renew</div>
+            </div>
+          </foreignObject>
+
+          <!-- NODE 2: Lambda Hero Node (ALERT STATE — RED BORDER & BADGE) -->
+          <foreignObject x="380" y="50" width="200" height="140">
+            <div xmlns="http://www.w3.org/1999/xhtml" class="topo-hero-alert p-4 rounded-2xl border-2 flex flex-col justify-between h-full relative">
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-rose-500/20 text-rose-500 border border-rose-500/40 flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping"></span>
+                  VULN DETECTED
+                </span>
+                <img src="/static/img/brands/lambda.svg" class="w-4 h-4" alt="Lambda">
+              </div>
+              <div>
+                <div class="text-xs font-black truncate">health-renewal-svc</div>
+                <div class="text-[10px] font-mono text-slate-400 mt-0.5">2 Critical · 4 High CVEs</div>
+              </div>
+              <div class="text-[10px] font-mono flex items-center justify-between text-rose-600 dark:text-rose-400 pt-1.5 border-t border-rose-500/20">
+                <span>SSRF Vulnerable</span>
+                <span class="font-bold">BLOCKED</span>
+              </div>
+            </div>
+          </foreignObject>
+
+          <!-- NODE 3A: EventBus -->
+          <foreignObject x="760" y="35" width="180" height="80">
+            <div xmlns="http://www.w3.org/1999/xhtml" class="topo-node p-3 rounded-xl border flex flex-col justify-between h-full">
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] font-mono font-bold text-slate-400">EVENT BUS</span>
+                <i data-lucide="bell" class="w-3.5 h-3.5 text-indigo-400"></i>
+              </div>
+              <div class="text-xs font-bold truncate">Reminder EventBus</div>
+              <div class="text-[10px] font-mono text-slate-400">Topic: renewal-events</div>
+            </div>
+          </foreignObject>
+
+          <!-- NODE 3B: PostgreSQL RDS -->
+          <foreignObject x="760" y="130" width="180" height="80">
+            <div xmlns="http://www.w3.org/1999/xhtml" class="topo-node p-3 rounded-xl border flex flex-col justify-between h-full">
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] font-mono font-bold text-rose-500">DATABASE ERR</span>
+                <i data-lucide="database" class="w-3.5 h-3.5 text-rose-500"></i>
+              </div>
+              <div class="text-xs font-bold truncate text-rose-600 dark:text-rose-400">NEURON_DB (RDS)</div>
+              <div class="text-[10px] font-mono text-slate-400">Query Latency &gt; 800ms</div>
+            </div>
+          </foreignObject>
+        </svg>
+      </div>
+    </section>
+
+    <!-- 3. INVENTORY TABLE WITH CVE BREAKDOWN (RED ALERT ROW) -->
+    <section class="table-section rounded-2xl border overflow-hidden transition-all" id="vulnerability-section">
+      <div class="p-5 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-4" id="tableHeader">
+        <div>
+          <h3 class="text-sm font-bold font-mono flex items-center gap-2" id="tableTitle">
+            <i data-lucide="shield-alert" class="w-4 h-4 text-rose-500"></i> Microservice Vulnerability & Security Triage
+          </h3>
+          <p class="text-xs text-slate-400" id="tableSub">Menampilkan bagaimana baris dengan status FAILED / Critical Alert dirender</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <input type="text" placeholder="Filter microservices..." class="search-input px-3.5 py-1.5 text-xs border font-mono focus:outline-none transition-all rounded-full" id="searchInput">
+          <button class="primary-btn px-4 py-1.5 text-black bg-[#3ecf8e] hover:bg-[#34b27b] text-xs font-bold font-mono transition-all rounded-full shadow-sm flex items-center gap-1.5" id="onboardBtn">
+            + Onboard Service
+          </button>
+        </div>
+      </div>
+
+      <!-- Table Body -->
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs">
+          <thead class="table-head font-mono text-[11px] uppercase border-b" id="tableThead">
+            <tr>
+              <th class="py-3.5 px-5 font-semibold">Service Name</th>
+              <th class="py-3.5 px-4 font-semibold">Shelf</th>
+              <th class="py-3.5 px-4 font-semibold">CI/CD Status</th>
+              <th class="py-3.5 px-4 font-semibold">Vulnerability Policy</th>
+              <th class="py-3.5 px-4 font-semibold">Scheduled Scan</th>
+              <th class="py-3.5 px-5 font-semibold text-right">Triage Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y" id="tableTbody">
+            
+            <!-- ROW 1: CRITICAL ALERT (RED HIGHLIGHT ROW) -->
+            <tr class="table-row-alert transition-colors">
+              <td class="py-4 px-5">
+                <div class="flex items-center gap-2.5">
+                  <span class="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping"></span>
+                  <div>
+                    <div class="font-black font-mono flex items-center gap-1.5">
+                      <span>health-renewal-svc-clone</span>
+                      <span class="text-[9px] font-mono px-1.5 py-0.2 rounded bg-rose-500 text-white font-bold">BLOCKED</span>
+                    </div>
+                    <div class="text-[10px] text-rose-600/80 dark:text-rose-400/80 font-mono">lmd-oona-ph-integration-health-renewal-svc</div>
+                  </div>
+                </div>
+              </td>
+              <td class="py-4 px-4">
+                <span class="shelf-pill px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold">
+                  ph:neuron
+                </span>
+              </td>
+              <td class="py-4 px-4">
+                <span class="pipeline-pill inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-mono font-semibold border">
+                  <img src="/static/img/brands/jenkins.svg" class="w-3.5 h-3.5" alt="Jenkins"> In Jenkins
+                </span>
+              </td>
+              <td class="py-4 px-4">
+                <!-- RED ALERT VULNERABILITY BADGE -->
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-rose-500/15 text-rose-600 dark:text-rose-300 border border-rose-500/40">
+                  <i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-rose-500"></i>
+                  FAILED (2 Crit · 4 High)
+                </span>
+              </td>
+              <td class="py-4 px-4 font-mono text-[11px]">
+                Daily @ 01:30 WIB
+              </td>
+              <td class="py-4 px-5 text-right">
+                <button class="triage-btn-alert px-3 py-1.5 rounded-full font-mono text-xs font-bold transition-all inline-flex items-center gap-1">
+                  Fix CVEs →
+                </button>
+              </td>
+            </tr>
+
+            <!-- ROW 2: NORMAL / PASSED SERVICE -->
+            <tr class="table-row-normal transition-colors">
+              <td class="py-4 px-5">
+                <div class="flex items-center gap-2.5">
+                  <span class="w-2.5 h-2.5 rounded-full bg-[#3ecf8e]"></span>
+                  <div>
+                    <div class="font-bold font-mono">policy-aggregation-trigger</div>
+                    <div class="text-[10px] text-slate-400 font-mono">lmd-oona-id-integration-coreplus-policy</div>
+                  </div>
+                </div>
+              </td>
+              <td class="py-4 px-4">
+                <span class="shelf-pill-id px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold">
+                  id:coreplus
+                </span>
+              </td>
+              <td class="py-4 px-4">
+                <span class="pipeline-pill inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-mono font-semibold border">
+                  <img src="/static/img/brands/jenkins.svg" class="w-3.5 h-3.5" alt="Jenkins"> In Jenkins
+                </span>
+              </td>
+              <td class="py-4 px-4">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#3ecf8e]/10 text-[#3ecf8e] border border-[#3ecf8e]/30">
+                  <span class="w-1.5 h-1.5 rounded-full bg-[#3ecf8e]"></span>
+                  PASSED (0 Crit)
+                </span>
+              </td>
+              <td class="py-4 px-4 font-mono text-[11px] text-slate-400">
+                Daily @ 02:00 WIB
+              </td>
+              <td class="py-4 px-5 text-right">
+                <button class="triage-btn-normal px-3 py-1.5 rounded-full font-mono text-xs font-semibold transition-all">
+                  Detail →
+                </button>
+              </td>
+            </tr>
+
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Vulnerability Breakdown Sub-Card Inside Table -->
+      <div class="p-5 border-t cve-drawer" id="cveDrawer">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold uppercase font-mono tracking-wider text-rose-600 dark:text-rose-400 flex items-center gap-1.5">
+              <i data-lucide="shield-alert" class="w-4 h-4"></i> Critical Finding Breakdown: health-renewal-svc-clone
+            </span>
+          </div>
+          <span class="text-[11px] font-mono text-slate-400">Source: Trivy FS Scanner (Local Mounted Repo)</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs font-mono">
+          
+          <!-- Finding 1: fast-uri SSRF -->
+          <div class="cve-item p-3.5 rounded-xl border">
+            <div class="flex items-center justify-between mb-1">
+              <span class="font-bold text-rose-600 dark:text-rose-400">CVE-2026-75899</span>
+              <span class="px-2 py-0.2 rounded text-[10px] font-bold bg-rose-500 text-white">CRITICAL · 9.1</span>
+            </div>
+            <p class="text-slate-400 text-[11px] mb-2">Double-decode Server-Side Request Forgery (SSRF) bypasses allowlist to reach AWS EC2/Lambda metadata endpoint.</p>
+            <div class="flex justify-between text-[10px] text-slate-400 border-t pt-1.5">
+              <span>Package: <strong class="text-slate-200" id="pkg1">fast-uri@3.1.5</strong></span>
+              <span>Fixed in: <strong class="text-[#3ecf8e]">3.1.6, 4.1.3</strong></span>
+            </div>
+          </div>
+
+          <!-- Finding 2: uuid buffer overflow -->
+          <div class="cve-item p-3.5 rounded-xl border">
+            <div class="flex items-center justify-between mb-1">
+              <span class="font-bold text-rose-600 dark:text-rose-400">CVE-2026-41907</span>
+              <span class="px-2 py-0.2 rounded text-[10px] font-bold bg-rose-500 text-white">CRITICAL · 8.5</span>
+            </div>
+            <p class="text-slate-400 text-[11px] mb-2">Out-of-bounds write in v3/v5/v6 when caller-provided buffer causes silent memory corruption or truncated ID.</p>
+            <div class="flex justify-between text-[10px] text-slate-400 border-t pt-1.5">
+              <span>Package: <strong class="text-slate-200" id="pkg2">uuid@8.3.2</strong></span>
+              <span>Fixed in: <strong class="text-[#3ecf8e]">11.1.1, 14.0.0</strong></span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <script>
+    lucide.createIcons();
+
+    let isDark = true;
+    let currentLightStyle = 'L1'; // L1, L2, L3
+
+    // LIGHT THEME STYLES DEFINITION
+    const lightStyles = {
+      // L1: Supabase Official Clean (Warm Minimalist White + Emerald Green + Crimson Alert)
+      L1: {
+        name: 'L1: Supabase Official Clean',
+        desc: 'Fondasi putih bersih (#fafafa), border netral tegas (#e5e7eb), pill buttons khas Supabase. Alert merah disajikan dengan latar putih bersih beraksen left-border rose tebal + crimson badge yang sangat kontras dan elegan.',
+        apply: () => {
+          document.body.className = "bg-[#fafafa] text-slate-900 font-sans antialiased min-h-screen transition-colors";
+          
+          // Header
+          applyElementStyles('siteHeader', 'bg-white/90 border-slate-200');
+          applyElementStyles('brandTitle', 'text-slate-900');
+          applyElementStyles('brandSub', 'text-slate-500');
+
+          // Banner Alert
+          applyElementStyles('alertBanner', 'bg-rose-50/60 border-rose-200 text-slate-800');
+          document.getElementById('bannerDesc').className = "text-xs mt-1 text-slate-600";
+
+          // KPI Cards
+          document.querySelectorAll('.kpi-card').forEach(c => {
+            c.className = "kpi-card p-5 rounded-2xl border border-slate-200 bg-white shadow-sm transition-all";
+          });
+          // Alert KPI Card
+          document.querySelectorAll('.kpi-card-alert').forEach(c => {
+            c.className = "kpi-card-alert p-5 rounded-2xl border-2 border-rose-300 bg-gradient-to-b from-rose-50/70 to-white shadow-sm transition-all relative overflow-hidden";
+          });
+
+          // Topology
+          applyElementStyles('topoHeader', 'border-slate-200');
+          applyElementStyles('topoTitle', 'text-slate-900');
+          applyElementStyles('topoSub', 'text-slate-500');
+          applyElementStyles('chipRegion', 'bg-slate-100 border-slate-200 text-slate-700');
+          applyElementStyles('chipIac', 'bg-slate-100 border-slate-200 text-slate-700');
+          document.querySelector('.topology-section').className = "topology-section p-6 rounded-2xl border border-slate-200 bg-white shadow-sm transition-all";
+          
+          document.querySelectorAll('.topo-node').forEach(n => {
+            n.className = "topo-node p-3.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 flex flex-col justify-between h-full";
+          });
+          document.querySelectorAll('.topo-hero-alert').forEach(h => {
+            h.className = "topo-hero-alert p-4 rounded-2xl border-2 border-rose-400 bg-gradient-to-b from-rose-50 to-white text-slate-900 flex flex-col justify-between h-full relative shadow-md";
+          });
+
+          // Table Section
+          applyElementStyles('tableHeader', 'border-slate-200');
+          applyElementStyles('tableTitle', 'text-slate-900');
+          applyElementStyles('tableSub', 'text-slate-500');
+          document.querySelector('.table-section').className = "table-section rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden transition-all";
+          applyElementStyles('tableThead', 'bg-slate-50 text-slate-600 border-slate-200');
+          applyElementStyles('tableTbody', 'divide-slate-200 text-slate-800');
+          
+          // Table Rows
+          document.querySelectorAll('.table-row-alert').forEach(r => {
+            r.className = "table-row-alert bg-rose-50/30 hover:bg-rose-50/60 transition-colors border-l-4 border-l-rose-500";
+          });
+          document.querySelectorAll('.table-row-normal').forEach(r => {
+            r.className = "table-row-normal hover:bg-slate-50/80 transition-colors border-l-4 border-l-transparent";
+          });
+
+          // Pills & Badges
+          document.querySelectorAll('.shelf-pill').forEach(p => p.className = "shelf-pill px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold bg-purple-50 text-purple-700 border border-purple-200");
+          document.querySelectorAll('.shelf-pill-id').forEach(p => p.className = "shelf-pill-id px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold bg-emerald-50 text-emerald-700 border border-emerald-200");
+          document.querySelectorAll('.pipeline-pill').forEach(p => p.className = "pipeline-pill inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-mono font-semibold border border-slate-200 bg-slate-100 text-slate-700");
+          
+          // Buttons
+          document.querySelectorAll('.triage-btn-alert').forEach(b => b.className = "triage-btn-alert px-3 py-1.5 rounded-full font-mono text-xs font-bold transition-all bg-rose-600 hover:bg-rose-700 text-white shadow-sm");
+          document.querySelectorAll('.triage-btn-normal').forEach(b => b.className = "triage-btn-normal px-3 py-1.5 rounded-full font-mono text-xs font-semibold transition-all bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200");
+          
+          // CVE Drawer
+          applyElementStyles('cveDrawer', 'border-slate-200 bg-slate-50/70');
+          document.querySelectorAll('.cve-item').forEach(i => i.className = "cve-item p-3.5 rounded-xl border border-rose-200 bg-white text-slate-800 shadow-sm");
+          document.getElementById('pkg1').className = "text-slate-800 font-bold";
+          document.getElementById('pkg2').className = "text-slate-800 font-bold";
+        }
+      },
+
+      // L2: GitHub Security / High-Contrast Light (Pure High Density, Crisp Deep Ruby)
+      L2: {
+        name: 'L2: GitHub Security / High-Contrast Light',
+        desc: 'Fokus ketajaman informasi ala GitHub Advisory / Datadog. Border abu-abu tegas (#d1d5db), card putih murni dengan bayangan 1px tajam. Alert merah pekat (#991b1b) berlatar pink lembut (#fef2f2) yang sangat mudah dibaca operator.',
+        apply: () => {
+          document.body.className = "bg-[#f6f8fa] text-[#1f2328] font-sans antialiased min-h-screen transition-colors";
+          
+          applyElementStyles('siteHeader', 'bg-white border-[#d0d7de]');
+          applyElementStyles('brandTitle', 'text-[#1f2328]');
+          applyElementStyles('brandSub', 'text-[#656d76]');
+
+          applyElementStyles('alertBanner', 'bg-[#ffebe9] border-[#ff8182] text-[#82071e]');
+          document.getElementById('bannerDesc').className = "text-xs mt-1 text-[#82071e]";
+
+          document.querySelectorAll('.kpi-card').forEach(c => {
+            c.className = "kpi-card p-5 rounded-xl border border-[#d0d7de] bg-white shadow-sm transition-all";
+          });
+          document.querySelectorAll('.kpi-card-alert').forEach(c => {
+            c.className = "kpi-card-alert p-5 rounded-xl border-2 border-[#ff8182] bg-[#ffebe9]/70 shadow-sm transition-all relative overflow-hidden";
+          });
+
+          applyElementStyles('topoHeader', 'border-[#d0d7de]');
+          applyElementStyles('topoTitle', 'text-[#1f2328]');
+          applyElementStyles('topoSub', 'text-[#656d76]');
+          applyElementStyles('chipRegion', 'bg-[#f6f8fa] border-[#d0d7de] text-[#1f2328]');
+          applyElementStyles('chipIac', 'bg-[#f6f8fa] border-[#d0d7de] text-[#1f2328]');
+          document.querySelector('.topology-section').className = "topology-section p-6 rounded-xl border border-[#d0d7de] bg-white shadow-sm transition-all";
+          
+          document.querySelectorAll('.topo-node').forEach(n => {
+            n.className = "topo-node p-3.5 rounded-lg border border-[#d0d7de] bg-[#f6f8fa] text-[#1f2328] flex flex-col justify-between h-full";
+          });
+          document.querySelectorAll('.topo-hero-alert').forEach(h => {
+            h.className = "topo-hero-alert p-4 rounded-xl border-2 border-[#cf222e] bg-[#ffebe9] text-[#1f2328] flex flex-col justify-between h-full relative shadow-sm";
+          });
+
+          applyElementStyles('tableHeader', 'border-[#d0d7de]');
+          applyElementStyles('tableTitle', 'text-[#1f2328]');
+          applyElementStyles('tableSub', 'text-[#656d76]');
+          document.querySelector('.table-section').className = "table-section rounded-xl border border-[#d0d7de] bg-white shadow-sm overflow-hidden transition-all";
+          applyElementStyles('tableThead', 'bg-[#f6f8fa] text-[#656d76] border-[#d0d7de]');
+          applyElementStyles('tableTbody', 'divide-[#d0d7de] text-[#1f2328]');
+          
+          document.querySelectorAll('.table-row-alert').forEach(r => {
+            r.className = "table-row-alert bg-[#ffebe9]/40 hover:bg-[#ffebe9]/80 transition-colors border-l-4 border-l-[#cf222e]";
+          });
+          document.querySelectorAll('.table-row-normal').forEach(r => {
+            r.className = "table-row-normal hover:bg-[#f6f8fa] transition-colors border-l-4 border-l-transparent";
+          });
+
+          document.querySelectorAll('.shelf-pill').forEach(p => p.className = "shelf-pill px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-[#eaeef2] text-[#0969da] border border-[#d0d7de]");
+          document.querySelectorAll('.shelf-pill-id').forEach(p => p.className = "shelf-pill-id px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-[#dafbe1] text-[#1a7f37] border border-[#aceebb]");
+          document.querySelectorAll('.pipeline-pill').forEach(p => p.className = "pipeline-pill inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-mono font-semibold border border-[#d0d7de] bg-[#f6f8fa] text-[#1f2328]");
+
+          document.querySelectorAll('.triage-btn-alert').forEach(b => b.className = "triage-btn-alert px-3 py-1.5 rounded-md font-mono text-xs font-bold transition-all bg-[#cf222e] hover:bg-[#a40e26] text-white shadow-sm");
+          document.querySelectorAll('.triage-btn-normal').forEach(b => b.className = "triage-btn-normal px-3 py-1.5 rounded-md font-mono text-xs font-semibold transition-all bg-[#f6f8fa] hover:bg-[#eaeef2] text-[#1f2328] border border-[#d0d7de]");
+
+          applyElementStyles('cveDrawer', 'border-[#d0d7de] bg-[#f6f8fa]');
+          document.querySelectorAll('.cve-item').forEach(i => i.className = "cve-item p-3.5 rounded-lg border border-[#ff8182] bg-white text-[#1f2328] shadow-sm");
+          document.getElementById('pkg1').className = "text-[#1f2328] font-bold";
+          document.getElementById('pkg2').className = "text-[#1f2328] font-bold";
+        }
+      },
+
+      // L3: Datadog Ops (Industrial Light with Alert Accent Stripe)
+      L3: {
+        name: 'L3: Datadog Ops (Alert Accent Stripe)',
+        desc: 'Gaya dashboard observability Datadog / AWS CloudWatch. Latar abu-abu sejuk (#eef2f6), card ber-aksen strip merah tebal di bagian atas saat ada insiden, font technical tajam, dan kontras data tinggi.',
+        apply: () => {
+          document.body.className = "bg-[#edf2f7] text-[#1a202c] font-sans antialiased min-h-screen transition-colors";
+          
+          applyElementStyles('siteHeader', 'bg-white border-[#cbd5e0]');
+          applyElementStyles('brandTitle', 'text-[#1a202c]');
+          applyElementStyles('brandSub', 'text-[#718096]');
+
+          applyElementStyles('alertBanner', 'bg-white border-l-8 border-l-red-600 border-y border-r border-[#cbd5e0] text-[#1a202c] shadow-sm');
+          document.getElementById('bannerDesc').className = "text-xs mt-1 text-[#4a5568]";
+
+          document.querySelectorAll('.kpi-card').forEach(c => {
+            c.className = "kpi-card p-5 rounded-lg border border-[#cbd5e0] bg-white shadow-sm transition-all";
+          });
+          document.querySelectorAll('.kpi-card-alert').forEach(c => {
+            c.className = "kpi-card-alert p-5 rounded-lg border border-[#cbd5e0] border-t-4 border-t-red-600 bg-white shadow-md transition-all relative overflow-hidden";
+          });
+
+          applyElementStyles('topoHeader', 'border-[#cbd5e0]');
+          applyElementStyles('topoTitle', 'text-[#1a202c]');
+          applyElementStyles('topoSub', 'text-[#718096]');
+          applyElementStyles('chipRegion', 'bg-[#edf2f7] border-[#cbd5e0] text-[#2d3748]');
+          applyElementStyles('chipIac', 'bg-[#edf2f7] border-[#cbd5e0] text-[#2d3748]');
+          document.querySelector('.topology-section').className = "topology-section p-6 rounded-lg border border-[#cbd5e0] bg-white shadow-sm transition-all";
+          
+          document.querySelectorAll('.topo-node').forEach(n => {
+            n.className = "topo-node p-3.5 rounded-md border border-[#cbd5e0] bg-[#f7fafc] text-[#1a202c] flex flex-col justify-between h-full";
+          });
+          document.querySelectorAll('.topo-hero-alert').forEach(h => {
+            h.className = "topo-hero-alert p-4 rounded-lg border-2 border-red-500 bg-red-50/30 text-[#1a202c] flex flex-col justify-between h-full relative shadow-sm";
+          });
+
+          applyElementStyles('tableHeader', 'border-[#cbd5e0]');
+          applyElementStyles('tableTitle', 'text-[#1a202c]');
+          applyElementStyles('tableSub', 'text-[#718096]');
+          document.querySelector('.table-section').className = "table-section rounded-lg border border-[#cbd5e0] bg-white shadow-sm overflow-hidden transition-all";
+          applyElementStyles('tableThead', 'bg-[#f7fafc] text-[#4a5568] border-[#cbd5e0]');
+          applyElementStyles('tableTbody', 'divide-[#cbd5e0] text-[#1a202c]');
+          
+          document.querySelectorAll('.table-row-alert').forEach(r => {
+            r.className = "table-row-alert bg-red-50/50 hover:bg-red-100/50 transition-colors border-l-4 border-l-red-600";
+          });
+          document.querySelectorAll('.table-row-normal').forEach(r => {
+            r.className = "table-row-normal hover:bg-[#f7fafc] transition-colors border-l-4 border-l-transparent";
+          });
+
+          document.querySelectorAll('.shelf-pill').forEach(p => p.className = "shelf-pill px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-indigo-50 text-indigo-800 border border-indigo-200");
+          document.querySelectorAll('.shelf-pill-id').forEach(p => p.className = "shelf-pill-id px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-teal-50 text-teal-800 border border-teal-200");
+          document.querySelectorAll('.pipeline-pill').forEach(p => p.className = "pipeline-pill inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-mono font-semibold border border-[#cbd5e0] bg-[#edf2f7] text-[#2d3748]");
+
+          document.querySelectorAll('.triage-btn-alert').forEach(b => b.className = "triage-btn-alert px-3 py-1.5 rounded-md font-mono text-xs font-bold transition-all bg-red-600 hover:bg-red-700 text-white shadow-sm");
+          document.querySelectorAll('.triage-btn-normal').forEach(b => b.className = "triage-btn-normal px-3 py-1.5 rounded-md font-mono text-xs font-semibold transition-all bg-[#edf2f7] hover:bg-[#e2e8f0] text-[#2d3748] border border-[#cbd5e0]");
+
+          applyElementStyles('cveDrawer', 'border-[#cbd5e0] bg-[#f7fafc]');
+          document.querySelectorAll('.cve-item').forEach(i => i.className = "cve-item p-3.5 rounded-md border border-red-300 bg-white text-[#1a202c] shadow-sm");
+          document.getElementById('pkg1').className = "text-[#1a202c] font-bold";
+          document.getElementById('pkg2').className = "text-[#1a202c] font-bold";
+        }
+      }
+    };
+
+    function applyElementStyles(id, classes) {
+      const el = document.getElementById(id);
+      if (el) el.className = el.className.split(' ').filter(c => !classes.split(' ').includes(c)).join(' ') + ' ' + classes;
+    }
+
+    // SUPABASE DARK MODE APPLICATION
+    function applySupabaseDark() {
+      document.body.className = "bg-[#121212] text-[#ededed] font-sans antialiased min-h-screen transition-colors";
+      
+      applyElementStyles('siteHeader', 'bg-[#171717]/95 border-[#282828]');
+      applyElementStyles('brandTitle', 'text-white');
+      applyElementStyles('brandSub', 'text-slate-400');
+
+      applyElementStyles('alertBanner', 'bg-rose-950/20 border-rose-500/30 text-[#ededed]');
+      document.getElementById('bannerDesc').className = "text-xs mt-1 text-slate-300";
+
+      document.querySelectorAll('.kpi-card').forEach(c => {
+        c.className = "kpi-card p-5 rounded-2xl border border-[#282828] bg-[#171717] shadow-sm transition-all";
+      });
+      document.querySelectorAll('.kpi-card-alert').forEach(c => {
+        c.className = "kpi-card-alert p-5 rounded-2xl border-2 border-rose-500/50 bg-gradient-to-b from-rose-950/30 to-[#171717] shadow-sm transition-all relative overflow-hidden";
+      });
+
+      applyElementStyles('topoHeader', 'border-[#282828]');
+      applyElementStyles('topoTitle', 'text-white');
+      applyElementStyles('topoSub', 'text-slate-400');
+      applyElementStyles('chipRegion', 'bg-[#1e1e1e] border-[#333] text-slate-300');
+      applyElementStyles('chipIac', 'bg-[#1e1e1e] border-[#333] text-slate-300');
+      document.querySelector('.topology-section').className = "topology-section p-6 rounded-2xl border border-[#282828] bg-[#171717] shadow-sm transition-all";
+      
+      document.querySelectorAll('.topo-node').forEach(n => {
+        n.className = "topo-node p-3.5 rounded-xl border border-[#2e2e2e] bg-[#1e1e1e] text-slate-200 flex flex-col justify-between h-full";
+      });
+      document.querySelectorAll('.topo-hero-alert').forEach(h => {
+        h.className = "topo-hero-alert p-4 rounded-2xl border-2 border-rose-500 bg-[#1e1e1e] text-white flex flex-col justify-between h-full relative shadow-lg";
+      });
+
+      applyElementStyles('tableHeader', 'border-[#282828]');
+      applyElementStyles('tableTitle', 'text-white');
+      applyElementStyles('tableSub', 'text-slate-400');
+      document.querySelector('.table-section').className = "table-section rounded-2xl border border-[#282828] bg-[#171717] shadow-sm overflow-hidden transition-all";
+      applyElementStyles('tableThead', 'bg-[#141414] text-slate-400 border-[#282828]');
+      applyElementStyles('tableTbody', 'divide-[#282828] text-slate-300');
+      
+      document.querySelectorAll('.table-row-alert').forEach(r => {
+        r.className = "table-row-alert bg-rose-950/20 hover:bg-rose-950/40 transition-colors border-l-4 border-l-rose-500";
+      });
+      document.querySelectorAll('.table-row-normal').forEach(r => {
+        r.className = "table-row-normal hover:bg-[#1c1c1c] transition-colors border-l-4 border-l-transparent";
+      });
+
+      document.querySelectorAll('.shelf-pill').forEach(p => p.className = "shelf-pill px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold bg-[#1e1e1e] text-[#a78bfa] border border-[#3b3b4f]");
+      document.querySelectorAll('.shelf-pill-id').forEach(p => p.className = "shelf-pill-id px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold bg-[#1e1e1e] text-[#3ecf8e] border border-[#1e4e3b]");
+      document.querySelectorAll('.pipeline-pill').forEach(p => p.className = "pipeline-pill inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-mono font-semibold border border-[#333] bg-[#1e1e1e] text-slate-300");
+
+      document.querySelectorAll('.triage-btn-alert').forEach(b => b.className = "triage-btn-alert px-3 py-1.5 rounded-full font-mono text-xs font-bold transition-all bg-rose-600 hover:bg-rose-500 text-white shadow-sm");
+      document.querySelectorAll('.triage-btn-normal').forEach(b => b.className = "triage-btn-normal px-3 py-1.5 rounded-full font-mono text-xs font-semibold transition-all bg-[#242424] hover:bg-[#333] text-slate-200 border border-[#333]");
+
+      applyElementStyles('cveDrawer', 'border-[#282828] bg-[#141414]');
+      document.querySelectorAll('.cve-item').forEach(i => i.className = "cve-item p-3.5 rounded-xl border border-rose-500/30 bg-[#1a1a1a] text-slate-200 shadow-sm");
+      document.getElementById('pkg1').className = "text-white font-bold";
+      document.getElementById('pkg2').className = "text-white font-bold";
+    }
+
+    function toggleMasterMode() {
+      const html = document.documentElement;
+      isDark = !isDark;
+
+      if (isDark) {
+        html.classList.add('dark');
+        document.getElementById('masterThemeIcon').textContent = '🌙';
+        document.getElementById('masterThemeLabel').textContent = 'Dark: Supabase';
+        document.getElementById('lightVariantGroup').classList.add('hidden');
+        applySupabaseDark();
+      } else {
+        html.classList.remove('dark');
+        document.getElementById('masterThemeIcon').textContent = '☀️';
+        document.getElementById('masterThemeLabel').textContent = 'Light Mode';
+        document.getElementById('lightVariantGroup').classList.remove('hidden');
+        setLightStyle(currentLightStyle);
+      }
+      lucide.createIcons();
+    }
+
+    function setLightStyle(styleKey) {
+      currentLightStyle = styleKey;
+      
+      ['L1', 'L2', 'L3'].forEach(k => {
+        const btn = document.getElementById(`btn${k}`);
+        if (k === styleKey) {
+          btn.className = "px-2.5 py-1.5 rounded-lg text-slate-900 bg-white shadow-sm transition-all flex items-center gap-1.5 font-bold border border-slate-300";
+        } else {
+          btn.className = "px-2.5 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all flex items-center gap-1.5";
+        }
+      });
+
+      lightStyles[styleKey].apply();
+      lucide.createIcons();
+    }
+
+    // Default startup in Supabase Dark Mode
+    applySupabaseDark();
+  </script>
+</body>
+</html>

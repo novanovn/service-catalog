@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Oona Dev Portal — Topology Modernization Showcase (3 Samples)</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
+          },
+          colors: {
+            supabase: {
+              canvas: '#121212',
+              card: '#171717',
+              border: '#282828',
+              hover: '#1f1f1f',
+              emerald: '#3ecf8e',
+            },
+            oona: {
+              purple: '#7c3aed',
+              violet: '#6d28d9',
+              light: '#a78bfa',
+            }
+          },
+          animation: {
+            'dash-flow': 'dash 15s linear infinite',
+            'dash-flow-fast': 'dash 7s linear infinite',
+            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+          },
+          keyframes: {
+            dash: {
+              to: {
+                strokeDashoffset: '-1000'
+              }
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    
+    /* Background Grid Matrix from gemini_ui_preview */
+    .bg-grid-matrix {
+      background-size: 28px 28px;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+    }
+    
+    html.light-mode .bg-grid-matrix {
+      background-size: 28px 28px;
+      background-image: 
+        linear-gradient(to right, rgba(0, 0, 0, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+    }
+
+    .anim-line {
+      animation: dash 20s linear infinite;
+    }
+    .anim-line-fast {
+      animation: dash 8s linear infinite;
+    }
+
+    @keyframes dash {
+      to {
+        strokeDashoffset: -1000;
+      }
+    }
+
+    .glow-emerald { filter: drop-shadow(0 0 8px rgba(62, 207, 142, 0.4)); }
+    .glow-purple { filter: drop-shadow(0 0 10px rgba(124, 58, 237, 0.45)); }
+    .glow-amber { filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.4)); }
+    .glow-blue { filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.4)); }
+  </style>
+</head>
+<body class="bg-[#121212] text-slate-100 min-h-screen p-4 sm:p-8 transition-colors">
+
+  <!-- Top Controller Bar -->
+  <div class="max-w-7xl mx-auto mb-8 bg-[#171717] border border-[#282828] rounded-2xl p-5 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div>
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-[#a78bfa]">
+          <i data-lucide="network" class="w-4 h-4"></i>
+        </div>
+        <div>
+          <h1 class="text-lg font-bold text-white">Topology Visual Overhaul Showcase</h1>
+          <p class="text-xs text-slate-400">Pilih salah satu sample di bawah untuk memodernisasi tab <code class="text-purple-300 font-mono">#topology</code> di service catalog.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sample Switcher Buttons -->
+    <div class="flex items-center gap-2">
+      <div class="bg-[#121212] p-1.5 rounded-xl border border-[#282828] flex items-center gap-1.5 text-xs font-mono">
+        <button onclick="switchSample(1)" id="btn-sample-1" class="px-3.5 py-1.5 rounded-lg bg-[#7c3aed] text-white font-bold transition-all shadow-sm">
+          Sample 1: eBPF Live Mesh
+        </button>
+        <button onclick="switchSample(2)" id="btn-sample-2" class="px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition-all">
+          Sample 2: Supabase Linear Track
+        </button>
+        <button onclick="switchSample(3)" id="btn-sample-3" class="px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition-all">
+          Sample 3: Interactive Inspector
+        </button>
+      </div>
+
+      <button onclick="toggleTheme()" class="p-2 bg-[#121212] border border-[#282828] hover:border-slate-600 rounded-xl text-slate-300 transition-all">
+        <span id="themeEmoji">☀️</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto space-y-8">
+
+    <!-- ========================================================================= -->
+    <!-- SAMPLE 1: eBPF LIVE MESH CANVAS (Persis seperti di gemini_ui_preview.html) -->
+    <!-- ========================================================================= -->
+    <div id="sample-1-view" class="space-y-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <span class="text-xs font-mono font-bold text-[#a78bfa] uppercase tracking-wider">Sample 1 (Gemini UI Signature)</span>
+          <h2 class="text-xl font-bold text-white">Live Mesh Canvas Topology dengan Flow Garis Bergerak</h2>
+          <p class="text-xs text-slate-400 mt-0.5">Memakai SVG Canvas Coordinate Viewport, grid pattern matrix 28px, kurva bezier, glowing pulse dot, dan indikator latency telemetry.</p>
+        </div>
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/15 text-[#a78bfa] border border-purple-500/30 text-xs font-mono font-bold">
+          Rekomendasi Utama
+        </span>
+      </div>
+
+      <!-- Canvas Container Card -->
+      <div class="bg-[#171717] border border-[#282828] rounded-2xl overflow-hidden shadow-2xl relative">
+        
+        <!-- Header Controls Bar -->
+        <div class="px-5 py-3.5 border-b border-[#282828] flex flex-wrap items-center justify-between gap-3 bg-[#141414]">
+          <div class="flex items-center space-x-3">
+            <div class="w-2.5 h-2.5 rounded-full bg-[#3ecf8e] glow-emerald animate-pulse"></div>
+            <div>
+              <h3 class="text-xs sm:text-sm font-bold text-white tracking-wide flex items-center gap-2 font-mono">
+                Live Mesh Topology Graph
+                <span class="text-[10px] font-mono text-[#a78bfa] bg-purple-500/15 px-2 py-0.5 rounded border border-purple-500/30">eBPF Data-Plane</span>
+              </h3>
+            </div>
+          </div>
+
+          <!-- Legend & Controls -->
+          <div class="flex items-center space-x-4 text-xs font-mono">
+            <div class="hidden sm:flex items-center space-x-3 text-[11px] text-slate-400">
+              <span class="flex items-center"><span class="w-2 h-0.5 bg-blue-400 inline-block mr-1.5"></span> HTTPS Sync</span>
+              <span class="flex items-center"><span class="w-2 h-0.5 bg-amber-400 inline-block mr-1.5"></span> PutEvents (Async)</span>
+              <span class="flex items-center"><span class="w-2 h-0.5 bg-[#3ecf8e] inline-block mr-1.5"></span> VPC / RDS Client</span>
+            </div>
+            <div class="h-4 w-[1px] bg-[#282828] hidden sm:block"></div>
+            <div class="flex items-center space-x-2">
+              <button onclick="toggleStream(this)" class="px-2.5 py-1 bg-[#121212] hover:bg-[#1f1f1f] border border-[#282828] text-slate-300 rounded-lg text-xs font-mono transition-colors">
+                Pause Stream
+              </button>
+              <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-emerald-500/10 text-[#3ecf8e] text-xs border border-emerald-500/20">
+                <span class="w-1.5 h-1.5 rounded-full bg-[#3ecf8e]"></span>
+                ap-southeast-3
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- SVG Topology Canvas Container -->
+        <div class="relative w-full h-[400px] bg-[#121212] overflow-hidden bg-grid-matrix cursor-default">
+          <div class="absolute inset-0 pointer-events-none bg-gradient-to-b from-[#121212]/40 via-transparent to-[#121212]/80"></div>
+          
+          <svg class="w-full h-full" viewBox="0 0 1060 380" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="grad-blue" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.3"/>
+                <stop offset="50%" stop-color="#60a5fa" stop-opacity="1"/>
+                <stop offset="100%" stop-color="#7c3aed" stop-opacity="0.5"/>
+              </linearGradient>
+
+              <linearGradient id="grad-amber" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#7c3aed" stop-opacity="0.5"/>
+                <stop offset="50%" stop-color="#fbbf24" stop-opacity="1"/>
+                <stop offset="100%" stop-color="#f59e0b" stop-opacity="0.3"/>
+              </linearGradient>
+
+              <linearGradient id="grad-green" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.3"/>
+                <stop offset="50%" stop-color="#3ecf8e" stop-opacity="1"/>
+                <stop offset="100%" stop-color="#10b981" stop-opacity="0.5"/>
+              </linearGradient>
+            </defs>
+
+            <!-- CONNECTIONS (Dashed Flowing Lines) -->
+            <!-- 1. API Gateway -> Lambda Core (HTTPS Sync) -->
+            <path d="M 230 190 L 370 190" stroke="url(#grad-blue)" stroke-width="2.5" stroke-dasharray="6,6" class="anim-line" />
+            
+            <!-- 2. Lambda Core -> EventBridge (PutEvents) -->
+            <path d="M 600 190 L 730 190" stroke="url(#grad-amber)" stroke-width="2.5" stroke-dasharray="6,6" class="anim-line" />
+
+            <!-- 3. Lambda Core -> RDS Postgres (VPC Private Subnet) -->
+            <path d="M 485 240 C 485 300, 680 300, 730 300" stroke="url(#grad-green)" stroke-width="2" stroke-dasharray="5,5" class="anim-line" />
+
+            <!-- LABELS ON PATHS -->
+            <rect x="270" y="176" width="62" height="18" rx="9" fill="#171717" stroke="#3b82f6" stroke-width="1" opacity="0.9" />
+            <text x="301" y="188" fill="#93c5fd" font-size="9" font-family="monospace" text-anchor="middle" font-weight="bold">HTTPS 4ms</text>
+
+            <rect x="635" y="176" width="66" height="18" rx="9" fill="#171717" stroke="#f59e0b" stroke-width="1" opacity="0.9" />
+            <text x="668" y="188" fill="#fcd34d" font-size="9" font-family="monospace" text-anchor="middle" font-weight="bold">PutEvents</text>
+
+            <rect x="580" y="291" width="70" height="18" rx="9" fill="#171717" stroke="#3ecf8e" stroke-width="1" opacity="0.9" />
+            <text x="615" y="303" fill="#6ee7b7" font-size="9" font-family="monospace" text-anchor="middle" font-weight="bold">VPC REST</text>
+
+            <!-- ================= NODES ================= -->
+
+            <!-- NODE 1: Ingress API Gateway -->
+            <foreignObject x="40" y="135" width="190" height="110">
+              <div xmlns="http://www.w3.org/1999/xhtml" class="p-3.5 rounded-2xl bg-[#171717]/95 border border-[#282828] hover:border-blue-500/50 shadow-xl transition-all group">
+                <div class="flex items-center justify-between">
+                  <span class="w-2 h-2 rounded-full bg-blue-400 glow-blue"></span>
+                  <span class="text-[9px] font-mono font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20">INGRESS</span>
+                </div>
+                <div class="mt-2 flex items-center gap-2">
+                  <div class="w-6 h-6 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
+                  </div>
+                  <div>
+                    <h4 class="text-xs font-bold text-white group-hover:text-blue-400 transition-colors">API Gateway</h4>
+                    <p class="text-[10px] text-slate-400">Care Portal Route</p>
+                  </div>
+                </div>
+                <div class="mt-2 pt-2 border-t border-[#282828] flex items-center justify-between text-[10px] font-mono text-slate-400">
+                  <span class="truncate text-blue-300">/care/v1/health...</span>
+                  <span class="text-slate-500">200 OK</span>
+                </div>
+              </div>
+            </foreignObject>
+
+            <!-- NODE 2: HERO MICROSERVICE (Core Runtime) -->
+            <foreignObject x="370" y="120" width="230" height="140">
+              <div xmlns="http://www.w3.org/1999/xhtml" class="p-4 rounded-2xl bg-[#171717] border-2 border-[#7c3aed] shadow-2xl shadow-purple-950/50 relative group">
+                <span class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-[#7c3aed] text-[9px] font-mono font-extrabold text-white uppercase tracking-wider shadow-md">
+                  CORE RUNTIME
+                </span>
+                <div class="flex items-center justify-between mt-1">
+                  <span class="w-2 h-2 rounded-full bg-[#3ecf8e] glow-emerald"></span>
+                  <span class="text-[9px] font-mono font-bold text-[#a78bfa] bg-purple-500/15 px-2 py-0.5 rounded border border-purple-500/30">nodejs24.x</span>
+                </div>
+                <div class="mt-2 flex items-center gap-2.5">
+                  <div class="w-8 h-8 rounded-xl bg-[#FF9900]/15 flex items-center justify-center ring-1 ring-[#FF9900]/40">
+                    <img src="/static/img/brands/lambda.svg" alt="AWS Lambda" width="18" height="18">
+                  </div>
+                  <div class="truncate">
+                    <h4 class="text-xs font-extrabold text-white truncate group-hover:text-purple-300 transition-colors">health-renewal-svc</h4>
+                    <p class="text-[10px] text-purple-300 font-mono">256 MB · ap-southeast-3</p>
+                  </div>
+                </div>
+                <div class="mt-3 pt-2 border-t border-[#282828] flex items-center justify-between text-[10px] font-mono">
+                  <span class="text-slate-400">P99: 142ms</span>
+                  <span class="text-[#3ecf8e] font-bold">● Operational</span>
+                </div>
+              </div>
+            </foreignObject>
+
+            <!-- NODE 3: Async EventBridge -->
+            <foreignObject x="730" y="135" width="210" height="110">
+              <div xmlns="http://www.w3.org/1999/xhtml" class="p-3.5 rounded-2xl bg-[#171717]/95 border border-[#282828] hover:border-amber-500/50 shadow-xl transition-all group">
+                <div class="flex items-center justify-between">
+                  <span class="w-2 h-2 rounded-full bg-amber-400 glow-amber"></span>
+                  <span class="text-[9px] font-mono font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">EVENT BUS</span>
+                </div>
+                <div class="mt-2 flex items-center gap-2">
+                  <div class="w-6 h-6 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-400">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                  </div>
+                  <div>
+                    <h4 class="text-xs font-bold text-white group-hover:text-amber-400 transition-colors">AWS EventBridge</h4>
+                    <p class="text-[10px] text-slate-400">care-router-events</p>
+                  </div>
+                </div>
+                <div class="mt-2 pt-2 border-t border-[#282828] flex items-center justify-between text-[10px] font-mono text-slate-400">
+                  <span class="truncate text-amber-300">0 lag · Fanout</span>
+                  <span class="text-slate-500">Bus Live</span>
+                </div>
+              </div>
+            </foreignObject>
+
+            <!-- NODE 4: PostgreSQL RDS Database (VPC) -->
+            <foreignObject x="730" y="260" width="210" height="100">
+              <div xmlns="http://www.w3.org/1999/xhtml" class="p-3 rounded-2xl bg-[#171717]/95 border border-[#282828] hover:border-emerald-500/50 shadow-xl transition-all group">
+                <div class="flex items-center justify-between">
+                  <span class="w-2 h-2 rounded-full bg-[#3ecf8e] glow-emerald"></span>
+                  <span class="text-[9px] font-mono font-bold text-[#3ecf8e] bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">POSTGRES RDS</span>
+                </div>
+                <div class="mt-1.5 flex items-center gap-2">
+                  <div class="w-6 h-6 rounded-lg bg-emerald-500/10 flex items-center justify-center text-[#3ecf8e]">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/></svg>
+                  </div>
+                  <div class="truncate">
+                    <h4 class="text-xs font-bold text-white group-hover:text-emerald-400 transition-colors">neuron_db</h4>
+                    <p class="text-[10px] text-slate-400 truncate">ap-southeast-3.rds</p>
+                  </div>
+                </div>
+              </div>
+            </foreignObject>
+
+          </svg>
+        </div>
+
+        <!-- Telemetry Bottom Bar -->
+        <div class="p-4 bg-[#141414] border-t border-[#282828] flex flex-wrap items-center justify-between gap-4 text-xs font-mono">
+          <div class="flex items-center gap-6">
+            <div>
+              <span class="text-slate-500 text-[10px] uppercase block">Traffic Rate</span>
+              <span class="font-bold text-white">124 req/min</span>
+            </div>
+            <div>
+              <span class="text-slate-500 text-[10px] uppercase block">Success Ratio</span>
+              <span class="font-bold text-[#3ecf8e]">99.98%</span>
+            </div>
+            <div>
+              <span class="text-slate-500 text-[10px] uppercase block">VPC Subnet</span>
+              <span class="font-bold text-slate-300">subnet-0a91f (Private)</span>
+            </div>
+          </div>
+          <div class="text-[11px] text-slate-400">
+            Telemetry parsed from Terraform state &amp; AWS Jakarta metadata.
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ========================================================================= -->
+    <!-- SAMPLE 2: SUPABASE LINEAR PIPELINE (Horizontal Track + Pulse Nodes)        -->
+    <!-- ========================================================================= -->
+    <div id="sample-2-view" class="space-y-4 hidden">
+      <div class="flex items-center justify-between">
+        <div>
+          <span class="text-xs font-mono font-bold text-blue-400 uppercase tracking-wider">Sample 2</span>
+          <h2 class="text-xl font-bold text-white">Supabase Linear Pipeline Track</h2>
+          <p class="text-xs text-slate-400 mt-0.5">Layout track horizontal yang ramping dengan particle beam connector dan card metrik terstruktur.</p>
+        </div>
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/15 text-blue-400 border border-blue-500/30 text-xs font-mono font-bold">
+          Clean &amp; Compact
+        </span>
+      </div>
+
+      <!-- Linear Track Card -->
+      <div class="bg-[#171717] border border-[#282828] rounded-2xl p-6 shadow-sm space-y-6">
+        <div class="flex items-center justify-between border-b border-[#282828] pb-4">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-[#3ecf8e] animate-pulse"></span>
+            <span class="text-xs font-mono font-bold text-white uppercase tracking-wider">End-to-End Service Flow Track</span>
+          </div>
+          <span class="text-xs font-mono text-slate-400">4 Stages Connected</span>
+        </div>
+
+        <!-- 4 Step Track Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 relative">
+          
+          <!-- Step 1 -->
+          <div class="p-4 rounded-xl bg-[#121212] border border-[#282828] relative group hover:border-blue-500/50 transition-all">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-[10px] font-mono font-bold text-blue-400 uppercase">1. Ingress</span>
+              <span class="w-2 h-2 rounded-full bg-blue-400"></span>
+            </div>
+            <h4 class="text-xs font-bold text-white">API Gateway Route</h4>
+            <p class="text-[11px] text-slate-400 mt-1">HTTP Sync Callback</p>
+            <div class="mt-3 pt-2 border-t border-[#282828] text-[10px] font-mono text-blue-300 truncate">
+              POST /care/v1/callback/...
+            </div>
+          </div>
+
+          <!-- Step 2 (Hero) -->
+          <div class="p-4 rounded-xl bg-[#121212] border-2 border-[#7c3aed] relative group shadow-lg shadow-purple-950/40">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-[10px] font-mono font-bold text-[#a78bfa] uppercase">2. Microservice</span>
+              <span class="w-2 h-2 rounded-full bg-[#3ecf8e] animate-pulse"></span>
+            </div>
+            <h4 class="text-xs font-extrabold text-white">AWS Lambda</h4>
+            <p class="text-[11px] text-purple-300 mt-1">health-renewal-svc</p>
+            <div class="mt-3 pt-2 border-t border-purple-500/30 flex items-center justify-between text-[10px] font-mono">
+              <span class="text-slate-400">nodejs24.x</span>
+              <span class="text-emerald-400 font-bold">256MB</span>
+            </div>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="p-4 rounded-xl bg-[#121212] border border-[#282828] relative group hover:border-amber-500/50 transition-all">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-[10px] font-mono font-bold text-amber-400 uppercase">3. Async Bus</span>
+              <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+            </div>
+            <h4 class="text-xs font-bold text-white">AWS EventBridge</h4>
+            <p class="text-[11px] text-slate-400 mt-1">PutEvents Router</p>
+            <div class="mt-3 pt-2 border-t border-[#282828] text-[10px] font-mono text-amber-300 truncate">
+              care-router-events
+            </div>
+          </div>
+
+          <!-- Step 4 -->
+          <div class="p-4 rounded-xl bg-[#121212] border border-[#282828] relative group hover:border-emerald-500/50 transition-all">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-[10px] font-mono font-bold text-[#3ecf8e] uppercase">4. Persistence</span>
+              <span class="w-2 h-2 rounded-full bg-[#3ecf8e]"></span>
+            </div>
+            <h4 class="text-xs font-bold text-white">PostgreSQL RDS</h4>
+            <p class="text-[11px] text-slate-400 mt-1">Database Instance</p>
+            <div class="mt-3 pt-2 border-t border-[#282828] text-[10px] font-mono text-emerald-300 truncate">
+              neuron_db (ap-southeast-3)
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ========================================================================= -->
+    <!-- SAMPLE 3: INTERACTIVE NODE INSPECTOR (Live Drawer & Telemetry Details)     -->
+    <!-- ========================================================================= -->
+    <div id="sample-3-view" class="space-y-4 hidden">
+      <div class="flex items-center justify-between">
+        <div>
+          <span class="text-xs font-mono font-bold text-emerald-400 uppercase tracking-wider">Sample 3</span>
+          <h2 class="text-xl font-bold text-white">Interactive Node Inspector + Live Telemetry</h2>
+          <p class="text-xs text-slate-400 mt-0.5">Setiap node bisa diklik untuk membuka inspector drawer di sampingnya yang merinci ARN, IAM Role, Security Group, dan connection string.</p>
+        </div>
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 text-[#3ecf8e] border border-emerald-500/30 text-xs font-mono font-bold">
+          High Diagnostic Value
+        </span>
+      </div>
+
+      <!-- Split Layout: Topology on Left, Inspector Drawer on Right -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Left 2 Cols: Topology Cards -->
+        <div class="lg:col-span-2 bg-[#171717] border border-[#282828] rounded-2xl p-6 shadow-sm space-y-4">
+          <div class="flex items-center justify-between border-b border-[#282828] pb-3">
+            <span class="text-xs font-mono font-bold text-slate-300">Click any node to inspect infrastructure config</span>
+            <span class="text-[11px] font-mono text-slate-500">Interactive</span>
+          </div>
+
+          <div class="space-y-3">
+            <!-- Node A -->
+            <div onclick="showNodeDetail('ingress')" class="p-4 rounded-xl bg-[#121212] border border-[#282828] hover:border-blue-500 cursor-pointer flex items-center justify-between transition-all">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400 font-bold">1</div>
+                <div>
+                  <h4 class="text-xs font-bold text-white">API Gateway Route</h4>
+                  <p class="text-[11px] text-slate-400">Ingress Trigger (Care Portal)</p>
+                </div>
+              </div>
+              <span class="text-xs font-mono text-blue-400">Inspect &rarr;</span>
+            </div>
+
+            <!-- Node B (Active) -->
+            <div onclick="showNodeDetail('lambda')" class="p-4 rounded-xl bg-[#121212] border-2 border-[#7c3aed] cursor-pointer flex items-center justify-between shadow-lg shadow-purple-950/30 transition-all">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center text-[#a78bfa] font-bold">2</div>
+                <div>
+                  <h4 class="text-xs font-bold text-white">AWS Lambda (health-renewal-svc)</h4>
+                  <p class="text-[11px] text-purple-300">Core Runtime Engine</p>
+                </div>
+              </div>
+              <span class="text-xs font-mono text-[#a78bfa] font-bold">Selected &bull;</span>
+            </div>
+
+            <!-- Node C -->
+            <div onclick="showNodeDetail('eventbridge')" class="p-4 rounded-xl bg-[#121212] border border-[#282828] hover:border-amber-500 cursor-pointer flex items-center justify-between transition-all">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-400 font-bold">3</div>
+                <div>
+                  <h4 class="text-xs font-bold text-white">AWS EventBridge</h4>
+                  <p class="text-[11px] text-slate-400">care-router-events</p>
+                </div>
+              </div>
+              <span class="text-xs font-mono text-amber-400">Inspect &rarr;</span>
+            </div>
+
+            <!-- Node D -->
+            <div onclick="showNodeDetail('rds')" class="p-4 rounded-xl bg-[#121212] border border-[#282828] hover:border-emerald-500 cursor-pointer flex items-center justify-between transition-all">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-[#3ecf8e] font-bold">4</div>
+                <div>
+                  <h4 class="text-xs font-bold text-white">PostgreSQL RDS (neuron_db)</h4>
+                  <p class="text-[11px] text-slate-400">VPC Private Subnet</p>
+                </div>
+              </div>
+              <span class="text-xs font-mono text-[#3ecf8e]">Inspect &rarr;</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right 1 Col: Live Inspector Detail Panel -->
+        <div class="bg-[#171717] border border-[#282828] rounded-2xl p-5 shadow-sm flex flex-col justify-between">
+          <div class="space-y-4">
+            <div class="flex items-center justify-between border-b border-[#282828] pb-3">
+              <div class="flex items-center gap-2">
+                <i data-lucide="info" class="w-4 h-4 text-[#a78bfa]"></i>
+                <h3 id="inspector-title" class="text-xs font-mono font-bold text-white uppercase">Lambda Node Details</h3>
+              </div>
+              <span id="inspector-badge" class="px-2 py-0.5 rounded bg-purple-500/15 text-[#a78bfa] border border-purple-500/30 text-[10px] font-mono">CORE</span>
+            </div>
+
+            <div class="space-y-3 text-xs font-mono">
+              <div>
+                <span class="text-[10px] text-slate-500 uppercase block">Terraform Resource Type</span>
+                <p id="inspector-type" class="text-slate-200 font-bold">aws_lambda_function</p>
+              </div>
+
+              <div>
+                <span class="text-[10px] text-slate-500 uppercase block">Cloud Region</span>
+                <p id="inspector-region" class="text-slate-200">ap-southeast-3 (Jakarta)</p>
+              </div>
+
+              <div>
+                <span class="text-[10px] text-slate-500 uppercase block">Runtime &amp; Memory</span>
+                <p id="inspector-runtime" class="text-purple-300 font-bold">nodejs24.x &bull; 256 MB</p>
+              </div>
+
+              <div>
+                <span class="text-[10px] text-slate-500 uppercase block">Target Endpoint / ARN</span>
+                <code id="inspector-arn" class="block p-2 rounded-lg bg-[#121212] border border-[#282828] text-[10px] text-slate-300 break-all">
+                  arn:aws:lambda:ap-southeast-3:378077:function:health-renewal-svc-clone
+                </code>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-4 border-t border-[#282828] flex items-center justify-between text-xs font-mono">
+            <span class="text-slate-500">Terraform IaC Synced</span>
+            <span class="text-[#3ecf8e] font-bold">● Validated</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    function switchSample(num) {
+      document.getElementById('sample-1-view').classList.add('hidden');
+      document.getElementById('sample-2-view').classList.add('hidden');
+      document.getElementById('sample-3-view').classList.add('hidden');
+
+      document.getElementById('btn-sample-1').className = "px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition-all";
+      document.getElementById('btn-sample-2').className = "px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition-all";
+      document.getElementById('btn-sample-3').className = "px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition-all";
+
+      document.getElementById(`sample-${num}-view`).classList.remove('hidden');
+      document.getElementById(`btn-sample-${num}`).className = "px-3.5 py-1.5 rounded-lg bg-[#7c3aed] text-white font-bold transition-all shadow-sm";
+    }
+
+    let isStreamActive = true;
+    function toggleStream(btn) {
+      isStreamActive = !isStreamActive;
+      const animLines = document.querySelectorAll('.anim-line');
+      animLines.forEach(el => {
+        el.style.animationPlayState = isStreamActive ? 'running' : 'paused';
+      });
+      btn.innerText = isStreamActive ? 'Pause Stream' : 'Resume Stream';
+    }
+
+    let isDark = true;
+    function toggleTheme() {
+      isDark = !isDark;
+      document.documentElement.classList.toggle('light-mode', !isDark);
+      document.documentElement.classList.toggle('dark', isDark);
+      document.getElementById('themeEmoji').innerText = isDark ? '☀️' : '🌙';
+    }
+
+    const nodeData = {
+      ingress: {
+        title: "API Gateway Details",
+        badge: "INGRESS",
+        type: "aws_apigatewayv2_route",
+        region: "ap-southeast-3 (Jakarta)",
+        runtime: "HTTP API / JWT Authorizer",
+        arn: "POST /care/v1/callback/health-renewal-quotation-clone"
+      },
+      lambda: {
+        title: "Lambda Node Details",
+        badge: "CORE",
+        type: "aws_lambda_function",
+        region: "ap-southeast-3 (Jakarta)",
+        runtime: "nodejs24.x • 256 MB",
+        arn: "arn:aws:lambda:ap-southeast-3:378077:function:health-renewal-svc-clone"
+      },
+      eventbridge: {
+        title: "EventBridge Bus Details",
+        badge: "EVENT BUS",
+        type: "aws_cloudwatch_event_rule",
+        region: "ap-southeast-3 (Jakarta)",
+        runtime: "Asynchronous Event Router",
+        arn: "arn:aws:events:ap-southeast-3:378077:event-bus/care-router-events"
+      },
+      rds: {
+        title: "PostgreSQL Database Details",
+        badge: "DATABASE",
+        type: "aws_db_instance (Postgres 15)",
+        region: "ap-southeast-3 (Jakarta)",
+        runtime: "VPC Private Subnet (neuron_db)",
+        arn: "oona-ph-integration-uat-postgres-db.cl8sc4g44494.ap-southeast-3.rds.amazonaws.com:5432"
+      }
+    };
+
+    function showNodeDetail(key) {
+      const d = nodeData[key];
+      if (!d) return;
+      document.getElementById('inspector-title').innerText = d.title;
+      document.getElementById('inspector-badge').innerText = d.badge;
+      document.getElementById('inspector-type').innerText = d.type;
+      document.getElementById('inspector-region').innerText = d.region;
+      document.getElementById('inspector-runtime').innerText = d.runtime;
+      document.getElementById('inspector-arn').innerText = d.arn;
+    }
+  </script>
+</body>
+</html>

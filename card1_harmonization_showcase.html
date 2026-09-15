@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="id" class="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Oona Dev Portal — Harmonious Card 1 Exploration</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Inter"', '"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f8fafc; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+    .dark ::-webkit-scrollbar-track { background: #121212; }
+    .dark ::-webkit-scrollbar-thumb { background: #282828; border-radius: 3px; }
+  </style>
+</head>
+<body class="bg-[#f8fafc] text-slate-800 font-sans antialiased min-h-screen p-4 sm:p-8 space-y-8 transition-colors duration-200" id="bodyRoot">
+
+  <!-- TOP HEADER WITH CONTROLS -->
+  <header class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-slate-200" id="topHeader">
+    <div class="flex items-center gap-3">
+      <div class="h-10 w-10 rounded-xl bg-[#7c3aed] text-white flex items-center justify-center font-bold text-sm shadow-md shadow-purple-500/20">
+        <i data-lucide="layout-grid" class="w-5 h-5"></i>
+      </div>
+      <div>
+        <h1 class="text-base font-bold text-slate-900 flex items-center gap-2" id="headerTitle">
+          Card 1 (Catalog Services) Harmonization
+          <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 font-bold border border-purple-200">
+            Symmetric 4-Card Grid
+          </span>
+        </h1>
+        <p class="text-xs text-slate-500" id="headerSub">Mengubah Card 1 agar selaras dengan Card 2, 3, 4 (tidak lagi memakai background ungu blok yang beda sendiri).</p>
+      </div>
+    </div>
+
+    <!-- Controls: Card 1 Style Selector & Dark/Light Toggle -->
+    <div class="flex items-center gap-3 flex-wrap">
+      <!-- Style Selector -->
+      <div class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-semibold" id="card1StyleGroup">
+        <button onclick="setCard1Style('opt1')" id="btnOpt1" class="px-3 py-1.5 rounded-lg bg-white text-slate-900 shadow-sm transition-all flex items-center gap-1.5 font-bold">
+          <span>Opsi 1: Neutral + Sparkline Ungu</span>
+        </button>
+        <button onclick="setCard1Style('opt2')" id="btnOpt2" class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all flex items-center gap-1.5">
+          <span>Opsi 2: Icon Box (Identik Card 2,3,4)</span>
+        </button>
+        <button onclick="setCard1Style('opt3')" id="btnOpt3" class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all flex items-center gap-1.5">
+          <span>Opsi 3: Supabase Emerald Accent</span>
+        </button>
+      </div>
+
+      <!-- Dark / Light Master Toggle -->
+      <button onclick="toggleTheme()" id="themeBtn" class="flex items-center gap-2 px-3.5 py-1.5 rounded-xl border border-slate-300 bg-white text-slate-800 hover:border-purple-400 shadow-sm transition-all text-xs font-bold cursor-pointer">
+        <span id="themeIcon">☀️</span>
+        <span id="themeLabel">Light Mode</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="max-w-7xl mx-auto space-y-8">
+
+    <!-- DESCRIPTION BANNER -->
+    <div class="p-4 rounded-2xl border border-purple-200 bg-purple-50/50 flex items-start gap-3.5 text-xs transition-colors" id="descBanner">
+      <div class="p-2 rounded-xl bg-purple-100 text-[#7c3aed] shrink-0 mt-0.5">
+        <i data-lucide="info" class="w-4 h-4"></i>
+      </div>
+      <div>
+        <h2 class="font-bold text-slate-900" id="bannerTitle">Keempat Card Sekarang Memiliki Latar Belakang Permukaan yang SERAGAM</h2>
+        <p class="text-slate-600 mt-0.5 leading-relaxed" id="bannerText">
+          Card 1 (Catalog Services) tidak lagi diblok warna ungu pekat sendirian. Keempat card kini memiliki <strong>background netral yang sama</strong> (putih bersih di Light Mode, #171717 di Supabase Dark Mode). Perbedaan fungsi antar card diwakili oleh <strong>warna aksen icon, badge pill, dan link</strong> (Ungu Oona, Biru Tickets, Amber Review, Merah Security Alert).
+        </p>
+      </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- THE 4 CARDS GRID (ALL 4 IN HARMONIOUS BALANCE) -->
+    <!-- ========================================================================= -->
+    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+
+      <!-- ========================================== -->
+      <!-- CARD 1: CATALOG SERVICES (DYNAMIC HARMONIZED) -->
+      <!-- ========================================== -->
+      <div class="kpi-card relative overflow-hidden rounded-2xl p-5 shadow-sm transition-all border" id="cardCatalog">
+        
+        <!-- Top accent line (Optional, dynamically styled) -->
+        <div class="absolute top-0 left-0 right-0 h-1 bg-[#7c3aed]" id="card1TopLine"></div>
+
+        <!-- Header row -->
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold uppercase tracking-wider text-slate-400 card-label">Catalog Services</span>
+          <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-mono font-bold border" id="card1Badge">
+            Live
+          </span>
+        </div>
+
+        <!-- Middle row: Metric + Graphic/Icon -->
+        <div class="mt-4 flex items-baseline justify-between" id="card1Middle">
+          <!-- Injected dynamically based on Opsi 1, 2, or 3 -->
+        </div>
+
+        <!-- Footer row -->
+        <div class="mt-4 pt-3 border-t flex items-center justify-between text-xs card-footer text-slate-400" id="card1Footer">
+          <span>7 Shelves (PH &amp; ID)</span>
+          <a href="#" class="font-bold hover:underline flex items-center gap-1" id="card1Link">Explore &rarr;</a>
+        </div>
+      </div>
+
+      <!-- ========================================== -->
+      <!-- CARD 2: OPEN TICKETS (Blue Accent) -->
+      <!-- ========================================== -->
+      <div class="kpi-card relative overflow-hidden rounded-2xl p-5 shadow-sm transition-all border" id="cardTickets">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold uppercase tracking-wider text-slate-400 card-label">Open Tickets</span>
+          <span class="inline-flex items-center rounded-full bg-blue-500/10 px-2.5 py-0.5 text-[10px] font-mono font-bold text-blue-600 dark:text-blue-400 border border-blue-500/20">Pipeline</span>
+        </div>
+        <div class="mt-4 flex items-baseline justify-between">
+          <p class="text-3xl font-extrabold tracking-tight font-mono card-num text-slate-900">8</p>
+          <div class="p-2.5 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 ring-1 ring-blue-500/20">
+            <i data-lucide="ticket" class="h-5 w-5"></i>
+          </div>
+        </div>
+        <div class="mt-4 pt-3 border-t flex items-center justify-between text-xs card-footer text-slate-400">
+          <span>In Provisioning Queue</span>
+          <a href="#" class="font-bold text-blue-600 dark:text-blue-400 hover:underline">View list &rarr;</a>
+        </div>
+      </div>
+
+      <!-- ========================================== -->
+      <!-- CARD 3: PENDING APPROVALS (Amber Accent) -->
+      <!-- ========================================== -->
+      <div class="kpi-card relative overflow-hidden rounded-2xl p-5 shadow-sm transition-all border" id="cardApprovals">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold uppercase tracking-wider text-slate-400 card-label">Pending Review</span>
+          <span class="inline-flex items-center rounded-full bg-amber-500/10 px-2.5 py-0.5 text-[10px] font-mono font-bold text-amber-600 dark:text-amber-400 border border-amber-500/20">DevOps Gate</span>
+        </div>
+        <div class="mt-4 flex items-baseline justify-between">
+          <p class="text-3xl font-extrabold tracking-tight font-mono card-num text-slate-900">3</p>
+          <div class="p-2.5 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 ring-1 ring-amber-500/20">
+            <i data-lucide="check-check" class="h-5 w-5"></i>
+          </div>
+        </div>
+        <div class="mt-4 pt-3 border-t flex items-center justify-between text-xs card-footer text-slate-400">
+          <span>Awaiting DevOps Decision</span>
+          <a href="#" class="font-bold text-amber-600 dark:text-amber-400 hover:underline">Review &rarr;</a>
+        </div>
+      </div>
+
+      <!-- ========================================== -->
+      <!-- CARD 4: SECURITY GATE (Swiss Pure Red Alert Accent) -->
+      <!-- ========================================== -->
+      <div class="kpi-card relative overflow-hidden rounded-2xl p-5 shadow-sm transition-all border border-red-200" id="cardSecurity">
+        <!-- Top Red Accent Strip -->
+        <div class="absolute top-0 left-0 right-0 h-1 bg-[#d92d20]"></div>
+
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold uppercase tracking-wider text-red-700 dark:text-red-400 card-label">Security Gate</span>
+          <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-mono font-bold bg-red-50 dark:bg-red-500/20 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-500/40">
+            FAILED (2 Critical)
+          </span>
+        </div>
+        <div class="mt-4 flex items-baseline justify-between">
+          <p class="text-3xl font-extrabold tracking-tight font-mono text-[#d92d20] dark:text-red-400">2</p>
+          <div class="p-2.5 rounded-xl bg-red-50 dark:bg-red-500/20 text-[#d92d20] dark:text-red-400 ring-1 ring-red-200 dark:ring-red-500/30">
+            <i data-lucide="shield-alert" class="h-5 w-5"></i>
+          </div>
+        </div>
+        <div class="mt-4 pt-3 border-t flex items-center justify-between text-xs card-footer text-red-700 dark:text-red-400 font-medium">
+          <span class="truncate pr-2">4 High &bull; SSRF Detected</span>
+          <a href="#" class="font-bold whitespace-nowrap text-[#d92d20] dark:text-red-400 hover:underline">Inspect &rarr;</a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- COMPARISON EXPLANATION TABLE -->
+    <div class="rounded-2xl border p-6 bg-white transition-all space-y-4 shadow-sm" id="tableSummary">
+      <h3 class="text-xs font-bold uppercase font-mono tracking-wider text-slate-500">Analisis Harmoni 4 Card:</h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+        <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/50 space-y-1.5" id="sumBox1">
+          <div class="font-bold text-purple-700 dark:text-purple-400 flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-[#7c3aed]"></span> Opsi 1: Sparkline Halus
+          </div>
+          <p class="text-slate-600 dark:text-slate-400 text-[11px] leading-relaxed">
+            Permukaan card putih/dark sama persis dengan card lainnya, namun tetap mempertahankan <strong>grafik sparkline SVG</strong> ungu lembut di samping angka 14.
+          </p>
+        </div>
+        <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/50 space-y-1.5" id="sumBox2">
+          <div class="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-slate-500"></span> Opsi 2: Icon Box (100% Simetris)
+          </div>
+          <p class="text-slate-600 dark:text-slate-400 text-[11px] leading-relaxed">
+            Card 1 memakai kotak icon `<i data-lucide="server"></i>` di kanan, sama persis bentuknya dengan Card 2 (`ticket`), Card 3 (`check-check`), dan Card 4 (`shield`).
+          </p>
+        </div>
+        <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/50 space-y-1.5" id="sumBox3">
+          <div class="font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Opsi 3: Emerald Accent (Supabase)
+          </div>
+          <p class="text-slate-600 dark:text-slate-400 text-[11px] leading-relaxed">
+            Card 1 memakai aksen hijau Emerald Supabase (`#3ecf8e`), melambangkan <em>"Active &amp; Healthy Service Catalog"</em>. Sangat serasi dengan tema Supabase Dark.
+          </p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    let isDark = false;
+    let currentCard1Style = 'opt1'; // opt1, opt2, opt3
+
+    function setCard1Style(styleKey) {
+      currentCard1Style = styleKey;
+
+      ['opt1', 'opt2', 'opt3'].forEach(k => {
+        const btn = document.getElementById('btn' + k.charAt(0).toUpperCase() + k.slice(1));
+        if (k === styleKey) {
+          btn.className = "px-3 py-1.5 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm transition-all flex items-center gap-1.5 font-bold border border-slate-300";
+        } else {
+          btn.className = "px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all flex items-center gap-1.5";
+        }
+      });
+
+      renderCard1();
+    }
+
+    function renderCard1() {
+      const middle = document.getElementById('card1Middle');
+      const badge = document.getElementById('card1Badge');
+      const link = document.getElementById('card1Link');
+      const topLine = document.getElementById('card1TopLine');
+
+      if (currentCard1Style === 'opt1') {
+        // OPSI 1: NEUTRAL CARD + SPARKLINES UNGU
+        topLine.className = "absolute top-0 left-0 right-0 h-1 bg-[#7c3aed]";
+        if (isDark) {
+          badge.className = "inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-mono font-bold bg-purple-500/15 text-purple-400 border border-purple-500/30";
+          link.className = "font-bold text-purple-400 hover:underline flex items-center gap-1";
+          middle.innerHTML = `
+            <p class="text-3xl font-extrabold tracking-tight font-mono text-white">14</p>
+            <div class="h-9 w-20 opacity-80">
+              <svg class="w-full h-full text-purple-400" viewBox="0 0 100 40" fill="none">
+                <defs>
+                  <linearGradient id="sparkGrad1" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#a78bfa" stop-opacity="0.3"/>
+                    <stop offset="100%" stop-color="#a78bfa" stop-opacity="0"/>
+                  </linearGradient>
+                </defs>
+                <path fill="url(#sparkGrad1)" d="M0,35 Q25,15, 50,22 T100,5 L100,40 L0,40 Z"/>
+                <path stroke="currentColor" stroke-width="2.5" stroke-linecap="round" d="M0,35 Q25,15, 50,22 T100,5"/>
+              </svg>
+            </div>
+          `;
+        } else {
+          badge.className = "inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-mono font-bold bg-purple-50 text-purple-700 border border-purple-200";
+          link.className = "font-bold text-purple-700 hover:underline flex items-center gap-1";
+          middle.innerHTML = `
+            <p class="text-3xl font-extrabold tracking-tight font-mono text-slate-900">14</p>
+            <div class="h-9 w-20 opacity-90">
+              <svg class="w-full h-full text-[#7c3aed]" viewBox="0 0 100 40" fill="none">
+                <defs>
+                  <linearGradient id="sparkGrad1" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#7c3aed" stop-opacity="0.2"/>
+                    <stop offset="100%" stop-color="#7c3aed" stop-opacity="0"/>
+                  </linearGradient>
+                </defs>
+                <path fill="url(#sparkGrad1)" d="M0,35 Q25,15, 50,22 T100,5 L100,40 L0,40 Z"/>
+                <path stroke="currentColor" stroke-width="2.5" stroke-linecap="round" d="M0,35 Q25,15, 50,22 T100,5"/>
+              </svg>
+            </div>
+          `;
+        }
+      } else if (currentCard1Style === 'opt2') {
+        // OPSI 2: NEUTRAL CARD + ICON BOX UNGU (100% IDENTIK CARD 2,3,4)
+        topLine.className = "absolute top-0 left-0 right-0 h-1 bg-[#7c3aed]";
+        if (isDark) {
+          badge.className = "inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-mono font-bold bg-purple-500/15 text-purple-400 border border-purple-500/30";
+          link.className = "font-bold text-purple-400 hover:underline flex items-center gap-1";
+          middle.innerHTML = `
+            <p class="text-3xl font-extrabold tracking-tight font-mono text-white">14</p>
+            <div class="p-2.5 rounded-xl bg-purple-500/15 text-purple-400 ring-1 ring-purple-500/30">
+              <i data-lucide="server" class="h-5 w-5"></i>
+            </div>
+          `;
+        } else {
+          badge.className = "inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-mono font-bold bg-purple-50 text-purple-700 border border-purple-200";
+          link.className = "font-bold text-purple-700 hover:underline flex items-center gap-1";
+          middle.innerHTML = `
+            <p class="text-3xl font-extrabold tracking-tight font-mono text-slate-900">14</p>
+            <div class="p-2.5 rounded-xl bg-purple-50 text-[#7c3aed] ring-1 ring-purple-200">
+              <i data-lucide="server" class="h-5 w-5"></i>
+            </div>
+          `;
+        }
+      } else if (currentCard1Style === 'opt3') {
+        // OPSI 3: EMERALD ACCENT (SUPABASE STYLE - HEALTHY INVENTORY)
+        topLine.className = "absolute top-0 left-0 right-0 h-1 bg-[#10b981]";
+        if (isDark) {
+          badge.className = "inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30";
+          link.className = "font-bold text-emerald-400 hover:underline flex items-center gap-1";
+          middle.innerHTML = `
+            <p class="text-3xl font-extrabold tracking-tight font-mono text-white">14</p>
+            <div class="p-2.5 rounded-xl bg-emerald-500/15 text-emerald-400 ring-1 ring-emerald-500/30">
+              <i data-lucide="server" class="h-5 w-5"></i>
+            </div>
+          `;
+        } else {
+          badge.className = "inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-mono font-bold bg-emerald-50 text-emerald-700 border border-emerald-200";
+          link.className = "font-bold text-emerald-700 hover:underline flex items-center gap-1";
+          middle.innerHTML = `
+            <p class="text-3xl font-extrabold tracking-tight font-mono text-slate-900">14</p>
+            <div class="p-2.5 rounded-xl bg-emerald-50 text-emerald-600 ring-1 ring-emerald-200">
+              <i data-lucide="server" class="h-5 w-5"></i>
+            </div>
+          `;
+        }
+      }
+
+      lucide.createIcons();
+    }
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      isDark = !isDark;
+
+      const root = document.getElementById('bodyRoot');
+      const topHead = document.getElementById('topHeader');
+      const headerTitle = document.getElementById('headerTitle');
+      const headerSub = document.getElementById('headerSub');
+      const themeBtn = document.getElementById('themeBtn');
+
+      const cardCat = document.getElementById('cardCatalog');
+      const cardTick = document.getElementById('cardTickets');
+      const cardApp = document.getElementById('cardApprovals');
+      const cardSec = document.getElementById('cardSecurity');
+      const tblSummary = document.getElementById('tableSummary');
+      const descBanner = document.getElementById('descBanner');
+
+      if (isDark) {
+        html.classList.add('dark');
+        root.className = "bg-[#121212] text-slate-100 font-sans antialiased min-h-screen p-4 sm:p-8 space-y-8 transition-colors duration-200";
+        topHead.className = "max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-[#282828]";
+        headerTitle.className = "text-base font-bold text-white flex items-center gap-2";
+        headerSub.className = "text-xs text-slate-400";
+        themeBtn.className = "flex items-center gap-2 px-3.5 py-1.5 rounded-xl border border-[#3ecf8e] bg-[#1a1a1a] text-white shadow-sm transition-all text-xs font-bold cursor-pointer";
+        document.getElementById('themeIcon').textContent = "🌙";
+        document.getElementById('themeLabel').textContent = "Dark (Supabase)";
+
+        descBanner.className = "p-4 rounded-2xl border border-purple-500/20 bg-purple-950/20 flex items-start gap-3.5 text-xs transition-colors";
+        document.getElementById('bannerTitle').className = "font-bold text-white";
+        document.getElementById('bannerText').className = "text-slate-300 mt-0.5 leading-relaxed";
+
+        [cardCat, cardTick, cardApp].forEach(c => {
+          c.className = "kpi-card relative overflow-hidden rounded-2xl p-5 shadow-sm transition-all border border-[#282828] bg-[#171717]";
+        });
+        cardSec.className = "kpi-card relative overflow-hidden rounded-2xl p-5 shadow-sm transition-all border border-red-500/40 bg-[#171717]";
+
+        document.querySelectorAll('.card-num').forEach(n => n.className = "text-3xl font-extrabold tracking-tight font-mono text-white");
+        document.querySelectorAll('.card-footer').forEach(f => f.className = "mt-4 pt-3 border-t border-[#282828] flex items-center justify-between text-xs text-slate-400");
+        document.querySelectorAll('.card-label').forEach(l => l.className = "text-xs font-bold uppercase tracking-wider text-slate-400");
+
+        tblSummary.className = "rounded-2xl border border-[#282828] p-6 bg-[#171717] transition-all space-y-4 shadow-sm";
+        document.getElementById('sumBox1').className = "p-4 rounded-xl border border-[#282828] bg-[#141414] space-y-1.5";
+        document.getElementById('sumBox2').className = "p-4 rounded-xl border border-[#282828] bg-[#141414] space-y-1.5";
+        document.getElementById('sumBox3').className = "p-4 rounded-xl border border-[#282828] bg-[#141414] space-y-1.5";
+
+      } else {
+        html.classList.remove('dark');
+        root.className = "bg-[#f8fafc] text-slate-800 font-sans antialiased min-h-screen p-4 sm:p-8 space-y-8 transition-colors duration-200";
+        topHead.className = "max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-slate-200";
+        headerTitle.className = "text-base font-bold text-slate-900 flex items-center gap-2";
+        headerSub.className = "text-xs text-slate-500";
+        themeBtn.className = "flex items-center gap-2 px-3.5 py-1.5 rounded-xl border border-slate-300 bg-white text-slate-800 hover:border-purple-400 shadow-sm transition-all text-xs font-bold cursor-pointer";
+        document.getElementById('themeIcon').textContent = "☀️";
+        document.getElementById('themeLabel').textContent = "Light Mode";
+
+        descBanner.className = "p-4 rounded-2xl border border-purple-200 bg-purple-50/50 flex items-start gap-3.5 text-xs transition-colors";
+        document.getElementById('bannerTitle').className = "font-bold text-slate-900";
+        document.getElementById('bannerText').className = "text-slate-600 mt-0.5 leading-relaxed";
+
+        [cardCat, cardTick, cardApp].forEach(c => {
+          c.className = "kpi-card relative overflow-hidden rounded-2xl p-5 shadow-sm transition-all border border-slate-200 bg-white hover:border-slate-300";
+        });
+        cardSec.className = "kpi-card relative overflow-hidden rounded-2xl p-5 shadow-sm transition-all border border-red-200 bg-white hover:border-red-300";
+
+        document.querySelectorAll('.card-num').forEach(n => n.className = "text-3xl font-extrabold tracking-tight font-mono text-slate-900");
+        document.querySelectorAll('.card-footer').forEach(f => f.className = "mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500");
+        document.querySelectorAll('.card-label').forEach(l => l.className = "text-xs font-bold uppercase tracking-wider text-slate-500");
+
+        tblSummary.className = "rounded-2xl border border-slate-200 p-6 bg-white transition-all space-y-4 shadow-sm";
+        document.getElementById('sumBox1').className = "p-4 rounded-xl border border-slate-200 bg-slate-50/50 space-y-1.5";
+        document.getElementById('sumBox2').className = "p-4 rounded-xl border border-slate-200 bg-slate-50/50 space-y-1.5";
+        document.getElementById('sumBox3').className = "p-4 rounded-xl border border-slate-200 bg-slate-50/50 space-y-1.5";
+      }
+
+      renderCard1();
+    }
+
+    // Default init
+    renderCard1();
+  </script>
+</body>
+</html>

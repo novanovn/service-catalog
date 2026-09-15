@@ -30,7 +30,7 @@
                 </button>
             </div>
 
-            <a href="/tickets/new" class="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-3.5 py-2 text-xs font-bold text-white shadow-lg shadow-indigo-600/25 hover:from-indigo-500 hover:to-violet-500 transition-all">
+            <a href="/tickets/new" class="inline-flex items-center gap-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white shadow-sm px-3.5 py-2 text-xs font-bold text-white shadow-lg shadow-indigo-600/25 hover:from-indigo-500 hover:to-violet-500 transition-all">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                 Onboard Service
             </a>
@@ -107,7 +107,7 @@
                                 {{ .CreatedAt }}
                             </td>
                             <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right font-semibold sm:pr-4 space-x-2">
-                                <a href="/catalog/{{ .ServiceName }}" class="text-indigo-400 hover:text-indigo-300">View Catalog &rarr;</a>
+                                <a href="/catalog/{{ .ServiceName }}" class="text-[#a78bfa] hover:text-purple-300 transition-colors">Catalog &rarr;</a>
                                 {{ if or (eq $.User.Role "admin") (eq $.User.Role "devops") (eq $.User.Role "infra") }}
                                 <button type="button" onclick="openDeleteTicketModal('{{ .ID }}', '{{ .TicketCode }}', '{{ .ServiceName }}')" class="text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 px-2 py-1 rounded transition-colors text-xs font-semibold ml-2">
                                     Delete
