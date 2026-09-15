@@ -15,6 +15,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 	"service-catalog/internal/auth"
 	db "service-catalog/internal/repository/postgres/generated"
+	"service-catalog/internal/worker/aws"
 )
 
 type TicketReviewRecord struct {
@@ -83,6 +84,7 @@ func ApproveTicketHandler(w http.ResponseWriter, r *http.Request) {
 	reviewComment := strings.TrimSpace(r.FormValue("comment"))
 	securityAck := r.FormValue("security_ack") == "true" || r.FormValue("security_ack") == "on" || r.FormValue("security_ack") == "1"
 	securityNotes := strings.TrimSpace(r.FormValue("security_notes"))
+	forceApprove := r.FormValue("force_approve") == "true" || r.FormValue("bypass_aws") == "true"
 
 	var userRole string
 	var userEmail string
@@ -114,96 +116,25 @@ func ApproveTicketHandler(w http.ResponseWriter, r *http.Request) {
 		jenkinsFolder = "AWS Lambda Projects"
 	}
 
-	// Save Review Record with Security Risk Acknowledgement in-memory
-	TicketReviews.Set(&TicketReviewRecord{
-		TicketID:             ticketID,
-		Status:               "APPROVED",
-		Comment:              reviewComment,
-		ReviewedBy:           triggeredBy,
-		ReviewedAt:           time.Now(),
-		SecurityAcknowledged: securityAck,
-		SecurityNotes:        securityNotes,
-	})
-
-	ServiceCatalog.UpdateStatus(ticketID, "LIVE")
-
 	var pipelineName string
 	var repoURL string
 	var integrationID string
 	var ticketServiceName string
 	var ticketDomain string
 	var ticketCountry string
+	var ticketUUID pgtype.UUID
 
 	if DB != nil {
-		var ticketUUID pgtype.UUID
 		if err := ticketUUID.Scan(ticketID); err == nil {
-			if DBPool != nil {
-				// Execute atomically in a database transaction
-				tx, txErr := DBPool.Begin(r.Context())
-				if txErr == nil {
-					qtx := DB.WithTx(tx)
-					_, revErr := qtx.CreateTicketReview(r.Context(), db.CreateTicketReviewParams{
-						TicketID:             ticketUUID,
-						Status:               "APPROVED",
-						Comment:              reviewComment,
-						ReviewedBy:           triggeredBy,
-						SecurityAcknowledged: securityAck,
-						SecurityNotes:        securityNotes,
-					})
-
-					if revErr == nil {
-						ticket, statErr := qtx.UpdateTicketStatus(r.Context(), db.UpdateTicketStatusParams{
-							ID:     ticketUUID,
-							Status: db.TicketStatusJENKINSREADY,
-						})
-						if statErr == nil {
-							_ = tx.Commit(r.Context())
-							pipelineName = ticket.PipelineName
-							repoURL = ticket.RepoUrl
-							ticketServiceName = ticket.ServiceName
-							ticketDomain = ticket.Domain
-							ticketCountry = ticket.Country
-							bytes, _ := ticket.IntegrationID.Value()
-							if bytes != nil {
-								integrationID = fmt.Sprintf("%x-%x-%x-%x-%x", bytes.([]byte)[0:4], bytes.([]byte)[4:6], bytes.([]byte)[6:8], bytes.([]byte)[8:10], bytes.([]byte)[10:16])
-							}
-							// Record audit trail
-							RecordAudit(r.Context(), r, "APPROVE", "ticket", ticketID, map[string]interface{}{
-								"pipeline_name": pipelineName,
-								"comment":       reviewComment,
-								"security_ack":  securityAck,
-							})
-						} else {
-							_ = tx.Rollback(r.Context())
-						}
-					} else {
-						_ = tx.Rollback(r.Context())
-					}
-				}
-			} else {
-				// Fallback if DBPool pointer is nil
-				_, _ = DB.CreateTicketReview(r.Context(), db.CreateTicketReviewParams{
-					TicketID:             ticketUUID,
-					Status:               "APPROVED",
-					Comment:              reviewComment,
-					ReviewedBy:           triggeredBy,
-					SecurityAcknowledged: securityAck,
-					SecurityNotes:        securityNotes,
-				})
-				ticket, err := DB.UpdateTicketStatus(r.Context(), db.UpdateTicketStatusParams{
-					ID:     ticketUUID,
-					Status: db.TicketStatusJENKINSREADY,
-				})
-				if err == nil {
-					pipelineName = ticket.PipelineName
-					repoURL = ticket.RepoUrl
-					ticketServiceName = ticket.ServiceName
-					ticketDomain = ticket.Domain
-					ticketCountry = ticket.Country
-					bytes, _ := ticket.IntegrationID.Value()
-					if bytes != nil {
-						integrationID = fmt.Sprintf("%x-%x-%x-%x-%x", bytes.([]byte)[0:4], bytes.([]byte)[4:6], bytes.([]byte)[6:8], bytes.([]byte)[8:10], bytes.([]byte)[10:16])
-					}
+			if tkt, err := DB.GetTicketByID(r.Context(), ticketUUID); err == nil {
+				pipelineName = tkt.PipelineName
+				repoURL = tkt.RepoUrl
+				ticketServiceName = tkt.ServiceName
+				ticketDomain = tkt.Domain
+				ticketCountry = tkt.Country
+				bytes, _ := tkt.IntegrationID.Value()
+				if bytes != nil {
+					integrationID = fmt.Sprintf("%x-%x-%x-%x-%x", bytes.([]byte)[0:4], bytes.([]byte)[4:6], bytes.([]byte)[6:8], bytes.([]byte)[8:10], bytes.([]byte)[10:16])
 				}
 			}
 		}
@@ -243,6 +174,161 @@ func ApproveTicketHandler(w http.ResponseWriter, r *http.Request) {
 		integrationID = "mock-integration-id"
 	}
 
+	// =========================================================================
+	// PRE-FLIGHT GATE: Check if Lambda exists in AWS before Jenkins Pipeline is created
+	// =========================================================================
+	targetFunctionName := pipelineName
+	targetAccountID := ""
+	countryLower := strings.ToLower(ticketCountry)
+	if countryLower == "ph" {
+		targetAccountID = "471112995648" // PH-DTC-UAT / Account scope
+	} else if countryLower == "id" {
+		targetAccountID = "794038209116" // ID-DTC-UAT / Account scope
+	}
+
+	tfPath, _ := ResolveTerraformPath(r.Context(), ticketDomain, ticketCountry, ticketServiceName, "main")
+
+	// Pre-flight AWS Lambda check runs regardless of forceApprove so bypass events
+	// can be accurately audited (did the operator override a REAL gap, or a false negative?).
+	lambdaCheckPerformed := false
+	lambdaExists := true
+	checkCtx, cancel := context.WithTimeout(r.Context(), 3*time.Second)
+	defer cancel()
+
+	awsClient, awsErr := aws.NewAWSClientForAccount(checkCtx, targetAccountID)
+	if awsErr == nil && awsClient != nil {
+		exists, _ := awsClient.CheckLambdaExists(checkCtx, targetFunctionName)
+		lambdaCheckPerformed = true
+		lambdaExists = exists
+	}
+
+	if !forceApprove && lambdaCheckPerformed && !lambdaExists {
+		reasonMsg := fmt.Sprintf("Fungsi Lambda '%s' belum ditemukan di AWS Console. Silakan buat resource terlebih dahulu oleh DevOps via 'terraform apply'.", targetFunctionName)
+
+		w.Header().Set("Content-Type", "application/json")
+		triggerPayload, _ := json.Marshal(map[string]interface{}{
+			"resourceNotReady": map[string]interface{}{
+				"ticket_id":     ticketID,
+				"function_name": targetFunctionName,
+				"region":        "ap-southeast-3",
+				"account_id":    targetAccountID,
+				"country":       ticketCountry,
+				"domain":        ticketDomain,
+				"service_name":  ticketServiceName,
+				"tf_path":       tfPath,
+				"reason":        reasonMsg,
+			},
+		})
+		w.Header().Set("HX-Trigger", string(triggerPayload))
+		w.WriteHeader(http.StatusOK)
+		_ = json.NewEncoder(w).Encode(map[string]string{
+			"status":        "resource_not_ready",
+			"function_name": targetFunctionName,
+			"message":       reasonMsg,
+		})
+		return
+	}
+
+	// Save Review Record with Security Risk Acknowledgement in-memory
+	TicketReviews.Set(&TicketReviewRecord{
+		TicketID:             ticketID,
+		Status:               "APPROVED",
+		Comment:              reviewComment,
+		ReviewedBy:           triggeredBy,
+		ReviewedAt:           time.Now(),
+		SecurityAcknowledged: securityAck,
+		SecurityNotes:        securityNotes,
+	})
+
+	ServiceCatalog.UpdateStatus(ticketID, "LIVE")
+
+	if DB != nil && ticketUUID.Valid {
+		if DBPool != nil {
+			// Execute atomically in a database transaction
+			tx, txErr := DBPool.Begin(r.Context())
+			if txErr == nil {
+				qtx := DB.WithTx(tx)
+				_, revErr := qtx.CreateTicketReview(r.Context(), db.CreateTicketReviewParams{
+					TicketID:             ticketUUID,
+					Status:               "APPROVED",
+					Comment:              reviewComment,
+					ReviewedBy:           triggeredBy,
+					SecurityAcknowledged: securityAck,
+					SecurityNotes:        securityNotes,
+				})
+
+				if revErr == nil {
+					ticket, statErr := qtx.UpdateTicketStatus(r.Context(), db.UpdateTicketStatusParams{
+						ID:     ticketUUID,
+						Status: db.TicketStatusJENKINSREADY,
+					})
+					if statErr == nil {
+						_ = tx.Commit(r.Context())
+						pipelineName = ticket.PipelineName
+						repoURL = ticket.RepoUrl
+						ticketServiceName = ticket.ServiceName
+						ticketDomain = ticket.Domain
+						ticketCountry = ticket.Country
+						bytes, _ := ticket.IntegrationID.Value()
+						if bytes != nil {
+							integrationID = fmt.Sprintf("%x-%x-%x-%x-%x", bytes.([]byte)[0:4], bytes.([]byte)[4:6], bytes.([]byte)[6:8], bytes.([]byte)[8:10], bytes.([]byte)[10:16])
+						}
+						// Record audit trail
+						RecordAudit(r.Context(), r, "APPROVE", "ticket", ticketID, map[string]interface{}{
+							"pipeline_name": pipelineName,
+							"comment":       reviewComment,
+							"security_ack":  securityAck,
+							"force_approve": forceApprove,
+						})
+
+						// Separate, filterable audit event: pre-flight gate was bypassed on a
+						// resource that genuinely does NOT exist yet in AWS (not a false negative).
+						if forceApprove && lambdaCheckPerformed && !lambdaExists {
+							RecordAudit(r.Context(), r, "BYPASS_PREFLIGHT_CHECK", "ticket", ticketID, map[string]interface{}{
+								"pipeline_name":  pipelineName,
+								"function_name":  targetFunctionName,
+								"account_id":     targetAccountID,
+								"region":         "ap-southeast-3",
+								"tf_path":        tfPath,
+								"lambda_existed": false,
+								"warning":        "Operator bypassed AWS pre-flight gate while Lambda function was confirmed NOT present. Jenkins build may fail with ResourceNotFoundException.",
+							})
+						}
+					} else {
+						_ = tx.Rollback(r.Context())
+					}
+				} else {
+					_ = tx.Rollback(r.Context())
+				}
+			}
+		} else {
+			// Fallback if DBPool pointer is nil
+			_, _ = DB.CreateTicketReview(r.Context(), db.CreateTicketReviewParams{
+				TicketID:             ticketUUID,
+				Status:               "APPROVED",
+				Comment:              reviewComment,
+				ReviewedBy:           triggeredBy,
+				SecurityAcknowledged: securityAck,
+				SecurityNotes:        securityNotes,
+			})
+			ticket, err := DB.UpdateTicketStatus(r.Context(), db.UpdateTicketStatusParams{
+				ID:     ticketUUID,
+				Status: db.TicketStatusJENKINSREADY,
+			})
+			if err == nil {
+				pipelineName = ticket.PipelineName
+				repoURL = ticket.RepoUrl
+				ticketServiceName = ticket.ServiceName
+				ticketDomain = ticket.Domain
+				ticketCountry = ticket.Country
+				bytes, _ := ticket.IntegrationID.Value()
+				if bytes != nil {
+					integrationID = fmt.Sprintf("%x-%x-%x-%x-%x", bytes.([]byte)[0:4], bytes.([]byte)[4:6], bytes.([]byte)[6:8], bytes.([]byte)[8:10], bytes.([]byte)[10:16])
+				}
+			}
+		}
+	}
+
 	ServiceCatalog.UpdateStatusAndPipeline(ticketID, "LIVE", pipelineName)
 
 	// Enqueue Asynq task TypeCreatePipeline
@@ -280,6 +366,80 @@ func ApproveTicketHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("HX-Trigger", `{"showToast": {"message": "Ticket Approved! Pipeline item queued for creation in Jenkins.", "type": "success"}}`)
 	w.Header().Set("HX-Redirect", "/approvals?toast=approved")
 	w.WriteHeader(http.StatusOK)
+}
+
+// VerifyTicketLambdaHandler checks whether the ticket's AWS Lambda function exists right now in AWS Console
+func VerifyTicketLambdaHandler(w http.ResponseWriter, r *http.Request) {
+	ticketID := chi.URLParam(r, "id")
+	if ticketID == "" {
+		http.Error(w, `{"error": "ticket ID is required"}`, http.StatusBadRequest)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+
+	var pipelineName string
+	var ticketServiceName string
+	var ticketDomain string
+	var ticketCountry string
+
+	if DB != nil {
+		var ticketUUID pgtype.UUID
+		if err := ticketUUID.Scan(ticketID); err == nil {
+			if tkt, err := DB.GetTicketByID(r.Context(), ticketUUID); err == nil {
+				pipelineName = tkt.PipelineName
+				ticketServiceName = tkt.ServiceName
+				ticketDomain = tkt.Domain
+				ticketCountry = tkt.Country
+			}
+		}
+	}
+
+	if ticketServiceName != "" {
+		pipelineName = ResolveCanonicalPipelineName(r.Context(), ticketDomain, ticketCountry, ticketServiceName, "main", pipelineName)
+	}
+
+	targetFunctionName := pipelineName
+	targetAccountID := ""
+	countryLower := strings.ToLower(ticketCountry)
+	if countryLower == "ph" {
+		targetAccountID = "471112995648"
+	} else if countryLower == "id" {
+		targetAccountID = "794038209116"
+	}
+
+	tfPath, _ := ResolveTerraformPath(r.Context(), ticketDomain, ticketCountry, ticketServiceName, "main")
+
+	checkCtx, cancel := context.WithTimeout(r.Context(), 3*time.Second)
+	defer cancel()
+
+	awsClient, err := aws.NewAWSClientForAccount(checkCtx, targetAccountID)
+	if err != nil {
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{
+			"exists":        false,
+			"function_name": targetFunctionName,
+			"region":        "ap-southeast-3",
+			"account_id":    targetAccountID,
+			"tf_path":       tfPath,
+			"reason":        "Resource belum ditemukan di AWS Console.",
+		})
+		return
+	}
+
+	exists, _ := awsClient.CheckLambdaExists(checkCtx, targetFunctionName)
+	reasonMsg := ""
+	if !exists {
+		reasonMsg = fmt.Sprintf("Lambda '%s' belum ditemukan di AWS. Silakan buat resource via 'terraform apply'.", targetFunctionName)
+	}
+
+	_ = json.NewEncoder(w).Encode(map[string]interface{}{
+		"exists":        exists,
+		"function_name": targetFunctionName,
+		"region":        "ap-southeast-3",
+		"account_id":    targetAccountID,
+		"tf_path":       tfPath,
+		"reason":        reasonMsg,
+	})
 }
 
 // RejectTicketHandler handles rejecting a ticket request with a mandatory DevOps reason/comment

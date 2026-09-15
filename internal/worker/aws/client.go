@@ -2,13 +2,17 @@ package aws
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/credentials/stscreds"
 	"github.com/aws/aws-sdk-go-v2/service/lambda"
 	"github.com/aws/aws-sdk-go-v2/service/lambda/types"
+	"github.com/aws/aws-sdk-go-v2/service/sts"
 )
 
 // AWSClient wraps the AWS Lambda SDK
@@ -19,7 +23,11 @@ type AWSClient struct {
 // NewAWSClient initializes a new AWS client
 // It automatically uses ~/.aws/config in local dev, or ECS Task Roles in production
 func NewAWSClient(ctx context.Context) (*AWSClient, error) {
-	// config.LoadDefaultConfig automatically handles SSO, ENV vars, and IAM Roles
+	return NewAWSClientForAccount(ctx, "")
+}
+
+// NewAWSClientForAccount initializes an AWS client, optionally assuming a role in the target AWS account.
+func NewAWSClientForAccount(ctx context.Context, targetAccountID string) (*AWSClient, error) {
 	region := os.Getenv("AWS_REGION")
 	if region == "" {
 		region = "ap-southeast-3" // Oona default region
@@ -30,23 +38,41 @@ func NewAWSClient(ctx context.Context) (*AWSClient, error) {
 		return nil, fmt.Errorf("unable to load AWS SDK config: %v", err)
 	}
 
+	// Check if cross-account AssumeRole is requested and target account is specified
+	roleName := os.Getenv("AWS_CROSS_ACCOUNT_ROLE_NAME")
+	if roleName == "" {
+		roleName = "CastanCrossAccountExecutionRole"
+	}
+
+	if targetAccountID != "" && os.Getenv("ENABLE_CROSS_ACCOUNT_ASSUME_ROLE") == "true" {
+		targetRoleARN := fmt.Sprintf("arn:aws:iam::%s:role/%s", targetAccountID, roleName)
+		stsClient := sts.NewFromConfig(cfg)
+		assumeProvider := stscreds.NewAssumeRoleProvider(stsClient, targetRoleARN)
+		cfg.Credentials = aws.NewCredentialsCache(assumeProvider)
+	}
+
 	return &AWSClient{
 		lambdaSvc: lambda.NewFromConfig(cfg),
 	}, nil
 }
 
-// CheckLambdaExists verifies if a Lambda function has been successfully deployed
-// This proves that DevOps ran 'terraform apply' successfully.
+// CheckLambdaExists verifies if a Lambda function has been successfully deployed.
+// Returns:
+//   - (true, nil): function exists in AWS!
+//   - (false, nil): function definitely does not exist (ResourceNotFoundException -> terraform apply hasn't run yet)
+//   - (false, err): network / credential error calling AWS API
 func (c *AWSClient) CheckLambdaExists(ctx context.Context, functionName string) (bool, error) {
 	input := &lambda.GetFunctionInput{
-		FunctionName: &functionName,
+		FunctionName: aws.String(functionName),
 	}
 
 	_, err := c.lambdaSvc.GetFunction(ctx, input)
 	if err != nil {
-		// If the error is ResourceNotFoundException, it means terraform apply hasn't run or failed
-		// For MVP, we simplify the error checking. In production, we'd check the exact AWS Error Code.
-		return false, fmt.Errorf("function %s not found or error occurred: %v", functionName, err)
+		var notFound *types.ResourceNotFoundException
+		if errors.As(err, &notFound) || strings.Contains(err.Error(), "ResourceNotFoundException") {
+			return false, nil
+		}
+		return false, fmt.Errorf("aws error checking function %s: %w", functionName, err)
 	}
 
 	return true, nil

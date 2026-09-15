@@ -388,6 +388,82 @@
 
 </div>
 
+<!-- MODAL POPUP: INFRASTRUCTURE RESOURCE NOT READY (PRE-FLIGHT AWS GATE) -->
+<div id="modal-infra-not-ready" class="fixed inset-0 z-[10000] hidden flex items-center justify-center p-4" aria-labelledby="infra-modal-title" role="dialog" aria-modal="true">
+    <!-- Backdrop overlay -->
+    <div id="infra-modal-backdrop" onclick="closeInfraNotReadyModal()" class="fixed inset-0 bg-black/75 backdrop-blur-sm transition-opacity"></div>
+
+    <!-- Modal Card Surface -->
+    <div class="relative w-full max-w-md rounded-2xl bg-white dark:bg-[#171717] border border-slate-200 dark:border-[#282828] shadow-2xl p-5 overflow-hidden z-10 transition-all">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-3.5 pb-2.5 border-b border-slate-100 dark:border-[#242424]">
+            <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-500 flex items-center justify-center flex-shrink-0">
+                    <!-- 2D Flat SVG Warning Shield (Zero 3D) -->
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                        <line x1="12" y1="9" x2="12" y2="13"></line>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-sm font-bold text-slate-900 dark:text-white" id="infra-modal-title">
+                        AWS Lambda Belum Siap
+                    </h3>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400">
+                        Pre-flight check gagal sebelum deploy Jenkins
+                    </p>
+                </div>
+            </div>
+            <button type="button" onclick="closeInfraNotReadyModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-[#242424] transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Clean Key-Value List -->
+        <div class="rounded-xl bg-slate-50 dark:bg-[#121212] border border-slate-200 dark:border-[#262626] divide-y divide-slate-100 dark:divide-[#1f1f1f] text-xs mb-3.5">
+            <div class="px-3 py-2 flex items-center justify-between gap-2">
+                <span class="text-slate-500 dark:text-slate-400 font-medium">Function</span>
+                <code id="infra-modal-func-name" class="font-mono font-bold text-slate-900 dark:text-slate-200 text-[11px] truncate max-w-[240px]">lmd-oona-service</code>
+            </div>
+            <div class="px-3 py-2 flex items-center justify-between gap-2">
+                <span class="text-slate-500 dark:text-slate-400 font-medium">Region & Scope</span>
+                <span id="infra-modal-region" class="font-mono text-slate-700 dark:text-slate-300 text-[11px]">ap-southeast-3 · Account</span>
+            </div>
+            <div class="px-3 py-2 flex items-center justify-between gap-2">
+                <span class="text-slate-500 dark:text-slate-400 font-medium">IaC Config</span>
+                <code id="infra-modal-tfpath" class="font-mono text-indigo-600 dark:text-indigo-400 text-[10.5px] truncate max-w-[240px]">02-app-setup/.../terraform.tfvars</code>
+            </div>
+        </div>
+
+        <!-- Concise Notice Box -->
+        <div class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 mb-4 text-xs text-amber-900 dark:text-amber-200/90 leading-relaxed">
+            <p id="infra-modal-reason" class="font-medium">
+                Fungsi Lambda belum terdaftar di AWS. Silakan jalankan <code class="font-mono font-bold">terraform apply</code> terlebih dahulu agar automated build Jenkins tidak gagal (<code class="font-mono">ResourceNotFoundException</code>).
+            </p>
+            <div id="infra-modal-live-status"></div>
+        </div>
+
+        <!-- Sleek Balanced Buttons -->
+        <div class="flex items-center justify-between gap-2 pt-1 border-t border-slate-100 dark:border-[#242424]">
+            <button type="button" onclick="closeInfraNotReadyModal()" class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-[#222222] dark:hover:bg-[#2a2a2a] text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-[#333333] transition-colors cursor-pointer">
+                ✕ Tutup
+            </button>
+
+            <div class="flex items-center gap-2">
+                <button type="button" onclick="forceSubmitApproval()" class="px-2.5 py-2 rounded-xl text-xs font-semibold text-amber-600 hover:text-amber-700 dark:text-amber-400 hover:bg-amber-500/10 transition-colors cursor-pointer" title="Bypass AWS pre-flight check (testing mode)">
+                    ⚡ Bypass
+                </button>
+                <button type="button" id="btn-infra-modal-recheck" onclick="recheckInfraReady()" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-teal-600 hover:bg-teal-500 text-white shadow-sm transition-all cursor-pointer">
+                    ⟲ Cek Ulang
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- SLIDE-OVER AI ADVISOR RIGHT DRAWER -->
 <div id="ai-advisor-drawer" class="fixed inset-0 z-[9999] hidden overflow-hidden" aria-labelledby="slide-over-title" role="dialog" aria-modal="true">
     <!-- Backdrop overlay with explicit dark semi-transparent tint for both light and dark modes -->
@@ -517,7 +593,7 @@
         }
     }
 
-    function submitDetailApproval() {
+    function submitDetailApproval(forceApprove = false) {
         const isAck = document.getElementById('detail-security-ack').checked;
         if (!isAck) {
             alert("Security & DevOps Acknowledgement is required prior to approval.");
@@ -527,10 +603,175 @@
         const folder = document.getElementById('detail-jenkins-folder').value;
         const secNotes = document.getElementById('detail-security-notes').value;
 
-        htmx.ajax('POST', '/api/v1/tickets/' + currentTicketId + '/approve', {
-            values: { comment: comment, jenkins_folder: folder, security_ack: "true", security_notes: secNotes },
-            headers: { 'X-CSRF-Token': getCSRFToken() }
+        const btn = document.getElementById('btn-detail-approve');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<svg class="w-4 h-4 animate-spin inline mr-1.5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg> Verifying AWS & Approving...';
+        }
+
+        const values = {
+            comment: comment,
+            jenkins_folder: folder,
+            security_ack: "true",
+            security_notes: secNotes
+        };
+        if (forceApprove) {
+            values.force_approve = "true";
+        }
+
+        const params = new URLSearchParams(values);
+
+        fetch('/api/v1/tickets/' + currentTicketId + '/approve', {
+            method: 'POST',
+            body: params,
+            headers: {
+                'X-CSRF-Token': getCSRFToken(),
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        })
+        .then(async res => {
+            const hxTrigger = res.headers.get('HX-Trigger');
+            const hxRedirect = res.headers.get('HX-Redirect');
+
+            if (hxTrigger) {
+                try {
+                    const triggerData = JSON.parse(hxTrigger);
+                    if (triggerData.resourceNotReady) {
+                        if (btn) {
+                            btn.disabled = false;
+                            btn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Approve & Provision Jenkins Pipeline';
+                        }
+                        showInfraNotReadyModal(triggerData.resourceNotReady);
+                        return;
+                    }
+                } catch(e) {}
+            }
+
+            if (hxRedirect) {
+                window.location.href = hxRedirect;
+                return;
+            }
+
+            if (res.ok) {
+                window.location.href = '/approvals?toast=approved';
+            } else {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Approve & Provision Jenkins Pipeline';
+                }
+                const errText = await res.text();
+                alert("Approval failed: " + errText);
+            }
+        })
+        .catch(err => {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Approve & Provision Jenkins Pipeline';
+            }
+            alert("Network error: " + err.message);
         });
+    }
+
+    // Handle HTMX custom trigger when AWS Lambda is not found
+    document.body.addEventListener("resourceNotReady", function(evt) {
+        const btn = document.getElementById('btn-detail-approve');
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Approve & Provision Jenkins Pipeline';
+        }
+        const data = evt.detail || {};
+        showInfraNotReadyModal(data);
+    });
+
+    function showInfraNotReadyModal(data) {
+        const modal = document.getElementById('modal-infra-not-ready');
+        if (!modal) return;
+
+        if (data.function_name) {
+            document.getElementById('infra-modal-func-name').textContent = data.function_name;
+        }
+        if (data.region || data.account_id) {
+            const region = data.region ? `${data.region} (Jakarta)` : 'ap-southeast-3';
+            const account = data.account_id ? ` · Account ${data.account_id}` : '';
+            document.getElementById('infra-modal-region').textContent = `${region}${account}`;
+        }
+        if (data.tf_path) {
+            document.getElementById('infra-modal-tfpath').textContent = `${data.tf_path}/terraform.tfvars`;
+            document.getElementById('infra-modal-tfpath').title = `${data.tf_path}/terraform.tfvars`;
+        }
+
+        // Simple, single message: resource belum dibuat oleh DevOps via terraform apply.
+        // Tidak ada cabang SSO/kredensial — itu urusan internal AWS SDK, bukan konteks DevOps.
+        const reasonElem = document.getElementById('infra-modal-reason');
+        if (reasonElem) {
+            reasonElem.innerHTML = "Fungsi Lambda belum terdaftar di AWS. Silakan buat resource terlebih dahulu oleh DevOps via <code class='font-mono font-bold'>terraform apply</code>.";
+        }
+
+        const statusElem = document.getElementById('infra-modal-live-status');
+        if (statusElem) {
+            statusElem.textContent = '';
+        }
+
+        modal.classList.remove('hidden');
+    }
+
+    function closeInfraNotReadyModal() {
+        const modal = document.getElementById('modal-infra-not-ready');
+        if (modal) modal.classList.add('hidden');
+    }
+
+    function recheckInfraReady() {
+        const checkBtn = document.getElementById('btn-infra-modal-recheck');
+        const statusText = document.getElementById('infra-modal-live-status');
+        if (checkBtn) {
+            checkBtn.disabled = true;
+            checkBtn.innerHTML = '<svg class="w-3.5 h-3.5 animate-spin inline mr-1" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg> Checking AWS...';
+        }
+        if (statusText) {
+            statusText.className = "text-xs font-semibold text-slate-500 dark:text-slate-400 mt-2 block";
+            statusText.textContent = "Connecting to AWS Lambda API (Region: ap-southeast-3)...";
+        }
+
+        fetch('/api/v1/tickets/' + currentTicketId + '/verify-lambda', {
+            headers: { 'X-CSRF-Token': getCSRFToken() }
+        })
+        .then(res => res.json())
+        .then(res => {
+            if (checkBtn) {
+                checkBtn.disabled = false;
+                checkBtn.innerHTML = '⟲ Cek Ulang Sekarang';
+            }
+            if (res.exists) {
+                if (statusText) {
+                    statusText.className = "text-xs font-bold text-emerald-600 dark:text-emerald-400 mt-2 block";
+                    statusText.textContent = "✅ Lambda Function ditemukan di AWS Console! Melanjutkan approval...";
+                }
+                setTimeout(() => {
+                    closeInfraNotReadyModal();
+                    submitDetailApproval(true);
+                }, 900);
+            } else {
+                if (statusText) {
+                    statusText.className = "text-xs font-semibold text-amber-600 dark:text-amber-400 mt-2 block";
+                    statusText.textContent = "⚠️ Masih belum ditemukan di AWS: " + (res.reason || "Function still missing.");
+                }
+            }
+        })
+        .catch(err => {
+            if (checkBtn) {
+                checkBtn.disabled = false;
+                checkBtn.innerHTML = '⟲ Cek Ulang Sekarang';
+            }
+            if (statusText) {
+                statusText.className = "text-xs font-semibold text-rose-500 mt-2 block";
+                statusText.textContent = "AWS error: " + err.message;
+            }
+        });
+    }
+
+    function forceSubmitApproval() {
+        closeInfraNotReadyModal();
+        submitDetailApproval(true);
     }
 
     function submitDetailRejection() {

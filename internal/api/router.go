@@ -170,6 +170,7 @@ func SetupRouter() *chi.Mux {
 			})
 			r.Post("/api/v1/tickets/{id}/approve", ApproveTicketHandler)
 			r.Post("/api/v1/tickets/{id}/reject", RejectTicketHandler)
+			r.Get("/api/v1/tickets/{id}/verify-lambda", VerifyTicketLambdaHandler)
 		})
 
 		// 6. Admin Only Sub-router (Strictly Admin)
