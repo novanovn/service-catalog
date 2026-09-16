@@ -20,19 +20,20 @@ const catalogStoreFilePath = "internal/docs/cache/catalog_store.json"
 
 // CatalogEntry represents a service in the catalog
 type CatalogEntry struct {
-	ID              string `json:"id"`
-	Name            string `json:"name"`
-	PipelineName    string `json:"pipeline_name"`
-	Description     string `json:"description"`
-	Domain          string `json:"domain"`
-	Country         string `json:"country"`
-	Status          string `json:"status"`
-	RepoURL         string `json:"repo_url"`
-	RequestorEmail  string `json:"requestor_email"`
-	JiraID          string `json:"jira_id"`
-	AWSLastModified string `json:"aws_last_modified"`
-	AWSLastInvoked  string `json:"aws_last_invoked"`
-	CreatedAt       string `json:"created_at"`
+	ID              string   `json:"id"`
+	Name            string   `json:"name"`
+	PipelineName    string   `json:"pipeline_name"`
+	Description     string   `json:"description"`
+	Domain          string   `json:"domain"`
+	Country         string   `json:"country"`
+	Status          string   `json:"status"`
+	RepoURL         string   `json:"repo_url"`
+	RequestorEmail  string   `json:"requestor_email"`
+	JiraID          string   `json:"jira_id"`
+	AWSLastModified string   `json:"aws_last_modified"`
+	AWSLastInvoked  string   `json:"aws_last_invoked"`
+	CreatedAt       string   `json:"created_at"`
+	DeployedEnvs    []string `json:"deployed_envs"`
 }
 
 // CatalogStore is a thread-safe store for catalog entries with disk persistence
@@ -167,6 +168,7 @@ func (cs *CatalogStore) ListAll() []CatalogEntry {
 					AWSLastModified: lastMod,
 					AWSLastInvoked:  lastInv,
 					CreatedAt:       e.CreatedAt.Time.Format("2006-01-02"),
+					DeployedEnvs:    e.DeployedEnvs,
 				})
 			}
 
@@ -422,6 +424,35 @@ func (cs *CatalogStore) UpdateStatusAndPipeline(idOrName string, status string, 
 	return false
 }
 
+// AddDeployedEnv marks an environment (e.g. "preprod", "prod") as active/deployed for a service
+func (cs *CatalogStore) AddDeployedEnv(idOrName, env string) bool {
+	cs.mu.Lock()
+	defer cs.mu.Unlock()
+
+	envLower := strings.ToLower(strings.TrimSpace(env))
+	if envLower == "" {
+		return false
+	}
+
+	for i, e := range cs.Entries {
+		if e.ID == idOrName || e.Name == idOrName || fmt.Sprintf("svc-%s", idOrName) == e.ID {
+			found := false
+			for _, existing := range cs.Entries[i].DeployedEnvs {
+				if strings.EqualFold(existing, envLower) {
+					found = true
+					break
+				}
+			}
+			if !found {
+				cs.Entries[i].DeployedEnvs = append(cs.Entries[i].DeployedEnvs, envLower)
+				cs.saveToDisk()
+			}
+			return true
+		}
+	}
+	return false
+}
+
 // UpdateCatalogHandler handles POST /api/v1/catalog/{id}/edit
 func UpdateCatalogHandler(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
@@ -577,4 +608,96 @@ func RequestPipelineHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	http.Redirect(w, r, "/approvals", http.StatusSeeOther)
+}
+
+// RequestPromotionHandler handles POST /api/v1/catalog/{service}/promote
+func RequestPromotionHandler(w http.ResponseWriter, r *http.Request) {
+	serviceParam := chi.URLParam(r, "service")
+	if serviceParam == "" {
+		http.Error(w, `{"error": "service name is required"}`, http.StatusBadRequest)
+		return
+	}
+
+	_ = r.ParseForm()
+	targetEnv := strings.ToLower(strings.TrimSpace(r.FormValue("target_env")))
+	if targetEnv != "preprod" && targetEnv != "prod" {
+		w.Header().Set("HX-Trigger", `{"showToast": {"message": "Invalid target environment. Only PreProd or Prod allowed.", "type": "error"}}`)
+		http.Error(w, `{"error": "target_env must be preprod or prod"}`, http.StatusBadRequest)
+		return
+	}
+
+	description := strings.TrimSpace(r.FormValue("description"))
+	jiraID := strings.TrimSpace(r.FormValue("jira_issue_id"))
+	branch := strings.TrimSpace(r.FormValue("branch"))
+	if branch == "" {
+		branch = "main"
+	}
+
+	claims, _ := r.Context().Value(userCtxKey).(*auth.Claims)
+
+	// Fetch service details from CatalogStore or DB
+	var repoURL, domain, country, pipelineName string
+	if entry, found := ServiceCatalog.FindByNameOrID(serviceParam); found {
+		repoURL = entry.RepoURL
+		domain = entry.Domain
+		country = entry.Country
+		pipelineName = entry.PipelineName
+	}
+	if repoURL == "" {
+		repoURL = fmt.Sprintf("https://github.com/oona-insurance/%s.git", serviceParam)
+	}
+	if domain == "" {
+		domain = "integration"
+	}
+	if country == "" {
+		country = "ph"
+	}
+	if pipelineName == "" {
+		pipelineName = ResolveCanonicalPipelineName(r.Context(), domain, country, serviceParam, branch, "")
+	}
+
+	if description == "" {
+		description = fmt.Sprintf("Promotion Request: Release %s to %s environment (Branch: %s)", serviceParam, strings.ToUpper(targetEnv), branch)
+	}
+
+	var newTicketID string
+	if DBPool != nil {
+		var userID pgtype.UUID
+		if claims != nil {
+			_ = userID.Scan(claims.UserID)
+		}
+		var returnedUUID pgtype.UUID
+		err := DBPool.QueryRow(r.Context(), `
+			INSERT INTO tickets (
+				created_by, repo_url, domain, country, service_name, pipeline_name, jira_issue_id, description, target_env, ticket_type, status
+			) VALUES (
+				$1, $2, $3, $4, $5, $6, $7, $8, $9, 'PROMOTION', 'INFRA_DETECTED'
+			)
+			RETURNING id
+		`, userID, repoURL, domain, country, serviceParam, pipelineName, pgtype.Text{String: jiraID, Valid: jiraID != ""}, description, targetEnv).Scan(&returnedUUID)
+		if err == nil {
+			newTicketID = fmt.Sprintf("%x-%x-%x-%x-%x", returnedUUID.Bytes[0:4], returnedUUID.Bytes[4:6], returnedUUID.Bytes[6:8], returnedUUID.Bytes[8:10], returnedUUID.Bytes[10:16])
+		}
+	}
+
+	// Record audit
+	RecordAudit(r.Context(), r, "REQUEST_PROMOTION", "ticket", newTicketID, map[string]interface{}{
+		"service_name": serviceParam,
+		"target_env":   targetEnv,
+		"branch":       branch,
+		"jira_id":      jiraID,
+	})
+
+	redirectURL := "/approvals"
+	if newTicketID != "" {
+		redirectURL = "/approvals/" + newTicketID
+	}
+
+	w.Header().Set("HX-Trigger", fmt.Sprintf(`{"showToast": {"message": "Promotion Request to %s created! Sent to DevOps Approval Queue.", "type": "success"}}`, strings.ToUpper(targetEnv)))
+	if r.Header.Get("HX-Request") == "true" {
+		w.Header().Set("HX-Redirect", redirectURL)
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+	http.Redirect(w, r, redirectURL, http.StatusSeeOther)
 }

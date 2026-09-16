@@ -7,26 +7,30 @@ INSERT INTO tickets (
 RETURNING id, status, created_at;
 
 -- name: GetTicketByID :one
-SELECT * FROM tickets
+SELECT id, created_by, repo_url, domain, country, service_name, pipeline_name, jira_issue_id, status, description, created_at, updated_at, integration_id, ai_analysis, ai_analyzed_at, shelf_code, target_env, ticket_type
+FROM tickets
 WHERE id = $1 LIMIT 1;
 
 -- name: ListTickets :many
-SELECT * FROM tickets
+SELECT id, created_by, repo_url, domain, country, service_name, pipeline_name, jira_issue_id, status, description, created_at, updated_at, integration_id, ai_analysis, ai_analyzed_at, shelf_code, target_env, ticket_type
+FROM tickets
 ORDER BY created_at DESC;
 
 -- name: UpdateTicketStatus :one
-UPDATE tickets 
+UPDATE tickets
 SET status = $2, updated_at = NOW()
 WHERE id = $1
-RETURNING *;
+RETURNING id, created_by, repo_url, domain, country, service_name, pipeline_name, jira_issue_id, status, description, created_at, updated_at, integration_id, ai_analysis, ai_analyzed_at, shelf_code, target_env, ticket_type;
 
 -- name: ListTicketsByStatus :many
-SELECT * FROM tickets
+SELECT id, created_by, repo_url, domain, country, service_name, pipeline_name, jira_issue_id, status, description, created_at, updated_at, integration_id, ai_analysis, ai_analyzed_at, shelf_code, target_env, ticket_type
+FROM tickets
 WHERE status = $1
 ORDER BY created_at DESC;
 
 -- name: ListTicketsPaginated :many
-SELECT * FROM tickets
+SELECT id, created_by, repo_url, domain, country, service_name, pipeline_name, jira_issue_id, status, description, created_at, updated_at, integration_id, ai_analysis, ai_analyzed_at, shelf_code, target_env, ticket_type
+FROM tickets
 ORDER BY created_at DESC
 LIMIT $1 OFFSET $2;
 
@@ -45,10 +49,9 @@ WHERE id = $1;
 UPDATE tickets
 SET ai_analysis = $2, ai_analyzed_at = NOW(), updated_at = NOW()
 WHERE id = $1
-RETURNING *;
+RETURNING id, created_by, repo_url, domain, country, service_name, pipeline_name, jira_issue_id, status, description, created_at, updated_at, integration_id, ai_analysis, ai_analyzed_at, shelf_code, target_env, ticket_type;
 
 -- name: GetTicketAIAnalysis :one
 SELECT id, service_name, ai_analysis, ai_analyzed_at
 FROM tickets
 WHERE id = $1 LIMIT 1;
-

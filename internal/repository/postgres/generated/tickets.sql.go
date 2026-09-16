@@ -112,7 +112,8 @@ func (q *Queries) GetTicketAIAnalysis(ctx context.Context, id pgtype.UUID) (GetT
 }
 
 const getTicketByID = `-- name: GetTicketByID :one
-SELECT id, created_by, repo_url, domain, country, service_name, pipeline_name, jira_issue_id, status, description, created_at, updated_at, integration_id, ai_analysis, ai_analyzed_at, shelf_code FROM tickets
+SELECT id, created_by, repo_url, domain, country, service_name, pipeline_name, jira_issue_id, status, description, created_at, updated_at, integration_id, ai_analysis, ai_analyzed_at, shelf_code, target_env, ticket_type
+FROM tickets
 WHERE id = $1 LIMIT 1
 `
 
@@ -136,12 +137,15 @@ func (q *Queries) GetTicketByID(ctx context.Context, id pgtype.UUID) (Ticket, er
 		&i.AiAnalysis,
 		&i.AiAnalyzedAt,
 		&i.ShelfCode,
+		&i.TargetEnv,
+		&i.TicketType,
 	)
 	return i, err
 }
 
 const listTickets = `-- name: ListTickets :many
-SELECT id, created_by, repo_url, domain, country, service_name, pipeline_name, jira_issue_id, status, description, created_at, updated_at, integration_id, ai_analysis, ai_analyzed_at, shelf_code FROM tickets
+SELECT id, created_by, repo_url, domain, country, service_name, pipeline_name, jira_issue_id, status, description, created_at, updated_at, integration_id, ai_analysis, ai_analyzed_at, shelf_code, target_env, ticket_type
+FROM tickets
 ORDER BY created_at DESC
 `
 
@@ -171,6 +175,8 @@ func (q *Queries) ListTickets(ctx context.Context) ([]Ticket, error) {
 			&i.AiAnalysis,
 			&i.AiAnalyzedAt,
 			&i.ShelfCode,
+			&i.TargetEnv,
+			&i.TicketType,
 		); err != nil {
 			return nil, err
 		}
@@ -183,7 +189,8 @@ func (q *Queries) ListTickets(ctx context.Context) ([]Ticket, error) {
 }
 
 const listTicketsByStatus = `-- name: ListTicketsByStatus :many
-SELECT id, created_by, repo_url, domain, country, service_name, pipeline_name, jira_issue_id, status, description, created_at, updated_at, integration_id, ai_analysis, ai_analyzed_at, shelf_code FROM tickets
+SELECT id, created_by, repo_url, domain, country, service_name, pipeline_name, jira_issue_id, status, description, created_at, updated_at, integration_id, ai_analysis, ai_analyzed_at, shelf_code, target_env, ticket_type
+FROM tickets
 WHERE status = $1
 ORDER BY created_at DESC
 `
@@ -214,6 +221,8 @@ func (q *Queries) ListTicketsByStatus(ctx context.Context, status TicketStatus) 
 			&i.AiAnalysis,
 			&i.AiAnalyzedAt,
 			&i.ShelfCode,
+			&i.TargetEnv,
+			&i.TicketType,
 		); err != nil {
 			return nil, err
 		}
@@ -226,7 +235,8 @@ func (q *Queries) ListTicketsByStatus(ctx context.Context, status TicketStatus) 
 }
 
 const listTicketsPaginated = `-- name: ListTicketsPaginated :many
-SELECT id, created_by, repo_url, domain, country, service_name, pipeline_name, jira_issue_id, status, description, created_at, updated_at, integration_id, ai_analysis, ai_analyzed_at, shelf_code FROM tickets
+SELECT id, created_by, repo_url, domain, country, service_name, pipeline_name, jira_issue_id, status, description, created_at, updated_at, integration_id, ai_analysis, ai_analyzed_at, shelf_code, target_env, ticket_type
+FROM tickets
 ORDER BY created_at DESC
 LIMIT $1 OFFSET $2
 `
@@ -262,6 +272,8 @@ func (q *Queries) ListTicketsPaginated(ctx context.Context, arg ListTicketsPagin
 			&i.AiAnalysis,
 			&i.AiAnalyzedAt,
 			&i.ShelfCode,
+			&i.TargetEnv,
+			&i.TicketType,
 		); err != nil {
 			return nil, err
 		}
@@ -277,7 +289,7 @@ const updateTicketAIAnalysis = `-- name: UpdateTicketAIAnalysis :one
 UPDATE tickets
 SET ai_analysis = $2, ai_analyzed_at = NOW(), updated_at = NOW()
 WHERE id = $1
-RETURNING id, created_by, repo_url, domain, country, service_name, pipeline_name, jira_issue_id, status, description, created_at, updated_at, integration_id, ai_analysis, ai_analyzed_at, shelf_code
+RETURNING id, created_by, repo_url, domain, country, service_name, pipeline_name, jira_issue_id, status, description, created_at, updated_at, integration_id, ai_analysis, ai_analyzed_at, shelf_code, target_env, ticket_type
 `
 
 type UpdateTicketAIAnalysisParams struct {
@@ -305,15 +317,17 @@ func (q *Queries) UpdateTicketAIAnalysis(ctx context.Context, arg UpdateTicketAI
 		&i.AiAnalysis,
 		&i.AiAnalyzedAt,
 		&i.ShelfCode,
+		&i.TargetEnv,
+		&i.TicketType,
 	)
 	return i, err
 }
 
 const updateTicketStatus = `-- name: UpdateTicketStatus :one
-UPDATE tickets 
+UPDATE tickets
 SET status = $2, updated_at = NOW()
 WHERE id = $1
-RETURNING id, created_by, repo_url, domain, country, service_name, pipeline_name, jira_issue_id, status, description, created_at, updated_at, integration_id, ai_analysis, ai_analyzed_at, shelf_code
+RETURNING id, created_by, repo_url, domain, country, service_name, pipeline_name, jira_issue_id, status, description, created_at, updated_at, integration_id, ai_analysis, ai_analyzed_at, shelf_code, target_env, ticket_type
 `
 
 type UpdateTicketStatusParams struct {
@@ -341,6 +355,8 @@ func (q *Queries) UpdateTicketStatus(ctx context.Context, arg UpdateTicketStatus
 		&i.AiAnalysis,
 		&i.AiAnalyzedAt,
 		&i.ShelfCode,
+		&i.TargetEnv,
+		&i.TicketType,
 	)
 	return i, err
 }

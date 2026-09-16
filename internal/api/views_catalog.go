@@ -327,11 +327,31 @@ func RenderServiceDetail(w http.ResponseWriter, r *http.Request) {
 
 	candidateBranches := []string{branch, "ci/portal"}
 
-	// Check whether each environment is provisioned in Terraform IaC
+	// Check whether each environment is marked deployed in catalog records.
+	// Presence of a terraform.tfvars file is NOT enough — that only means IaC was
+	// committed. Castan pills stay disabled until a promotion ticket is approved
+	// (or the env is already in catalog.deployed_envs).
 	checkEnvActive := func(envName string) bool {
-		for _, br := range candidateBranches {
-			if _, found := ResolveTerraformPathForEnv(r.Context(), domain, country, envName, serviceName, br); found {
+		envLower := strings.ToLower(envName)
+		if DBPool != nil {
+			var hasEnv bool
+			_ = DBPool.QueryRow(r.Context(), `
+				SELECT EXISTS(
+					SELECT 1 FROM catalog 
+					WHERE (LOWER(name) = LOWER($1) OR id::text = $1)
+					AND $2 = ANY(deployed_envs)
+				)
+			`, serviceParam, envLower).Scan(&hasEnv)
+			if hasEnv {
 				return true
+			}
+		}
+
+		if entry, found := ServiceCatalog.FindByNameOrID(serviceParam); found {
+			for _, de := range entry.DeployedEnvs {
+				if strings.EqualFold(de, envLower) {
+					return true
+				}
 			}
 		}
 		return false

@@ -11,6 +11,27 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const addCatalogDeployedEnv = `-- name: AddCatalogDeployedEnv :exec
+UPDATE catalog
+SET deployed_envs = CASE
+        WHEN $1::text = ANY(COALESCE(deployed_envs, '{}')) THEN deployed_envs
+        ELSE array_append(COALESCE(deployed_envs, '{}'), $1::text)
+    END,
+    updated_at = NOW()
+WHERE LOWER(name) = LOWER($2)
+   OR id::text = $2
+`
+
+type AddCatalogDeployedEnvParams struct {
+	Env         string `json:"env"`
+	ServiceName string `json:"service_name"`
+}
+
+func (q *Queries) AddCatalogDeployedEnv(ctx context.Context, arg AddCatalogDeployedEnvParams) error {
+	_, err := q.db.Exec(ctx, addCatalogDeployedEnv, arg.Env, arg.ServiceName)
+	return err
+}
+
 const countCatalogEntries = `-- name: CountCatalogEntries :one
 SELECT COUNT(*) FROM catalog WHERE is_active = true
 `
@@ -32,7 +53,7 @@ func (q *Queries) DeleteCatalogEntry(ctx context.Context, id pgtype.UUID) error 
 }
 
 const getCatalogEntryByID = `-- name: GetCatalogEntryByID :one
-SELECT id, name, description, domain, country, status, repo_url, pipeline_name, requestor_email, jira_id, aws_last_modified, aws_last_invoked, created_at, updated_at
+SELECT id, name, description, domain, country, status, repo_url, pipeline_name, requestor_email, jira_id, aws_last_modified, aws_last_invoked, created_at, updated_at, deployed_envs
 FROM catalog
 WHERE id = $1 AND is_active = true
 `
@@ -52,6 +73,7 @@ type GetCatalogEntryByIDRow struct {
 	AwsLastInvoked  pgtype.Text        `json:"aws_last_invoked"`
 	CreatedAt       pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
+	DeployedEnvs    []string           `json:"deployed_envs"`
 }
 
 func (q *Queries) GetCatalogEntryByID(ctx context.Context, id pgtype.UUID) (GetCatalogEntryByIDRow, error) {
@@ -72,12 +94,13 @@ func (q *Queries) GetCatalogEntryByID(ctx context.Context, id pgtype.UUID) (GetC
 		&i.AwsLastInvoked,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.DeployedEnvs,
 	)
 	return i, err
 }
 
 const getCatalogEntryByName = `-- name: GetCatalogEntryByName :one
-SELECT id, name, description, domain, country, status, repo_url, pipeline_name, requestor_email, jira_id, aws_last_modified, aws_last_invoked, created_at, updated_at
+SELECT id, name, description, domain, country, status, repo_url, pipeline_name, requestor_email, jira_id, aws_last_modified, aws_last_invoked, created_at, updated_at, deployed_envs
 FROM catalog
 WHERE name = $1 AND is_active = true
 `
@@ -97,6 +120,7 @@ type GetCatalogEntryByNameRow struct {
 	AwsLastInvoked  pgtype.Text        `json:"aws_last_invoked"`
 	CreatedAt       pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
+	DeployedEnvs    []string           `json:"deployed_envs"`
 }
 
 func (q *Queries) GetCatalogEntryByName(ctx context.Context, name string) (GetCatalogEntryByNameRow, error) {
@@ -117,12 +141,13 @@ func (q *Queries) GetCatalogEntryByName(ctx context.Context, name string) (GetCa
 		&i.AwsLastInvoked,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.DeployedEnvs,
 	)
 	return i, err
 }
 
 const listCatalogEntries = `-- name: ListCatalogEntries :many
-SELECT id, name, description, domain, country, status, repo_url, pipeline_name, requestor_email, jira_id, aws_last_modified, aws_last_invoked, created_at, updated_at
+SELECT id, name, description, domain, country, status, repo_url, pipeline_name, requestor_email, jira_id, aws_last_modified, aws_last_invoked, created_at, updated_at, deployed_envs
 FROM catalog
 WHERE is_active = true
 ORDER BY name ASC
@@ -143,6 +168,7 @@ type ListCatalogEntriesRow struct {
 	AwsLastInvoked  pgtype.Text        `json:"aws_last_invoked"`
 	CreatedAt       pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
+	DeployedEnvs    []string           `json:"deployed_envs"`
 }
 
 func (q *Queries) ListCatalogEntries(ctx context.Context) ([]ListCatalogEntriesRow, error) {
@@ -169,6 +195,7 @@ func (q *Queries) ListCatalogEntries(ctx context.Context) ([]ListCatalogEntriesR
 			&i.AwsLastInvoked,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.DeployedEnvs,
 		); err != nil {
 			return nil, err
 		}
@@ -181,7 +208,7 @@ func (q *Queries) ListCatalogEntries(ctx context.Context) ([]ListCatalogEntriesR
 }
 
 const listCatalogEntriesPaginated = `-- name: ListCatalogEntriesPaginated :many
-SELECT id, name, description, domain, country, status, repo_url, pipeline_name, requestor_email, jira_id, aws_last_modified, aws_last_invoked, created_at, updated_at
+SELECT id, name, description, domain, country, status, repo_url, pipeline_name, requestor_email, jira_id, aws_last_modified, aws_last_invoked, created_at, updated_at, deployed_envs
 FROM catalog
 WHERE is_active = true
 ORDER BY name ASC
@@ -208,6 +235,7 @@ type ListCatalogEntriesPaginatedRow struct {
 	AwsLastInvoked  pgtype.Text        `json:"aws_last_invoked"`
 	CreatedAt       pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
+	DeployedEnvs    []string           `json:"deployed_envs"`
 }
 
 func (q *Queries) ListCatalogEntriesPaginated(ctx context.Context, arg ListCatalogEntriesPaginatedParams) ([]ListCatalogEntriesPaginatedRow, error) {
@@ -234,6 +262,7 @@ func (q *Queries) ListCatalogEntriesPaginated(ctx context.Context, arg ListCatal
 			&i.AwsLastInvoked,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.DeployedEnvs,
 		); err != nil {
 			return nil, err
 		}
@@ -310,7 +339,7 @@ ON CONFLICT (name) DO UPDATE SET
     aws_last_modified = EXCLUDED.aws_last_modified,
     aws_last_invoked = EXCLUDED.aws_last_invoked,
     updated_at = NOW()
-RETURNING id, name, description, domain, country, status, repo_url, pipeline_name, requestor_email, jira_id, aws_last_modified, aws_last_invoked, created_at, updated_at
+RETURNING id, name, description, domain, country, status, repo_url, pipeline_name, requestor_email, jira_id, aws_last_modified, aws_last_invoked, created_at, updated_at, deployed_envs
 `
 
 type UpsertCatalogEntryParams struct {
@@ -342,6 +371,7 @@ type UpsertCatalogEntryRow struct {
 	AwsLastInvoked  pgtype.Text        `json:"aws_last_invoked"`
 	CreatedAt       pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
+	DeployedEnvs    []string           `json:"deployed_envs"`
 }
 
 func (q *Queries) UpsertCatalogEntry(ctx context.Context, arg UpsertCatalogEntryParams) (UpsertCatalogEntryRow, error) {
@@ -374,6 +404,7 @@ func (q *Queries) UpsertCatalogEntry(ctx context.Context, arg UpsertCatalogEntry
 		&i.AwsLastInvoked,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.DeployedEnvs,
 	)
 	return i, err
 }

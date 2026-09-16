@@ -682,6 +682,8 @@ type ApprovalItem struct {
 	HasAIAnalysis   bool
 	AIAnalysisHTML  template.HTML
 	AIAnalyzedAt    string
+	TicketType      string
+	TargetEnv       string
 }
 
 // RenderApprovalDashboard renders the DevOps approval screen dynamically linked to PostgreSQL Tickets & Service Catalog
@@ -705,56 +707,73 @@ func RenderApprovalDashboard(w http.ResponseWriter, r *http.Request) {
 		JiraID         string
 		RepoURL        string
 		CreatedAt      string
+		TicketType     string
+		TargetEnv      string
 	}
 
 	var sources []pendingSource
 	seenServices := make(map[string]bool)
 
-	if DB != nil {
-		if dbTickets, err := DB.ListTickets(r.Context()); err == nil {
-			for _, t := range dbTickets {
-				var idStr string
-				bytes, _ := t.ID.Value()
-				if bytes != nil {
-					if b, ok := bytes.([]byte); ok && len(b) == 16 {
-						idStr = fmt.Sprintf("%x-%x-%x-%x-%x", b[0:4], b[4:6], b[6:8], b[8:10], b[10:16])
+	if DBPool != nil {
+		rows, err := DBPool.Query(r.Context(), `
+			SELECT id, service_name, domain, country, status::text, jira_issue_id, repo_url, created_at, target_env::text, ticket_type::text
+			FROM tickets
+			ORDER BY created_at DESC
+		`)
+		if err == nil {
+			defer rows.Close()
+			for rows.Next() {
+				var (
+					tID                                            pgtype.UUID
+					tSvc, tDomain, tCountry, tStatus, tRepo        string
+					tJira, tTargetEnv, tTicketType                 pgtype.Text
+					tCreatedAt                                     pgtype.Timestamptz
+				)
+				if errScan := rows.Scan(&tID, &tSvc, &tDomain, &tCountry, &tStatus, &tJira, &tRepo, &tCreatedAt, &tTargetEnv, &tTicketType); errScan == nil {
+					idStr := fmt.Sprintf("%x-%x-%x-%x-%x", tID.Bytes[0:4], tID.Bytes[4:6], tID.Bytes[6:8], tID.Bytes[8:10], tID.Bytes[10:16])
+					jiraID := ""
+					if tJira.Valid {
+						jiraID = tJira.String
 					}
-				}
-				if idStr == "" {
-					idStr = fmt.Sprintf("%x-%x-%x-%x-%x", t.ID.Bytes[0:4], t.ID.Bytes[4:6], t.ID.Bytes[6:8], t.ID.Bytes[8:10], t.ID.Bytes[10:16])
-				}
-
-				reqEmail := "admin@oona-insurance.com"
-				jiraID := ""
-				if t.JiraIssueID.Valid && t.JiraIssueID.String != "" {
-					jiraID = t.JiraIssueID.String
-				}
-				if entry, found := ServiceCatalog.FindByNameOrID(t.ServiceName); found {
-					if entry.RequestorEmail != "" {
-						reqEmail = entry.RequestorEmail
+					targetEnv := "uat"
+					if tTargetEnv.Valid && tTargetEnv.String != "" {
+						targetEnv = tTargetEnv.String
 					}
-					if entry.JiraID != "" && jiraID == "" {
-						jiraID = entry.JiraID
+					ticketType := "ONBOARDING"
+					if tTicketType.Valid && tTicketType.String != "" {
+						ticketType = tTicketType.String
 					}
-				}
 
-				createdAtStr := time.Now().Format("2006-01-02 15:04")
-				if t.CreatedAt.Valid {
-					createdAtStr = t.CreatedAt.Time.Format("2006-01-02 15:04")
-				}
+					reqEmail := "admin@oona-insurance.com"
+					if entry, found := ServiceCatalog.FindByNameOrID(tSvc); found {
+						if entry.RequestorEmail != "" {
+							reqEmail = entry.RequestorEmail
+						}
+						if entry.JiraID != "" && jiraID == "" {
+							jiraID = entry.JiraID
+						}
+					}
 
-				sources = append(sources, pendingSource{
-					ID:             idStr,
-					ServiceName:    t.ServiceName,
-					Domain:         t.Domain,
-					Country:        strings.ToUpper(t.Country),
-					Status:         string(t.Status),
-					RequestorEmail: reqEmail,
-					JiraID:         jiraID,
-					RepoURL:        fmt.Sprintf("https://github.com/oona-insurance/%s", t.ServiceName),
-					CreatedAt:      createdAtStr,
-				})
-				seenServices[strings.ToLower(t.ServiceName)] = true
+					createdAtStr := time.Now().Format("2006-01-02 15:04")
+					if tCreatedAt.Valid {
+						createdAtStr = tCreatedAt.Time.Format("2006-01-02 15:04")
+					}
+
+					sources = append(sources, pendingSource{
+						ID:             idStr,
+						ServiceName:    tSvc,
+						Domain:         tDomain,
+						Country:        strings.ToUpper(tCountry),
+						Status:         tStatus,
+						RequestorEmail: reqEmail,
+						JiraID:         jiraID,
+						RepoURL:        tRepo,
+						CreatedAt:      createdAtStr,
+						TicketType:     ticketType,
+						TargetEnv:      targetEnv,
+					})
+					seenServices[strings.ToLower(tSvc)] = true
+				}
 			}
 		}
 	}
@@ -799,15 +818,19 @@ func RenderApprovalDashboard(w http.ResponseWriter, r *http.Request) {
 				countryLower = "ph"
 			}
 
+			tEnv := s.TargetEnv
+			if tEnv == "" {
+				tEnv = "uat"
+			}
 			pipelineName := fmt.Sprintf("lmd-oona-%s-%s-%s", countryLower, domainLower, cleanName)
-			tfPath := fmt.Sprintf("02-app-setup/%s/%s/uat/services/%s", domainLower, countryLower, cleanName)
+			tfPath := fmt.Sprintf("02-app-setup/%s/%s/%s/services/%s", domainLower, countryLower, tEnv, cleanName)
 
 			candidateBranches := []string{"ci/portal", "main"}
 			detectedBranch := "main"
 			tfExists := false
 
 			for _, br := range candidateBranches {
-				resolvedP, found := ResolveTerraformPath(r.Context(), s.Domain, s.Country, s.ServiceName, br)
+				resolvedP, found := ResolveTerraformPathForEnv(r.Context(), s.Domain, s.Country, tEnv, s.ServiceName, br)
 				if found {
 					tfExists = true
 					detectedBranch = br
@@ -870,6 +893,8 @@ func RenderApprovalDashboard(w http.ResponseWriter, r *http.Request) {
 				RequestorEmail:  itemReq,
 				JiraID:          itemJira,
 				RepoURL:         s.RepoURL,
+				TicketType:      s.TicketType,
+				TargetEnv:       s.TargetEnv,
 			}
 		}(idx, src)
 	}
@@ -947,6 +972,8 @@ func RenderApprovalDetail(w http.ResponseWriter, r *http.Request) {
 		hasAIAnalysis  = false
 		aiAnalysisHTML = template.HTML("")
 		aiAnalyzedAt   = ""
+		ticketType     = "ONBOARDING"
+		targetEnv      = "uat"
 	)
 
 	// 1. Try finding ticket from PostgreSQL DB
@@ -968,6 +995,13 @@ func RenderApprovalDetail(w http.ResponseWriter, r *http.Request) {
 					if t.AiAnalyzedAt.Valid {
 						aiAnalyzedAt = t.AiAnalyzedAt.Time.Format("2006-01-02 15:04 MST")
 					}
+				}
+
+				if t.TargetEnv != "" {
+					targetEnv = strings.ToLower(t.TargetEnv)
+				}
+				if t.TicketType != "" {
+					ticketType = t.TicketType
 				}
 			}
 		}
@@ -1006,14 +1040,14 @@ func RenderApprovalDetail(w http.ResponseWriter, r *http.Request) {
 	}
 
 	pipelineName := fmt.Sprintf("lmd-oona-%s-%s-%s", countryLower, domainLower, cleanName)
-	tfPath := fmt.Sprintf("02-app-setup/%s/%s/uat/services/%s", domainLower, countryLower, cleanName)
+	tfPath := fmt.Sprintf("02-app-setup/%s/%s/%s/services/%s", domainLower, countryLower, targetEnv, cleanName)
 
 	candidateBranches := []string{"ci/portal", "main", "dev", "staging"}
 	detectedBranch := "main"
 	tfExists := false
 
 	for _, br := range candidateBranches {
-		resolvedP, found := ResolveTerraformPath(r.Context(), domain, country, serviceName, br)
+		resolvedP, found := ResolveTerraformPathForEnv(r.Context(), domain, country, targetEnv, serviceName, br)
 		if found {
 			tfExists = true
 			detectedBranch = br
@@ -1064,6 +1098,8 @@ func RenderApprovalDetail(w http.ResponseWriter, r *http.Request) {
 		HasAIAnalysis:   hasAIAnalysis,
 		AIAnalysisHTML:  aiAnalysisHTML,
 		AIAnalyzedAt:    aiAnalyzedAt,
+		TicketType:      ticketType,
+		TargetEnv:       targetEnv,
 	}
 
 	// 3. Read live terraform.tfvars content

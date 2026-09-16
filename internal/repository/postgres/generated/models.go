@@ -179,6 +179,7 @@ type Catalog struct {
 	AwsLastModified pgtype.Text        `json:"aws_last_modified"`
 	AwsLastInvoked  pgtype.Text        `json:"aws_last_invoked"`
 	ShelfCode       pgtype.Text        `json:"shelf_code"`
+	DeployedEnvs    []string           `json:"deployed_envs"`
 }
 
 type Integration struct {
@@ -235,6 +236,8 @@ type Ticket struct {
 	AiAnalysis    pgtype.Text        `json:"ai_analysis"`
 	AiAnalyzedAt  pgtype.Timestamptz `json:"ai_analyzed_at"`
 	ShelfCode     pgtype.Text        `json:"shelf_code"`
+	TargetEnv     string             `json:"target_env"`
+	TicketType    string             `json:"ticket_type"`
 }
 
 type TicketEnv struct {

@@ -158,6 +158,7 @@ func SetupRouter() *chi.Mux {
 		r.Post("/api/v1/tickets", CreateTicketHandler)
 		r.Delete("/api/v1/tickets/{id}", DeleteTicketHandler)
 		r.Post("/api/v1/catalog/{service}/test", InvokeLambdaHandler)
+		r.Post("/api/v1/catalog/{service}/promote", RequestPromotionHandler)
 
 		// 5. Infra & Admin Approvals Sub-router (Infra, Admin)
 		r.Group(func(r chi.Router) {

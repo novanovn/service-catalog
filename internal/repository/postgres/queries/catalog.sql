@@ -1,16 +1,16 @@
 -- name: ListCatalogEntries :many
-SELECT id, name, description, domain, country, status, repo_url, pipeline_name, requestor_email, jira_id, aws_last_modified, aws_last_invoked, created_at, updated_at
+SELECT id, name, description, domain, country, status, repo_url, pipeline_name, requestor_email, jira_id, aws_last_modified, aws_last_invoked, created_at, updated_at, deployed_envs
 FROM catalog
 WHERE is_active = true
 ORDER BY name ASC;
 
 -- name: GetCatalogEntryByName :one
-SELECT id, name, description, domain, country, status, repo_url, pipeline_name, requestor_email, jira_id, aws_last_modified, aws_last_invoked, created_at, updated_at
+SELECT id, name, description, domain, country, status, repo_url, pipeline_name, requestor_email, jira_id, aws_last_modified, aws_last_invoked, created_at, updated_at, deployed_envs
 FROM catalog
 WHERE name = $1 AND is_active = true;
 
 -- name: GetCatalogEntryByID :one
-SELECT id, name, description, domain, country, status, repo_url, pipeline_name, requestor_email, jira_id, aws_last_modified, aws_last_invoked, created_at, updated_at
+SELECT id, name, description, domain, country, status, repo_url, pipeline_name, requestor_email, jira_id, aws_last_modified, aws_last_invoked, created_at, updated_at, deployed_envs
 FROM catalog
 WHERE id = $1 AND is_active = true;
 
@@ -29,7 +29,7 @@ ON CONFLICT (name) DO UPDATE SET
     aws_last_modified = EXCLUDED.aws_last_modified,
     aws_last_invoked = EXCLUDED.aws_last_invoked,
     updated_at = NOW()
-RETURNING id, name, description, domain, country, status, repo_url, pipeline_name, requestor_email, jira_id, aws_last_modified, aws_last_invoked, created_at, updated_at;
+RETURNING id, name, description, domain, country, status, repo_url, pipeline_name, requestor_email, jira_id, aws_last_modified, aws_last_invoked, created_at, updated_at, deployed_envs;
 
 -- name: UpdateCatalogEntry :exec
 UPDATE catalog SET
@@ -51,7 +51,7 @@ WHERE id = $1;
 UPDATE catalog SET is_active = false, updated_at = NOW() WHERE id = $1;
 
 -- name: ListCatalogEntriesPaginated :many
-SELECT id, name, description, domain, country, status, repo_url, pipeline_name, requestor_email, jira_id, aws_last_modified, aws_last_invoked, created_at, updated_at
+SELECT id, name, description, domain, country, status, repo_url, pipeline_name, requestor_email, jira_id, aws_last_modified, aws_last_invoked, created_at, updated_at, deployed_envs
 FROM catalog
 WHERE is_active = true
 ORDER BY name ASC
@@ -59,4 +59,14 @@ LIMIT $1 OFFSET $2;
 
 -- name: CountCatalogEntries :one
 SELECT COUNT(*) FROM catalog WHERE is_active = true;
+
+-- name: AddCatalogDeployedEnv :exec
+UPDATE catalog
+SET deployed_envs = CASE
+        WHEN sqlc.arg('env')::text = ANY(COALESCE(deployed_envs, '{}')) THEN deployed_envs
+        ELSE array_append(COALESCE(deployed_envs, '{}'), sqlc.arg('env')::text)
+    END,
+    updated_at = NOW()
+WHERE LOWER(name) = LOWER(sqlc.arg('service_name'))
+   OR id::text = sqlc.arg('service_name');
 

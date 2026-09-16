@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"os"
 	"strings"
@@ -123,6 +124,8 @@ func ApproveTicketHandler(w http.ResponseWriter, r *http.Request) {
 	var ticketDomain string
 	var ticketCountry string
 	var ticketUUID pgtype.UUID
+	var targetEnv string = "uat"
+	var ticketType string = "ONBOARDING"
 
 	if DB != nil {
 		if err := ticketUUID.Scan(ticketID); err == nil {
@@ -132,10 +135,18 @@ func ApproveTicketHandler(w http.ResponseWriter, r *http.Request) {
 				ticketServiceName = tkt.ServiceName
 				ticketDomain = tkt.Domain
 				ticketCountry = tkt.Country
+				if tkt.TargetEnv != "" {
+					targetEnv = strings.ToLower(tkt.TargetEnv)
+				}
+				if tkt.TicketType != "" {
+					ticketType = tkt.TicketType
+				}
 				bytes, _ := tkt.IntegrationID.Value()
 				if bytes != nil {
 					integrationID = fmt.Sprintf("%x-%x-%x-%x-%x", bytes.([]byte)[0:4], bytes.([]byte)[4:6], bytes.([]byte)[6:8], bytes.([]byte)[8:10], bytes.([]byte)[10:16])
 				}
+			} else {
+				slog.Error("approve: GetTicketByID failed", "ticket_id", ticketID, "err", err)
 			}
 		}
 	}
@@ -186,7 +197,7 @@ func ApproveTicketHandler(w http.ResponseWriter, r *http.Request) {
 		targetAccountID = "794038209116" // ID-DTC-UAT / Account scope
 	}
 
-	tfPath, _ := ResolveTerraformPath(r.Context(), ticketDomain, ticketCountry, ticketServiceName, "main")
+	tfPath, _ := ResolveTerraformPathForEnv(r.Context(), ticketDomain, ticketCountry, targetEnv, ticketServiceName, "main")
 
 	// Pre-flight AWS Lambda check runs regardless of forceApprove so bypass events
 	// can be accurately audited (did the operator override a REAL gap, or a false negative?).
@@ -243,10 +254,12 @@ func ApproveTicketHandler(w http.ResponseWriter, r *http.Request) {
 	ServiceCatalog.UpdateStatus(ticketID, "LIVE")
 
 	if DB != nil && ticketUUID.Valid {
+		persistOK := false
 		if DBPool != nil {
-			// Execute atomically in a database transaction
 			tx, txErr := DBPool.Begin(r.Context())
-			if txErr == nil {
+			if txErr != nil {
+				slog.Error("approve: begin tx failed", "ticket_id", ticketID, "err", txErr)
+			} else {
 				qtx := DB.WithTx(tx)
 				_, revErr := qtx.CreateTicketReview(r.Context(), db.CreateTicketReviewParams{
 					TicketID:             ticketUUID,
@@ -256,33 +269,44 @@ func ApproveTicketHandler(w http.ResponseWriter, r *http.Request) {
 					SecurityAcknowledged: securityAck,
 					SecurityNotes:        securityNotes,
 				})
-
-				if revErr == nil {
+				if revErr != nil {
+					_ = tx.Rollback(r.Context())
+					slog.Error("approve: CreateTicketReview failed", "ticket_id", ticketID, "err", revErr)
+				} else {
 					ticket, statErr := qtx.UpdateTicketStatus(r.Context(), db.UpdateTicketStatusParams{
 						ID:     ticketUUID,
 						Status: db.TicketStatusJENKINSREADY,
 					})
-					if statErr == nil {
-						_ = tx.Commit(r.Context())
+					if statErr != nil {
+						_ = tx.Rollback(r.Context())
+						slog.Error("approve: UpdateTicketStatus failed", "ticket_id", ticketID, "err", statErr)
+					} else if commitErr := tx.Commit(r.Context()); commitErr != nil {
+						slog.Error("approve: commit failed", "ticket_id", ticketID, "err", commitErr)
+					} else {
+						persistOK = true
 						pipelineName = ticket.PipelineName
 						repoURL = ticket.RepoUrl
 						ticketServiceName = ticket.ServiceName
 						ticketDomain = ticket.Domain
 						ticketCountry = ticket.Country
+						if ticket.TargetEnv != "" {
+							targetEnv = strings.ToLower(ticket.TargetEnv)
+						}
+						if ticket.TicketType != "" {
+							ticketType = ticket.TicketType
+						}
 						bytes, _ := ticket.IntegrationID.Value()
 						if bytes != nil {
 							integrationID = fmt.Sprintf("%x-%x-%x-%x-%x", bytes.([]byte)[0:4], bytes.([]byte)[4:6], bytes.([]byte)[6:8], bytes.([]byte)[8:10], bytes.([]byte)[10:16])
 						}
-						// Record audit trail
 						RecordAudit(r.Context(), r, "APPROVE", "ticket", ticketID, map[string]interface{}{
 							"pipeline_name": pipelineName,
 							"comment":       reviewComment,
 							"security_ack":  securityAck,
 							"force_approve": forceApprove,
+							"ticket_type":   ticketType,
+							"target_env":    targetEnv,
 						})
-
-						// Separate, filterable audit event: pre-flight gate was bypassed on a
-						// resource that genuinely does NOT exist yet in AWS (not a false negative).
 						if forceApprove && lambdaCheckPerformed && !lambdaExists {
 							RecordAudit(r.Context(), r, "BYPASS_PREFLIGHT_CHECK", "ticket", ticketID, map[string]interface{}{
 								"pipeline_name":  pipelineName,
@@ -294,16 +318,11 @@ func ApproveTicketHandler(w http.ResponseWriter, r *http.Request) {
 								"warning":        "Operator bypassed AWS pre-flight gate while Lambda function was confirmed NOT present. Jenkins build may fail with ResourceNotFoundException.",
 							})
 						}
-					} else {
-						_ = tx.Rollback(r.Context())
 					}
-				} else {
-					_ = tx.Rollback(r.Context())
 				}
 			}
 		} else {
-			// Fallback if DBPool pointer is nil
-			_, _ = DB.CreateTicketReview(r.Context(), db.CreateTicketReviewParams{
+			_, revErr := DB.CreateTicketReview(r.Context(), db.CreateTicketReviewParams{
 				TicketID:             ticketUUID,
 				Status:               "APPROVED",
 				Comment:              reviewComment,
@@ -311,60 +330,105 @@ func ApproveTicketHandler(w http.ResponseWriter, r *http.Request) {
 				SecurityAcknowledged: securityAck,
 				SecurityNotes:        securityNotes,
 			})
+			if revErr != nil {
+				slog.Error("approve: CreateTicketReview (no-tx) failed", "ticket_id", ticketID, "err", revErr)
+			}
 			ticket, err := DB.UpdateTicketStatus(r.Context(), db.UpdateTicketStatusParams{
 				ID:     ticketUUID,
 				Status: db.TicketStatusJENKINSREADY,
 			})
-			if err == nil {
+			if err != nil {
+				slog.Error("approve: UpdateTicketStatus (no-tx) failed", "ticket_id", ticketID, "err", err)
+			} else {
+				persistOK = true
 				pipelineName = ticket.PipelineName
 				repoURL = ticket.RepoUrl
 				ticketServiceName = ticket.ServiceName
 				ticketDomain = ticket.Domain
 				ticketCountry = ticket.Country
+				if ticket.TargetEnv != "" {
+					targetEnv = strings.ToLower(ticket.TargetEnv)
+				}
+				if ticket.TicketType != "" {
+					ticketType = ticket.TicketType
+				}
 				bytes, _ := ticket.IntegrationID.Value()
 				if bytes != nil {
 					integrationID = fmt.Sprintf("%x-%x-%x-%x-%x", bytes.([]byte)[0:4], bytes.([]byte)[4:6], bytes.([]byte)[6:8], bytes.([]byte)[8:10], bytes.([]byte)[10:16])
 				}
 			}
 		}
+
+		if !persistOK {
+			w.Header().Set("Content-Type", "application/json")
+			w.Header().Set("HX-Trigger", `{"showToast": {"message": "Approval failed to persist. Check server logs.", "type": "error"}}`)
+			w.WriteHeader(http.StatusInternalServerError)
+			_ = json.NewEncoder(w).Encode(map[string]string{"error": "failed to persist ticket approval"})
+			return
+		}
 	}
 
 	ServiceCatalog.UpdateStatusAndPipeline(ticketID, "LIVE", pipelineName)
 
-	// Enqueue Asynq task TypeCreatePipeline
-	redisAddr := os.Getenv("VALKEY_URL")
-	if redisAddr == "" {
-		redisAddr = "localhost:6379"
+	envToMark := strings.ToLower(targetEnv)
+	if envToMark == "" {
+		envToMark = "uat"
 	}
-	redisPassword := os.Getenv("VALKEY_PASSWORD")
+	if ticketType == "PROMOTION" || envToMark == "uat" {
+		if DB != nil && ticketServiceName != "" {
+			if err := DB.AddCatalogDeployedEnv(r.Context(), db.AddCatalogDeployedEnvParams{
+				ServiceName: ticketServiceName,
+				Env:         envToMark,
+			}); err != nil {
+				slog.Error("approve: AddCatalogDeployedEnv failed", "service", ticketServiceName, "env", envToMark, "err", err)
+			}
+		}
+		ServiceCatalog.AddDeployedEnv(ticketServiceName, envToMark)
+	}
 
-	asynqClient := asynq.NewClient(asynq.RedisClientOpt{
-		Addr:     redisAddr,
-		Password: redisPassword,
-	})
-	defer asynqClient.Close()
+	// Enqueue Asynq task TypeCreatePipeline only for onboarding (multibranch project creation)
+	if ticketType != "PROMOTION" {
+		redisAddr := os.Getenv("VALKEY_URL")
+		if redisAddr == "" {
+			redisAddr = "localhost:6379"
+		}
+		redisPassword := os.Getenv("VALKEY_PASSWORD")
 
-	payload, _ := json.Marshal(struct {
-		TicketID      string
-		PipelineName  string
-		JenkinsFolder string
-		RepoURL       string
-		IntegrationID string
-		TriggeredBy   string
-	}{
-		TicketID:      ticketID,
-		PipelineName:  pipelineName,
-		JenkinsFolder: jenkinsFolder,
-		RepoURL:       repoURL,
-		IntegrationID: integrationID,
-		TriggeredBy:   triggeredBy,
-	})
+		asynqClient := asynq.NewClient(asynq.RedisClientOpt{
+			Addr:     redisAddr,
+			Password: redisPassword,
+		})
+		defer asynqClient.Close()
 
-	task := asynq.NewTask("ci:create_pipeline", payload, asynq.Queue("aws_jenkins"), asynq.MaxRetry(3))
-	_, _ = asynqClient.Enqueue(task)
+		payload, _ := json.Marshal(struct {
+			TicketID      string
+			PipelineName  string
+			JenkinsFolder string
+			RepoURL       string
+			IntegrationID string
+			TriggeredBy   string
+		}{
+			TicketID:      ticketID,
+			PipelineName:  pipelineName,
+			JenkinsFolder: jenkinsFolder,
+			RepoURL:       repoURL,
+			IntegrationID: integrationID,
+			TriggeredBy:   triggeredBy,
+		})
 
-	w.Header().Set("HX-Trigger", `{"showToast": {"message": "Ticket Approved! Pipeline item queued for creation in Jenkins.", "type": "success"}}`)
-	w.Header().Set("HX-Redirect", "/approvals?toast=approved")
+		task := asynq.NewTask("ci:create_pipeline", payload, asynq.Queue("aws_jenkins"), asynq.MaxRetry(3))
+		_, _ = asynqClient.Enqueue(task)
+	}
+
+	toastMsg := "Ticket Approved! Pipeline item queued for creation in Jenkins."
+	redirectURL := "/approvals?toast=approved"
+	if ticketType == "PROMOTION" {
+		toastMsg = fmt.Sprintf("Promotion to %s Approved! Environment status is now active.", strings.ToUpper(targetEnv))
+		redirectURL = fmt.Sprintf("/catalog/%s?env=%s", ticketServiceName, targetEnv)
+	}
+
+	w.Header().Set("HX-Trigger", fmt.Sprintf(`{"showToast": {"message": "%s", "type": "success"}}`, toastMsg))
+	w.Header().Set("HX-Redirect", redirectURL)
 	w.WriteHeader(http.StatusOK)
 }
 
