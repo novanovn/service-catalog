@@ -31,6 +31,34 @@ type ShelfView struct {
 	Description string
 	Icon        string
 	Services    []CatalogEntry
+	IsMyShelf   bool
+}
+
+// getUserShelfScope returns (assignedShelves, hasGlobalAccess) for the given claims.
+// Admin/DevOps roles and any user with a "*" entry get global access (see everything,
+// nothing pinned as "mine" specifically). A nil claims (unauthenticated/test path)
+// also gets global access so existing behavior is preserved when auth is not wired up.
+func getUserShelfScope(ctx context.Context, claims *auth.Claims) (shelves []string, hasGlobalAccess bool) {
+	if claims == nil {
+		return nil, true
+	}
+	if claims.Role == "admin" || claims.Role == "devops" {
+		return nil, true
+	}
+	if DB == nil {
+		return nil, true
+	}
+	user, err := DB.GetUserByEmail(ctx, claims.Email)
+	if err != nil {
+		// Fail open to global access rather than locking someone out on a lookup error
+		return nil, true
+	}
+	for _, s := range user.AssignedShelves {
+		if s == "*" {
+			return nil, true
+		}
+	}
+	return user.AssignedShelves, false
 }
 
 func RenderCatalogList(w http.ResponseWriter, r *http.Request) {
@@ -45,6 +73,14 @@ func RenderCatalogList(w http.ResponseWriter, r *http.Request) {
 	// Parse query params
 	selectedCountry := strings.ToLower(strings.TrimSpace(r.URL.Query().Get("country")))
 	selectedShelf := strings.ToLower(strings.TrimSpace(r.URL.Query().Get("shelf")))
+	showAllFolders := r.URL.Query().Get("all") == "true"
+
+	myShelves, hasGlobalAccess := getUserShelfScope(r.Context(), claims)
+	myShelfSet := make(map[string]bool)
+	for _, s := range myShelves {
+		myShelfSet[strings.ToLower(s)] = true
+	}
+	hasFolderScope := !hasGlobalAccess && len(myShelves) > 0
 
 	allServices := ServiceCatalog.ListAll()
 
@@ -130,33 +166,59 @@ func RenderCatalogList(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	var shelvesList []ShelfView
+	var myShelvesList []ShelfView
+	var otherShelvesList []ShelfView
 	for _, sc := range shelvesConfig {
 		if sh, ok := shelfMap[sc.Code]; ok {
-			shelvesList = append(shelvesList, *sh)
+			view := *sh
+			view.IsMyShelf = myShelfSet[strings.ToLower(sc.Code)]
+			if hasFolderScope && view.IsMyShelf {
+				myShelvesList = append(myShelvesList, view)
+			} else if hasFolderScope {
+				otherShelvesList = append(otherShelvesList, view)
+			} else {
+				myShelvesList = append(myShelvesList, view)
+			}
+		}
+	}
+
+	// When the user is folder-scoped, pin their shelves first; only include the rest
+	// of the org's 300+ shelves if they explicitly ask to see everything (?all=true).
+	shelvesList := myShelvesList
+	otherShelvesCount := 0
+	if hasFolderScope {
+		otherShelvesCount = len(otherShelvesList)
+		if showAllFolders {
+			shelvesList = append(shelvesList, otherShelvesList...)
 		}
 	}
 
 	data := struct {
-		Title           string
-		User            *auth.Claims
-		Services        []CatalogEntry
-		Shelves         []ShelfView
-		Countries       []SystemParam
-		Domains         []SystemParam
-		SelectedCountry string
-		SelectedShelf   string
-		TotalServices   int
+		Title             string
+		User              *auth.Claims
+		Services          []CatalogEntry
+		Shelves           []ShelfView
+		Countries         []SystemParam
+		Domains           []SystemParam
+		SelectedCountry   string
+		SelectedShelf     string
+		TotalServices     int
+		HasFolderScope    bool
+		ShowAllFolders    bool
+		OtherShelvesCount int
 	}{
-		Title:           "Service Catalog",
-		User:            claims,
-		Services:        allServices,
-		Shelves:         shelvesList,
-		Countries:       SystemParams.GetActiveCountries(),
-		Domains:         SystemParams.GetActiveDomains(),
-		SelectedCountry: selectedCountry,
-		SelectedShelf:   selectedShelf,
-		TotalServices:   len(allServices),
+		Title:             "Service Catalog",
+		User:              claims,
+		Services:          allServices,
+		Shelves:           shelvesList,
+		Countries:         SystemParams.GetActiveCountries(),
+		Domains:           SystemParams.GetActiveDomains(),
+		SelectedCountry:   selectedCountry,
+		SelectedShelf:     selectedShelf,
+		TotalServices:     len(allServices),
+		HasFolderScope:    hasFolderScope,
+		ShowAllFolders:    showAllFolders,
+		OtherShelvesCount: otherShelvesCount,
 	}
 
 	tmpl.ExecuteTemplate(w, "base", data)
