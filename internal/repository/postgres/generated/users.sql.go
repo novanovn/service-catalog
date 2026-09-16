@@ -13,28 +13,30 @@ import (
 
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (
-    email, full_name, password_hash, role
+    email, full_name, password_hash, role, assigned_shelves
 ) VALUES (
-    $1, $2, $3, $4
+    $1, $2, $3, $4, $5
 )
-RETURNING id, email, full_name, role, is_active, created_at, updated_at
+RETURNING id, email, full_name, role, is_active, assigned_shelves, created_at, updated_at
 `
 
 type CreateUserParams struct {
-	Email        string   `json:"email"`
-	FullName     string   `json:"full_name"`
-	PasswordHash string   `json:"password_hash"`
-	Role         UserRole `json:"role"`
+	Email           string   `json:"email"`
+	FullName        string   `json:"full_name"`
+	PasswordHash    string   `json:"password_hash"`
+	Role            UserRole `json:"role"`
+	AssignedShelves []string `json:"assigned_shelves"`
 }
 
 type CreateUserRow struct {
-	ID        pgtype.UUID        `json:"id"`
-	Email     string             `json:"email"`
-	FullName  string             `json:"full_name"`
-	Role      UserRole           `json:"role"`
-	IsActive  bool               `json:"is_active"`
-	CreatedAt pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
+	ID              pgtype.UUID        `json:"id"`
+	Email           string             `json:"email"`
+	FullName        string             `json:"full_name"`
+	Role            UserRole           `json:"role"`
+	IsActive        bool               `json:"is_active"`
+	AssignedShelves []string           `json:"assigned_shelves"`
+	CreatedAt       pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error) {
@@ -43,6 +45,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateU
 		arg.FullName,
 		arg.PasswordHash,
 		arg.Role,
+		arg.AssignedShelves,
 	)
 	var i CreateUserRow
 	err := row.Scan(
@@ -51,14 +54,24 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateU
 		&i.FullName,
 		&i.Role,
 		&i.IsActive,
+		&i.AssignedShelves,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
 	return i, err
 }
 
+const deleteUser = `-- name: DeleteUser :exec
+DELETE FROM users WHERE id = $1
+`
+
+func (q *Queries) DeleteUser(ctx context.Context, id pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, deleteUser, id)
+	return err
+}
+
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, email, full_name, password_hash, role, is_active, created_at, updated_at FROM users
+SELECT id, email, full_name, password_hash, role, is_active, created_at, updated_at, assigned_shelves FROM users
 WHERE email = $1 LIMIT 1
 `
 
@@ -74,12 +87,13 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 		&i.IsActive,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.AssignedShelves,
 	)
 	return i, err
 }
 
 const listUsers = `-- name: ListUsers :many
-SELECT id, email, full_name, password_hash, role, is_active, created_at, updated_at FROM users
+SELECT id, email, full_name, password_hash, role, is_active, created_at, updated_at, assigned_shelves FROM users
 ORDER BY created_at DESC
 `
 
@@ -101,6 +115,7 @@ func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
 			&i.IsActive,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.AssignedShelves,
 		); err != nil {
 			return nil, err
 		}
@@ -110,4 +125,43 @@ func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateUserShelves = `-- name: UpdateUserShelves :one
+UPDATE users
+SET assigned_shelves = $2, updated_at = NOW()
+WHERE id = $1
+RETURNING id, email, full_name, role, is_active, assigned_shelves, created_at, updated_at
+`
+
+type UpdateUserShelvesParams struct {
+	ID              pgtype.UUID `json:"id"`
+	AssignedShelves []string    `json:"assigned_shelves"`
+}
+
+type UpdateUserShelvesRow struct {
+	ID              pgtype.UUID        `json:"id"`
+	Email           string             `json:"email"`
+	FullName        string             `json:"full_name"`
+	Role            UserRole           `json:"role"`
+	IsActive        bool               `json:"is_active"`
+	AssignedShelves []string           `json:"assigned_shelves"`
+	CreatedAt       pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
+}
+
+func (q *Queries) UpdateUserShelves(ctx context.Context, arg UpdateUserShelvesParams) (UpdateUserShelvesRow, error) {
+	row := q.db.QueryRow(ctx, updateUserShelves, arg.ID, arg.AssignedShelves)
+	var i UpdateUserShelvesRow
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.FullName,
+		&i.Role,
+		&i.IsActive,
+		&i.AssignedShelves,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }

@@ -155,7 +155,7 @@ SET name = $2,
     provider = $3,
     base_url = $4,
     auth_user = $5,
-    auth_token = CASE WHEN $6 != '' THEN $6 ELSE auth_token END,
+    auth_token = $6,
     is_active = $7,
     updated_at = NOW()
 WHERE id = $1
@@ -183,4 +183,3 @@ func (q *Queries) UpdateIntegration(ctx context.Context, arg UpdateIntegrationPa
 	)
 	return err
 }
-

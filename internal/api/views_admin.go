@@ -359,6 +359,19 @@ func RenderAdminIntegrations(w http.ResponseWriter, r *http.Request) {
 	tmpl.ExecuteTemplate(w, "base", data)
 }
 
+// UserView represents a user formatted for HTML display in the admin panel
+type UserView struct {
+	ID              string
+	Email           string
+	FullName        string
+	Role            string
+	IsActive        bool
+	AssignedShelves []string
+	IsGlobalAccess  bool
+	Initials        string
+	CreatedAt       string
+}
+
 // RenderAdminUsers renders the user management page
 func RenderAdminUsers(w http.ResponseWriter, r *http.Request) {
 	tmpl, err := parsePage("admin_users.html")
@@ -369,12 +382,58 @@ func RenderAdminUsers(w http.ResponseWriter, r *http.Request) {
 
 	claims, _ := r.Context().Value(userCtxKey).(*auth.Claims)
 
+	var userViews []UserView
+	if DB != nil {
+		users, err := DB.ListUsers(r.Context())
+		if err == nil {
+			for _, u := range users {
+				idStr := ""
+				if u.ID.Valid {
+					idStr = fmt.Sprintf("%x-%x-%x-%x-%x", u.ID.Bytes[0:4], u.ID.Bytes[4:6], u.ID.Bytes[6:8], u.ID.Bytes[8:10], u.ID.Bytes[10:16])
+				}
+				isGlobal := false
+				for _, s := range u.AssignedShelves {
+					if s == "*" {
+						isGlobal = true
+						break
+					}
+				}
+				initials := "U"
+				parts := strings.Fields(u.FullName)
+				if len(parts) >= 2 {
+					initials = strings.ToUpper(string(parts[0][0]) + string(parts[1][0]))
+				} else if len(parts) == 1 && len(parts[0]) > 0 {
+					initials = strings.ToUpper(parts[0][:1])
+				}
+				userViews = append(userViews, UserView{
+					ID:              idStr,
+					Email:           u.Email,
+					FullName:        u.FullName,
+					Role:            string(u.Role),
+					IsActive:        u.IsActive,
+					AssignedShelves: u.AssignedShelves,
+					IsGlobalAccess:  isGlobal,
+					Initials:        initials,
+					CreatedAt:       u.CreatedAt.Time.Format("2006-01-02"),
+				})
+			}
+		} else {
+			log.Printf("Warning: Failed to list users from DB: %v", err)
+		}
+	}
+
+	shelves := SystemParams.GetActiveShelves()
+
 	data := struct {
-		Title string
-		User  *auth.Claims
+		Title   string
+		User    *auth.Claims
+		Users   []UserView
+		Shelves []SystemParam
 	}{
-		Title: "User Management",
-		User:  claims,
+		Title:   "User Management",
+		User:    claims,
+		Users:   userViews,
+		Shelves: shelves,
 	}
 
 	tmpl.ExecuteTemplate(w, "base", data)

@@ -178,6 +178,7 @@ type Catalog struct {
 	JiraID          pgtype.Text        `json:"jira_id"`
 	AwsLastModified pgtype.Text        `json:"aws_last_modified"`
 	AwsLastInvoked  pgtype.Text        `json:"aws_last_invoked"`
+	ShelfCode       pgtype.Text        `json:"shelf_code"`
 }
 
 type Integration struct {
@@ -190,6 +191,20 @@ type Integration struct {
 	IsActive  bool                `json:"is_active"`
 	CreatedAt pgtype.Timestamptz  `json:"created_at"`
 	UpdatedAt pgtype.Timestamptz  `json:"updated_at"`
+}
+
+type ServiceScanSchedule struct {
+	ID             pgtype.UUID        `json:"id"`
+	ServiceName    string             `json:"service_name"`
+	IsEnabled      bool               `json:"is_enabled"`
+	TargetBranches string             `json:"target_branches"`
+	ScheduleTime   string             `json:"schedule_time"`
+	Frequency      string             `json:"frequency"`
+	Timezone       string             `json:"timezone"`
+	LastRunAt      pgtype.Timestamptz `json:"last_run_at"`
+	LastStatus     pgtype.Text        `json:"last_status"`
+	CreatedAt      pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt      pgtype.Timestamptz `json:"updated_at"`
 }
 
 type SystemParameter struct {
@@ -219,6 +234,7 @@ type Ticket struct {
 	IntegrationID pgtype.UUID        `json:"integration_id"`
 	AiAnalysis    pgtype.Text        `json:"ai_analysis"`
 	AiAnalyzedAt  pgtype.Timestamptz `json:"ai_analyzed_at"`
+	ShelfCode     pgtype.Text        `json:"shelf_code"`
 }
 
 type TicketEnv struct {
@@ -242,13 +258,22 @@ type TicketReview struct {
 	CreatedAt            pgtype.Timestamptz `json:"created_at"`
 }
 
+type TopologyLayout struct {
+	LayoutName string             `json:"layout_name"`
+	Positions  []byte             `json:"positions"`
+	UpdatedBy  string             `json:"updated_by"`
+	CreatedAt  pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt  pgtype.Timestamptz `json:"updated_at"`
+}
+
 type User struct {
-	ID           pgtype.UUID        `json:"id"`
-	Email        string             `json:"email"`
-	FullName     string             `json:"full_name"`
-	PasswordHash string             `json:"password_hash"`
-	Role         UserRole           `json:"role"`
-	IsActive     bool               `json:"is_active"`
-	CreatedAt    pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
+	ID              pgtype.UUID        `json:"id"`
+	Email           string             `json:"email"`
+	FullName        string             `json:"full_name"`
+	PasswordHash    string             `json:"password_hash"`
+	Role            UserRole           `json:"role"`
+	IsActive        bool               `json:"is_active"`
+	CreatedAt       pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
+	AssignedShelves []string           `json:"assigned_shelves"`
 }

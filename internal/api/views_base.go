@@ -27,6 +27,14 @@ func parsePage(pageFileName string) (*template.Template, error) {
 	funcMap := template.FuncMap{
 		"add": func(a, b int) int { return a + b },
 		"sub": func(a, b int) int { return a - b },
+		"contains": func(list []string, item string) bool {
+			for _, s := range list {
+				if s == item {
+					return true
+				}
+			}
+			return false
+		},
 	}
 	tmplDir := getTemplateDir()
 	return template.New("base").Funcs(funcMap).ParseFiles(

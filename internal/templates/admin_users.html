@@ -1,25 +1,25 @@
 {{ define "content" }}
 <div class="max-w-6xl mx-auto space-y-6">
     <!-- Header & Action Bar -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-800 pb-5">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-[#282828] pb-5">
         <div>
             <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
                 User & Access Management
             </h2>
-            <p class="text-xs sm:text-sm text-slate-400 mt-1">Manage portal access, assign roles (Developer, DevOps, Admin), and configure credentials.</p>
+            <p class="text-xs sm:text-sm text-slate-400 mt-1">Manage portal access, assign roles, and attach developers to their team's catalog folders.</p>
         </div>
-        <button 
+        <button
             onclick="document.getElementById('user-form').classList.toggle('hidden')"
-            class="inline-flex items-center gap-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white shadow-sm px-4 py-2 text-xs font-bold text-white shadow-lg shadow-indigo-600/25 hover:from-indigo-500 hover:to-violet-500 transition-all cursor-pointer">
+            class="inline-flex items-center gap-1.5 rounded-xl bg-[#7c3aed] hover:bg-[#6d28d9] text-white px-4 py-2 text-xs font-bold transition-all cursor-pointer">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
             + Add New User
         </button>
     </div>
 
     <!-- User Creation Form Container (Hidden by default) -->
-    <div id="user-form" class="hidden bg-slate-900/90 border border-slate-800/80 shadow-xl shadow-black/30 rounded-2xl p-6 backdrop-blur-xl transition-all">
-        <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-5">
-            <h3 class="text-sm font-bold text-white uppercase tracking-wider">Register New Access Credentials</h3>
+    <div id="user-form" class="hidden bg-[#171717] border border-[#282828] shadow-2xl rounded-2xl p-6 text-white transition-all">
+        <div class="flex items-center justify-between border-b border-[#282828] pb-3 mb-5">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 font-mono">Register New Access Credentials</h3>
             <button type="button" onclick="document.getElementById('user-form').classList.add('hidden')" class="text-slate-400 hover:text-white p-1 rounded-lg">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
@@ -28,32 +28,55 @@
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                     <label class="block text-xs font-semibold text-slate-300 mb-1.5">Full Name</label>
-                    <input type="text" name="full_name" placeholder="John Doe" required class="block w-full rounded-xl bg-slate-950 border-0 py-2.5 text-white ring-1 ring-inset ring-slate-800 placeholder:text-slate-500 focus:ring-2 focus:ring-inset focus:ring-indigo-500 text-xs px-3.5"/>
+                    <input type="text" name="full_name" placeholder="John Doe" required class="block w-full rounded-xl bg-[#121212] border border-[#282828] py-2.5 text-white placeholder:text-slate-600 focus:ring-2 focus:ring-purple-500 text-xs px-3.5"/>
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-300 mb-1.5">Corporate Email</label>
-                    <input type="email" name="email" placeholder="john.doe@oona-insurance.com" required class="block w-full rounded-xl bg-slate-950 border-0 py-2.5 text-white ring-1 ring-inset ring-slate-800 placeholder:text-slate-500 focus:ring-2 focus:ring-inset focus:ring-indigo-500 text-xs px-3.5"/>
+                    <input type="email" name="email" placeholder="john.doe@oona-insurance.com" required class="block w-full rounded-xl bg-[#121212] border border-[#282828] py-2.5 text-white placeholder:text-slate-600 focus:ring-2 focus:ring-purple-500 text-xs px-3.5"/>
                 </div>
             </div>
-            
+
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                     <label class="block text-xs font-semibold text-slate-300 mb-1.5">Role / Access Scope</label>
-                    <select name="role" class="block w-full rounded-xl bg-slate-950 border-0 py-2.5 text-white ring-1 ring-inset ring-slate-800 focus:ring-2 focus:ring-inset focus:ring-indigo-500 text-xs px-3.5">
+                    <select name="role" id="new-user-role" onchange="toggleShelfPicker()" class="block w-full rounded-xl bg-[#121212] border border-[#282828] py-2.5 text-white focus:ring-2 focus:ring-purple-500 text-xs px-3.5">
                         <option value="developer">Developer (Submit tickets, View catalog)</option>
-                        <option value="devops">DevOps (Approve Infra & Jenkins)</option>
-                        <option value="admin">Admin (Full Access & Integrations)</option>
+                        <option value="devops">DevOps (Approve Infra & Jenkins — Global Access)</option>
+                        <option value="admin">Admin (Full Access & Integrations — Global Access)</option>
                     </select>
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-300 mb-1.5">Temporary Password</label>
-                    <input type="password" name="password" required class="block w-full rounded-xl bg-slate-950 border-0 py-2.5 text-white ring-1 ring-inset ring-slate-800 placeholder:text-slate-500 focus:ring-2 focus:ring-inset focus:ring-indigo-500 text-xs px-3.5"/>
+                    <input type="password" name="password" required class="block w-full rounded-xl bg-[#121212] border border-[#282828] py-2.5 text-white placeholder:text-slate-600 focus:ring-2 focus:ring-purple-500 text-xs px-3.5"/>
                 </div>
             </div>
 
-            <div class="pt-4 border-t border-slate-800 flex items-center justify-end gap-3">
-                <button type="button" onclick="document.getElementById('user-form').classList.add('hidden')" class="rounded-xl bg-slate-800 hover:bg-slate-700 px-4 py-2 text-xs font-semibold text-slate-300 hover:text-white transition-colors">Cancel</button>
-                <button type="submit" class="rounded-xl bg-purple-600 hover:bg-purple-700 text-white shadow-sm px-4 py-2 text-xs font-bold text-white shadow-lg shadow-indigo-600/30 hover:from-indigo-500 hover:to-violet-500 transition-all">
+            <!-- Folder / Shelf Attachment (only meaningful for Developer role; DevOps/Admin get global access) -->
+            <div id="new-user-shelf-picker">
+                <label class="block text-xs font-semibold text-slate-300 mb-1.5">
+                    Attach to Shelves / Folders
+                    <span class="text-slate-500 font-normal normal-case">— scopes this user's default catalog view</span>
+                </label>
+                {{ if .Shelves }}
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 rounded-xl bg-[#121212] border border-[#282828] p-3 max-h-48 overflow-y-auto">
+                    {{ range .Shelves }}
+                    <label class="flex items-center gap-2 text-xs text-slate-300 hover:text-white cursor-pointer rounded-lg px-2 py-1.5 hover:bg-[#1e1e1e] transition-colors">
+                        <input type="checkbox" name="shelves" value="{{ .Code }}" class="rounded border-[#333333] bg-[#121212] text-[#7c3aed] focus:ring-purple-500 focus:ring-offset-0"/>
+                        <span class="truncate">{{ .Name }} <span class="text-slate-600 font-mono">({{ .Code }})</span></span>
+                    </label>
+                    {{ end }}
+                </div>
+                {{ else }}
+                <p class="text-xs text-slate-500 italic">No shelves configured yet — create one from the Service Catalog first.</p>
+                {{ end }}
+            </div>
+            <div id="new-user-global-notice" class="hidden text-xs text-indigo-300 bg-indigo-500/10 border border-indigo-500/20 rounded-xl px-3.5 py-2.5">
+                ★ This role has global access to all folders — no folder attachment needed.
+            </div>
+
+            <div class="pt-4 border-t border-[#282828] flex items-center justify-end gap-3">
+                <button type="button" onclick="document.getElementById('user-form').classList.add('hidden')" class="rounded-xl bg-[#1e1e1e] hover:bg-[#282828] border border-[#2e2e2e] px-4 py-2 text-xs font-bold text-slate-300 hover:text-white transition-colors">Cancel</button>
+                <button type="submit" class="rounded-xl bg-[#7c3aed] hover:bg-[#6d28d9] px-4 py-2 text-xs font-bold text-white transition-all">
                     Create User Account
                 </button>
             </div>
@@ -61,71 +84,136 @@
     </div>
 
     <!-- Users Table Container -->
-    <div class="overflow-hidden bg-slate-900/90 border border-slate-800/80 rounded-2xl shadow-xl shadow-black/30 backdrop-blur-xl">
+    <div class="overflow-hidden bg-[#171717] border border-[#282828] rounded-2xl shadow-sm">
         <div class="overflow-x-auto p-1 sm:p-2">
-            <table class="min-w-full divide-y divide-slate-800 text-left text-xs">
+            <table class="min-w-full divide-y divide-[#282828] text-left text-xs">
                 <thead>
-                    <tr class="text-slate-400 font-semibold uppercase tracking-wider bg-slate-950/60">
+                    <tr class="text-slate-400 font-semibold uppercase tracking-wider bg-[#141414]">
                         <th class="py-3.5 pl-4 pr-3 sm:pl-4">User & Identity</th>
                         <th class="px-3 py-3.5">Assigned Role</th>
+                        <th class="px-3 py-3.5">Assigned Folders</th>
                         <th class="px-3 py-3.5">Account Status</th>
                         <th class="px-3 py-3.5 text-right pr-4 sm:pr-4">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-800/60">
-                    <tr class="hover:bg-slate-800/40 transition-colors">
+                <tbody class="divide-y divide-[#282828]/60">
+                    {{ range .Users }}
+                    <tr class="hover:bg-[#1c1c1c] transition-colors">
                         <td class="py-4 pl-4 pr-3 sm:pl-4">
                             <div class="flex items-center gap-3">
-                                <div class="h-9 w-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-600 flex items-center justify-center text-white font-bold text-xs shadow-md shadow-indigo-600/20">
-                                    SA
+                                <div class="h-9 w-9 rounded-xl bg-[#242424] border border-[#333333] flex items-center justify-center text-slate-200 font-bold text-xs">
+                                    {{ .Initials }}
                                 </div>
-                                <div>
-                                    <div class="font-bold text-white">System Administrator</div>
-                                    <div class="text-slate-400 font-mono text-[11px]">admin@oona-insurance.com</div>
+                                <div class="min-w-0">
+                                    <div class="font-bold text-white truncate">{{ .FullName }}</div>
+                                    <div class="text-slate-400 font-mono text-[11px] truncate">{{ .Email }}</div>
                                 </div>
                             </div>
                         </td>
                         <td class="px-3 py-4">
-                            <span class="inline-flex items-center rounded-lg bg-indigo-500/10 px-2.5 py-1 text-[11px] font-bold text-indigo-400 border border-indigo-500/20">ADMINISTRATOR</span>
-                        </td>
-                        <td class="px-3 py-4">
-                            <span class="inline-flex items-center gap-1.5 text-emerald-400 font-semibold">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                                Active
-                            </span>
-                        </td>
-                        <td class="px-3 py-4 text-right pr-4 sm:pr-4 space-x-2">
-                            <span class="text-slate-500 text-[11px] font-mono">System Root</span>
-                        </td>
-                    </tr>
-                    <tr class="hover:bg-slate-800/40 transition-colors">
-                        <td class="py-4 pl-4 pr-3 sm:pl-4">
-                            <div class="flex items-center gap-3">
-                                <div class="h-9 w-9 rounded-xl bg-gradient-to-tr from-blue-600 to-cyan-600 flex items-center justify-center text-white font-bold text-xs shadow-md shadow-blue-600/20">
-                                    DV
-                                </div>
-                                <div>
-                                    <div class="font-bold text-white">Developer Account</div>
-                                    <div class="text-slate-400 font-mono text-[11px]">dev@oona-insurance.com</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="px-3 py-4">
+                            {{ if eq .Role "admin" }}
+                            <span class="inline-flex items-center rounded-lg bg-indigo-500/10 px-2.5 py-1 text-[11px] font-bold text-indigo-400 border border-indigo-500/20">ADMIN</span>
+                            {{ else if eq .Role "devops" }}
+                            <span class="inline-flex items-center rounded-lg bg-teal-500/10 px-2.5 py-1 text-[11px] font-bold text-teal-400 border border-teal-500/20">DEVOPS</span>
+                            {{ else }}
                             <span class="inline-flex items-center rounded-lg bg-blue-500/10 px-2.5 py-1 text-[11px] font-bold text-blue-400 border border-blue-500/20">DEVELOPER</span>
+                            {{ end }}
+                        </td>
+                        <td class="px-3 py-4 max-w-[220px]">
+                            {{ if .IsGlobalAccess }}
+                            <span class="inline-flex items-center gap-1 rounded-lg bg-purple-500/10 px-2.5 py-1 text-[11px] font-bold text-[#a78bfa] border border-purple-500/20">★ All Folders (Global)</span>
+                            {{ else if .AssignedShelves }}
+                            <div class="flex flex-wrap gap-1">
+                                {{ range .AssignedShelves }}
+                                <span class="inline-flex items-center rounded-md bg-[#121212] border border-[#282828] px-1.5 py-0.5 text-[10px] font-mono text-slate-300">{{ . }}</span>
+                                {{ end }}
+                            </div>
+                            {{ else }}
+                            <span class="text-slate-600 text-[11px] italic">No folders assigned</span>
+                            {{ end }}
                         </td>
                         <td class="px-3 py-4">
+                            {{ if .IsActive }}
                             <span class="inline-flex items-center gap-1.5 text-emerald-400 font-semibold">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
                                 Active
                             </span>
+                            {{ else }}
+                            <span class="inline-flex items-center gap-1.5 text-slate-500 font-semibold">
+                                <span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span>
+                                Inactive
+                            </span>
+                            {{ end }}
                         </td>
-                        <td class="px-3 py-4 text-right pr-4 sm:pr-4 space-x-2">
-                            <button class="text-indigo-400 hover:text-indigo-300 font-semibold">Edit</button>
+                        <td class="px-3 py-4 text-right pr-4 sm:pr-4">
+                            <div class="flex items-center justify-end gap-3">
+                                {{ if not (eq .Role "admin") }}
+                                <button type="button" onclick="toggleShelfEditor('{{ .ID }}')" class="text-indigo-400 hover:text-indigo-300 font-semibold">Edit Folders</button>
+                                {{ end }}
+                                {{ if not (eq .Role "admin") }}
+                                <button type="button"
+                                    hx-delete="/api/v1/admin/users/{{ .ID }}"
+                                    hx-confirm="Delete user {{ .Email }}? This cannot be undone."
+                                    hx-target="closest tr"
+                                    hx-swap="outerHTML swap:0.2s"
+                                    class="text-red-400 hover:text-red-300 font-semibold">Delete</button>
+                                {{ else }}
+                                <span class="text-slate-600 text-[11px] font-mono">System Root</span>
+                                {{ end }}
+                            </div>
                         </td>
                     </tr>
+                    {{ if not (eq .Role "admin") }}
+                    <tr id="shelf-editor-{{ .ID }}" class="hidden bg-[#141414]">
+                        <td colspan="5" class="px-4 py-4">
+                            <form hx-post="/api/v1/admin/users/{{ .ID }}/shelves" class="space-y-3">
+                                <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Reassign folders for {{ .FullName }}</p>
+                                {{ if eq .Role "devops" }}
+                                <p class="text-xs text-indigo-300 bg-indigo-500/10 border border-indigo-500/20 rounded-xl px-3.5 py-2.5">★ DevOps role always has global folder access — no changes needed here.</p>
+                                {{ else }}
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 rounded-xl bg-[#121212] border border-[#282828] p-3 max-h-48 overflow-y-auto">
+                                    {{ $assigned := .AssignedShelves }}
+                                    {{ range $.Shelves }}
+                                    <label class="flex items-center gap-2 text-xs text-slate-300 hover:text-white cursor-pointer rounded-lg px-2 py-1.5 hover:bg-[#1e1e1e] transition-colors">
+                                        <input type="checkbox" name="shelves" value="{{ .Code }}" {{ if contains $assigned .Code }}checked{{ end }} class="rounded border-[#333333] bg-[#121212] text-[#7c3aed] focus:ring-purple-500 focus:ring-offset-0"/>
+                                        <span class="truncate">{{ .Name }} <span class="text-slate-600 font-mono">({{ .Code }})</span></span>
+                                    </label>
+                                    {{ end }}
+                                </div>
+                                <div class="flex items-center justify-end gap-2">
+                                    <button type="button" onclick="toggleShelfEditor('{{ .ID }}')" class="rounded-xl bg-[#1e1e1e] hover:bg-[#282828] border border-[#2e2e2e] px-3.5 py-2 text-xs font-bold text-slate-300 hover:text-white transition-colors">Cancel</button>
+                                    <button type="submit" class="rounded-xl bg-[#7c3aed] hover:bg-[#6d28d9] px-3.5 py-2 text-xs font-bold text-white transition-all">Save Assignment</button>
+                                </div>
+                                {{ end }}
+                            </form>
+                        </td>
+                    </tr>
+                    {{ end }}
+                    {{ else }}
+                    <tr>
+                        <td colspan="5" class="px-4 py-10 text-center text-slate-500 text-xs">
+                            No users found. Click "+ Add New User" to register the first account.
+                        </td>
+                    </tr>
+                    {{ end }}
                 </tbody>
             </table>
         </div>
     </div>
 </div>
+
+<script>
+    function toggleShelfPicker() {
+        const role = document.getElementById('new-user-role').value;
+        const picker = document.getElementById('new-user-shelf-picker');
+        const notice = document.getElementById('new-user-global-notice');
+        const isGlobal = (role === 'admin' || role === 'devops');
+        picker.classList.toggle('hidden', isGlobal);
+        notice.classList.toggle('hidden', !isGlobal);
+    }
+    function toggleShelfEditor(userId) {
+        const row = document.getElementById('shelf-editor-' + userId);
+        if (row) row.classList.toggle('hidden');
+    }
+</script>
 {{ end }}

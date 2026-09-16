@@ -14,6 +14,33 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// validUserRoles are the only role values accepted by CreateUserHandler.
+var validUserRoles = map[string]bool{
+	"developer": true,
+	"devops":    true,
+	"admin":     true,
+}
+
+// normalizeAssignedShelves cleans and dedupes the raw shelf codes submitted from
+// the "Attach to Shelves" checkbox list. Admin/DevOps roles get an implicit global
+// wildcard ("*") since folder scoping does not apply to them.
+func normalizeAssignedShelves(role string, rawShelves []string) []string {
+	if role == "admin" || role == "devops" {
+		return []string{"*"}
+	}
+	seen := make(map[string]bool)
+	var out []string
+	for _, s := range rawShelves {
+		s = strings.TrimSpace(strings.ToLower(s))
+		if s == "" || seen[s] {
+			continue
+		}
+		seen[s] = true
+		out = append(out, s)
+	}
+	return out
+}
+
 // CreateUserHandler handles POST /api/v1/admin/users
 func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
@@ -30,8 +57,9 @@ func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	fullName := r.FormValue("full_name")
 	email := r.FormValue("email")
-	role := r.FormValue("role")
+	role := strings.ToLower(strings.TrimSpace(r.FormValue("role")))
 	password := r.FormValue("password")
+	rawShelves := r.Form["shelves"]
 
 	if email == "" || fullName == "" || password == "" {
 		w.Header().Set("Content-Type", "text/html")
@@ -43,6 +71,19 @@ func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 		`))
 		return
 	}
+
+	if !validUserRoles[role] {
+		w.Header().Set("Content-Type", "text/html")
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(`
+			<div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 border border-red-200" role="alert">
+				<span class="font-bold">Error!</span> Invalid role selected.
+			</div>
+		`))
+		return
+	}
+
+	assignedShelves := normalizeAssignedShelves(role, rawShelves)
 
 	// Hash password using bcrypt
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
@@ -59,10 +100,11 @@ func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	if DB != nil {
 		_, err = DB.CreateUser(r.Context(), db.CreateUserParams{
-			Email:        email,
-			FullName:     fullName,
-			PasswordHash: string(hashedPassword),
-			Role:         db.UserRole(role),
+			Email:           email,
+			FullName:        fullName,
+			PasswordHash:    string(hashedPassword),
+			Role:            db.UserRole(role),
+			AssignedShelves: assignedShelves,
 		})
 		if err != nil {
 			w.Header().Set("Content-Type", "text/html")
@@ -75,11 +117,80 @@ func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		RecordAudit(r.Context(), r, "CREATE", "user", email, map[string]interface{}{
-			"full_name": fullName,
-			"role":      role,
+			"full_name":        fullName,
+			"role":             role,
+			"assigned_shelves": assignedShelves,
 		})
 	}
 
+	if r.Header.Get("HX-Request") == "true" {
+		w.Header().Set("HX-Redirect", "/admin/users")
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+	http.Redirect(w, r, "/admin/users", http.StatusSeeOther)
+}
+
+// UpdateUserShelvesHandler handles POST /api/v1/admin/users/{id}/shelves
+// Re-assigns which shelves (folders) a developer/devops user can see by default
+// in the catalog. Admin and DevOps roles are always forced to wildcard access.
+func UpdateUserShelvesHandler(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	if id == "" {
+		http.Error(w, "User ID is required", http.StatusBadRequest)
+		return
+	}
+
+	if err := r.ParseForm(); err != nil {
+		w.Header().Set("HX-Trigger", `{"showToast": {"message": "Invalid form data", "type": "error"}}`)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	rawShelves := r.Form["shelves"]
+
+	if DB == nil {
+		w.Header().Set("HX-Trigger", `{"showToast": {"message": "Database unavailable", "type": "error"}}`)
+		w.WriteHeader(http.StatusServiceUnavailable)
+		return
+	}
+
+	var uid pgtype.UUID
+	if err := uid.Scan(id); err != nil {
+		w.Header().Set("HX-Trigger", `{"showToast": {"message": "Invalid user ID", "type": "error"}}`)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	// Look up the user's current role so admin/devops keep their forced wildcard.
+	existing, listErr := DB.ListUsers(r.Context())
+	role := "developer"
+	if listErr == nil {
+		for _, u := range existing {
+			if u.ID == uid {
+				role = string(u.Role)
+				break
+			}
+		}
+	}
+
+	assignedShelves := normalizeAssignedShelves(role, rawShelves)
+
+	updated, err := DB.UpdateUserShelves(r.Context(), db.UpdateUserShelvesParams{
+		ID:              uid,
+		AssignedShelves: assignedShelves,
+	})
+	if err != nil {
+		w.Header().Set("HX-Trigger", `{"showToast": {"message": "Failed to update shelf assignment", "type": "error"}}`)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	RecordAudit(r.Context(), r, "UPDATE_SHELVES", "user", updated.Email, map[string]interface{}{
+		"assigned_shelves": assignedShelves,
+	})
+
+	w.Header().Set("HX-Trigger", `{"showToast": {"message": "Folder assignment updated!", "type": "success"}}`)
 	if r.Header.Get("HX-Request") == "true" {
 		w.Header().Set("HX-Redirect", "/admin/users")
 		w.WriteHeader(http.StatusOK)
@@ -97,11 +208,21 @@ func DeleteUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if DB != nil {
-		RecordAudit(r.Context(), r, "DELETE", "user", id, map[string]interface{}{
-			"user_id": id,
-		})
+		var uid pgtype.UUID
+		if err := uid.Scan(id); err == nil {
+			if err := DB.DeleteUser(r.Context(), uid); err != nil {
+				log.Printf("ERROR: DeleteUser DB delete failed: %v", err)
+				w.Header().Set("HX-Trigger", `{"showToast": {"message": "Failed to delete user", "type": "error"}}`)
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			RecordAudit(r.Context(), r, "DELETE", "user", id, map[string]interface{}{
+				"user_id": id,
+			})
+		}
 	}
 
+	w.Header().Set("HX-Trigger", `{"showToast": {"message": "User deleted successfully", "type": "success"}}`)
 	if r.Header.Get("HX-Request") == "true" {
 		w.WriteHeader(http.StatusOK)
 		return
