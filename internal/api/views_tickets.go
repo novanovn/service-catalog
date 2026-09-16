@@ -34,19 +34,15 @@ func RenderTicketForm(w http.ResponseWriter, r *http.Request) {
 	claims, _ := r.Context().Value(userCtxKey).(*auth.Claims)
 
 	data := struct {
-		Title        string
-		User         *auth.Claims
-		Countries    []SystemParam
-		Domains      []SystemParam
-		Environments []SystemParam
-		Shelves      []SystemParam
+		Title     string
+		User      *auth.Claims
+		Countries []SystemParam
+		Domains   []SystemParam
 	}{
-		Title:        "Onboard Service",
-		User:         claims,
-		Countries:    SystemParams.GetActiveCountries(),
-		Domains:      SystemParams.GetActiveDomains(),
-		Environments: SystemParams.GetActiveEnvironments(),
-		Shelves:      SystemParams.GetActiveShelves(),
+		Title:     "Onboard Service",
+		User:      claims,
+		Countries: SystemParams.GetActiveCountries(),
+		Domains:   SystemParams.GetActiveDomains(),
 	}
 
 	tmpl.ExecuteTemplate(w, "base", data)

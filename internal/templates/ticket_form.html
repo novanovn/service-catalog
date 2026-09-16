@@ -26,8 +26,8 @@
                 </h3>
                 
                 <div class="grid grid-cols-1 gap-x-6 gap-y-6 sm:grid-cols-6">
-                    <div class="sm:col-span-2">
-                        <label for="country" class="block text-xs font-bold uppercase tracking-wider text-slate-300 font-mono">1. Country Scope</label>
+                    <div class="sm:col-span-3">
+                        <label for="country" class="block text-xs font-bold uppercase tracking-wider text-slate-300 font-mono">1. Country Scope <span class="text-[10px] font-normal normal-case text-slate-500">→ determines the Main Shelf in the catalog</span></label>
                         <div class="mt-1.5">
                             <select id="country" name="country" hx-post="/tickets/preview" hx-trigger="change" hx-target="#pipeline-preview" class="block w-full rounded-xl border border-[#282828] py-2.5 text-white bg-[#121212] focus:ring-2 focus:ring-purple-500 sm:text-xs px-3 font-mono">
                                 {{ range .Countries }}
@@ -37,19 +37,8 @@
                         </div>
                     </div>
 
-                    <div class="sm:col-span-2">
-                        <label for="shelf_code" class="block text-xs font-bold uppercase tracking-wider text-slate-300 font-mono">2. Target Shelf (Product Suite)</label>
-                        <div class="mt-1.5">
-                            <select id="shelf_code" name="shelf_code" class="block w-full rounded-xl border border-[#282828] py-2.5 text-white bg-[#121212] focus:ring-2 focus:ring-purple-500 sm:text-xs px-3 font-mono">
-                                {{ range .Shelves }}
-                                    <option value="{{ .Code }}">{{ .Name }} ({{ .Code }})</option>
-                                {{ end }}
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="sm:col-span-2">
-                        <label for="domain" class="block text-xs font-bold uppercase tracking-wider text-slate-300 font-mono">3. Functional Domain</label>
+                    <div class="sm:col-span-3">
+                        <label for="domain" class="block text-xs font-bold uppercase tracking-wider text-slate-300 font-mono">2. Functional Domain <span class="text-[10px] font-normal normal-case text-slate-500">→ shown as a badge on the service row</span></label>
                         <div class="mt-1.5">
                             <select id="domain" name="domain" hx-post="/tickets/preview" hx-trigger="change" hx-target="#pipeline-preview" class="block w-full rounded-xl border border-[#282828] py-2.5 text-white bg-[#121212] focus:ring-2 focus:ring-purple-500 sm:text-xs px-3 font-mono">
                                 {{ range .Domains }}
@@ -67,18 +56,14 @@
                         <p class="mt-1.5 text-xs text-slate-400">This must match exactly with the folder name you intend to use in the Terraform IaC repository.</p>
                     </div>
 
-                    <!-- Environment Checkboxes -->
+                    <!-- Sub Shelf (Environment) info -->
                     <div class="sm:col-span-6">
-                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 font-mono mb-2">Target Environments</label>
-                        <div class="env-checkbox-box grid grid-cols-2 sm:grid-cols-4 gap-4 bg-[#121212] p-4 rounded-xl border border-[#282828]">
-                            {{ range .Environments }}
-                            <div class="relative flex items-center">
-                                <input id="env-{{ .Code }}" name="environments" value="{{ .Code }}" type="checkbox" {{ if or (eq .Code "dev") (eq .Code "uat") }}checked{{ end }} class="h-4 w-4 rounded border-[#282828] bg-[#171717] text-[#7c3aed] focus:ring-purple-500">
-                                <label for="env-{{ .Code }}" class="ml-2.5 text-xs font-mono font-medium text-slate-200 cursor-pointer">{{ .Name }}</label>
-                            </div>
-                            {{ else }}
-                            <p class="text-xs text-slate-500 italic col-span-4 font-mono">No target environments configured.</p>
-                            {{ end }}
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 font-mono mb-2">Sub Shelf (Environment) Placement</label>
+                        <div class="flex items-start gap-2.5 bg-[#121212] p-3.5 rounded-xl border border-[#282828]">
+                            <i data-lucide="info" class="w-4 h-4 text-[#a78bfa] flex-shrink-0 mt-0.5"></i>
+                            <p class="text-xs text-slate-400 leading-relaxed">
+                                This service starts in <span class="font-mono text-slate-200">Not Yet Deployed</span>. Once DevOps approves the ticket and Terraform is applied, it automatically moves to the matching Sub Shelf (<span class="font-mono text-slate-200">UAT</span> → <span class="font-mono text-slate-200">Pre-Production</span> → <span class="font-mono text-slate-200">Production</span>) based on its approval status — there's nothing to select here.
+                            </p>
                         </div>
                     </div>
                 </div>
