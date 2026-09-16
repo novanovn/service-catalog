@@ -340,6 +340,22 @@ func RenderServiceDetail(w http.ResponseWriter, r *http.Request) {
 	preprodActive := checkEnvActive("preprod")
 	prodActive := checkEnvActive("prod")
 
+	// If the requested environment is not deployed, fallback to an active one so users
+	// can't select an un-deployed environment directly via query param
+	if selectedEnv == "preprod" && !preprodActive {
+		if uatActive {
+			selectedEnv = "uat"
+		} else if prodActive {
+			selectedEnv = "prod"
+		}
+	} else if selectedEnv == "prod" && !prodActive {
+		if uatActive {
+			selectedEnv = "uat"
+		} else if preprodActive {
+			selectedEnv = "preprod"
+		}
+	}
+
 	terraformPath := fmt.Sprintf("02-app-setup/%s/%s/%s/services/%s", domainLower, countryLower, selectedEnv, serviceName)
 	terraformURL := fmt.Sprintf("https://github.com/oona-insurance/oona-dtc-country-terraform-iac/tree/%s/%s", branch, terraformPath)
 	terraformExists := false

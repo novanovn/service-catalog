@@ -311,21 +311,77 @@
             <div class="mt-3.5 flex flex-wrap items-center gap-3">
                 <span class="text-xs font-mono uppercase tracking-wider text-slate-400">Environment:</span>
                 <div class="inline-flex p-1 rounded-xl bg-[#121212] border border-[#282828] text-xs font-mono shadow-inner">
+                    {{ if .UATActive }}
                     <button type="button" onclick="switchEnvironment('uat')" class="px-3 py-1.5 rounded-lg font-bold flex items-center gap-2 transition-all cursor-pointer {{ if eq .SelectedEnv "uat" }}bg-[#7c3aed] text-white shadow-md{{ else }}text-slate-400 hover:text-white hover:bg-white/5{{ end }}">
-                        <span class="w-2 h-2 rounded-full {{ if .UATActive }}bg-emerald-400 shadow-sm shadow-emerald-500/50{{ else }}bg-slate-600{{ end }}"></span>
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-sm shadow-emerald-500/50"></span>
                         UAT
-                        <span class="text-[10.5px] {{ if eq .SelectedEnv "uat" }}text-purple-200{{ else }}text-slate-500{{ end }}">{{ if .UATActive }}(Active){{ else }}(Not Deployed){{ end }}</span>
+                        <span class="text-[10.5px] {{ if eq .SelectedEnv "uat" }}text-purple-200{{ else }}text-slate-400{{ end }}">(Active)</span>
                     </button>
+                    {{ else }}
+                    <div class="relative group/env inline-flex">
+                        <button type="button" disabled class="px-3 py-1.5 rounded-lg font-bold flex items-center gap-2 text-slate-500 bg-transparent cursor-not-allowed opacity-50">
+                            <span class="w-2 h-2 rounded-full bg-slate-600"></span>
+                            UAT
+                            <span class="text-[10.5px] text-slate-600">(Not Deployed)</span>
+                        </button>
+                        <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover/env:flex flex-col items-center z-50 pointer-events-auto">
+                            <div class="bg-[#1c1c1c] border border-[#333333] text-slate-200 text-xs font-mono px-3.5 py-2 rounded-xl shadow-2xl whitespace-nowrap flex items-center gap-2">
+                                <span class="text-amber-400 font-bold">⚠️ Belum Dideploy:</span>
+                                <span class="text-slate-300">Harus request approval terlebih dahulu.</span>
+                                <a href="/tickets/new" class="text-[#a78bfa] hover:text-purple-300 underline font-bold ml-1">Request Approval &rarr;</a>
+                            </div>
+                            <div class="w-2.5 h-2.5 bg-[#1c1c1c] border-b border-r border-[#333333] rotate-45 -mt-1"></div>
+                        </div>
+                    </div>
+                    {{ end }}
+
+                    {{ if .PreProdActive }}
                     <button type="button" onclick="switchEnvironment('preprod')" class="px-3 py-1.5 rounded-lg font-bold flex items-center gap-2 transition-all cursor-pointer {{ if eq .SelectedEnv "preprod" }}bg-[#7c3aed] text-white shadow-md{{ else }}text-slate-400 hover:text-white hover:bg-white/5{{ end }}">
-                        <span class="w-2 h-2 rounded-full {{ if .PreProdActive }}bg-emerald-400 shadow-sm shadow-emerald-500/50{{ else }}bg-slate-600{{ end }}"></span>
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-sm shadow-emerald-500/50"></span>
                         PreProd
-                        <span class="text-[10.5px] {{ if eq .SelectedEnv "preprod" }}text-purple-200{{ else }}text-slate-500{{ end }}">{{ if .PreProdActive }}(Active){{ else }}(Not Deployed){{ end }}</span>
+                        <span class="text-[10.5px] {{ if eq .SelectedEnv "preprod" }}text-purple-200{{ else }}text-slate-400{{ end }}">(Active)</span>
                     </button>
+                    {{ else }}
+                    <div class="relative group/env inline-flex">
+                        <button type="button" disabled class="px-3 py-1.5 rounded-lg font-bold flex items-center gap-2 text-slate-500 bg-transparent cursor-not-allowed opacity-50">
+                            <span class="w-2 h-2 rounded-full bg-slate-600"></span>
+                            PreProd
+                            <span class="text-[10.5px] text-slate-600">(Not Deployed)</span>
+                        </button>
+                        <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover/env:flex flex-col items-center z-50 pointer-events-auto">
+                            <div class="bg-[#1c1c1c] border border-[#333333] text-slate-200 text-xs font-mono px-3.5 py-2 rounded-xl shadow-2xl whitespace-nowrap flex items-center gap-2">
+                                <span class="text-amber-400 font-bold">⚠️ Belum Dideploy:</span>
+                                <span class="text-slate-300">Harus request approval terlebih dahulu.</span>
+                                <a href="/tickets/new" class="text-[#a78bfa] hover:text-purple-300 underline font-bold ml-1">Request Approval &rarr;</a>
+                            </div>
+                            <div class="w-2.5 h-2.5 bg-[#1c1c1c] border-b border-r border-[#333333] rotate-45 -mt-1"></div>
+                        </div>
+                    </div>
+                    {{ end }}
+
+                    {{ if .ProdActive }}
                     <button type="button" onclick="switchEnvironment('prod')" class="px-3 py-1.5 rounded-lg font-bold flex items-center gap-2 transition-all cursor-pointer {{ if eq .SelectedEnv "prod" }}bg-[#7c3aed] text-white shadow-md{{ else }}text-slate-400 hover:text-white hover:bg-white/5{{ end }}">
-                        <span class="w-2 h-2 rounded-full {{ if .ProdActive }}bg-emerald-400 shadow-sm shadow-emerald-500/50{{ else }}bg-slate-600{{ end }}"></span>
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-sm shadow-emerald-500/50"></span>
                         Prod
-                        <span class="text-[10.5px] {{ if eq .SelectedEnv "prod" }}text-purple-200{{ else }}text-slate-500{{ end }}">{{ if .ProdActive }}(Active){{ else }}(Not Deployed){{ end }}</span>
+                        <span class="text-[10.5px] {{ if eq .SelectedEnv "prod" }}text-purple-200{{ else }}text-slate-400{{ end }}">(Active)</span>
                     </button>
+                    {{ else }}
+                    <div class="relative group/env inline-flex">
+                        <button type="button" disabled class="px-3 py-1.5 rounded-lg font-bold flex items-center gap-2 text-slate-500 bg-transparent cursor-not-allowed opacity-50">
+                            <span class="w-2 h-2 rounded-full bg-slate-600"></span>
+                            Prod
+                            <span class="text-[10.5px] text-slate-600">(Not Deployed)</span>
+                        </button>
+                        <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover/env:flex flex-col items-center z-50 pointer-events-auto">
+                            <div class="bg-[#1c1c1c] border border-[#333333] text-slate-200 text-xs font-mono px-3.5 py-2 rounded-xl shadow-2xl whitespace-nowrap flex items-center gap-2">
+                                <span class="text-amber-400 font-bold">⚠️ Belum Dideploy:</span>
+                                <span class="text-slate-300">Harus request approval terlebih dahulu.</span>
+                                <a href="/tickets/new" class="text-[#a78bfa] hover:text-purple-300 underline font-bold ml-1">Request Approval &rarr;</a>
+                            </div>
+                            <div class="w-2.5 h-2.5 bg-[#1c1c1c] border-b border-r border-[#333333] rotate-45 -mt-1"></div>
+                        </div>
+                    </div>
+                    {{ end }}
                 </div>
             </div>
         </div>
