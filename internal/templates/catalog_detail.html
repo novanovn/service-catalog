@@ -253,30 +253,80 @@
                     <svg class="mr-1.5 h-4 w-4 flex-shrink-0 text-slate-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM6.75 9.25a.75.75 0 000 1.5h6.5a.75.75 0 000-1.5h-6.5z" clip-rule="evenodd" /></svg>
                     {{ .Domain }} / {{ .Country }}
                 </div>
-                {{ if eq .Status "LIVE" }}
-                <div class="mt-2 flex items-center text-sm text-emerald-400 font-semibold">
-                    <span class="relative flex h-2.5 w-2.5 mr-2">
-                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                      <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-                    </span>
-                    LIVE in Prod
-                </div>
-                {{ else if eq .Status "REJECTED_SECURITY" }}
-                <div class="mt-2 flex items-center text-sm text-rose-400 font-semibold">
-                    <span class="relative flex h-2.5 w-2.5 mr-2">
-                      <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500"></span>
-                    </span>
-                    Rejected by DevOps
-                </div>
-                {{ else }}
-                <div class="mt-2 flex items-center text-sm text-amber-400 font-semibold">
-                    <span class="relative flex h-2.5 w-2.5 mr-2">
-                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                      <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
-                    </span>
-                    Pending Infrastructure Approval
-                </div>
+                {{ if eq .SelectedEnv "uat" }}
+                    {{ if .UATActive }}
+                    <div class="mt-2 flex items-center text-sm text-emerald-400 font-semibold font-mono">
+                        <span class="relative flex h-2.5 w-2.5 mr-2">
+                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                          <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                        </span>
+                        Active in UAT (Staging)
+                    </div>
+                    {{ else }}
+                    <div class="mt-2 flex items-center text-sm text-slate-400 font-semibold font-mono">
+                        <span class="relative flex h-2.5 w-2.5 mr-2">
+                          <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-slate-500"></span>
+                        </span>
+                        Not Deployed in UAT
+                    </div>
+                    {{ end }}
+                {{ else if eq .SelectedEnv "preprod" }}
+                    {{ if .PreProdActive }}
+                    <div class="mt-2 flex items-center text-sm text-sky-400 font-semibold font-mono">
+                        <span class="relative flex h-2.5 w-2.5 mr-2">
+                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
+                          <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-sky-500"></span>
+                        </span>
+                        Active in PreProd
+                    </div>
+                    {{ else }}
+                    <div class="mt-2 flex items-center text-sm text-amber-400 font-semibold font-mono">
+                        <span class="relative flex h-2.5 w-2.5 mr-2">
+                          <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
+                        </span>
+                        Not Deployed in PreProd
+                    </div>
+                    {{ end }}
+                {{ else if eq .SelectedEnv "prod" }}
+                    {{ if .ProdActive }}
+                    <div class="mt-2 flex items-center text-sm text-emerald-400 font-semibold font-mono">
+                        <span class="relative flex h-2.5 w-2.5 mr-2">
+                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                          <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                        </span>
+                        LIVE in Production
+                    </div>
+                    {{ else }}
+                    <div class="mt-2 flex items-center text-sm text-amber-400 font-semibold font-mono">
+                        <span class="relative flex h-2.5 w-2.5 mr-2">
+                          <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
+                        </span>
+                        Not Deployed in Production
+                    </div>
+                    {{ end }}
                 {{ end }}
+            </div>
+
+            <!-- Global Environment Switcher: Option B -->
+            <div class="mt-3.5 flex flex-wrap items-center gap-3">
+                <span class="text-xs font-mono uppercase tracking-wider text-slate-400">Environment:</span>
+                <div class="inline-flex p-1 rounded-xl bg-[#121212] border border-[#282828] text-xs font-mono shadow-inner">
+                    <button type="button" onclick="switchEnvironment('uat')" class="px-3 py-1.5 rounded-lg font-bold flex items-center gap-2 transition-all cursor-pointer {{ if eq .SelectedEnv "uat" }}bg-[#7c3aed] text-white shadow-md{{ else }}text-slate-400 hover:text-white hover:bg-white/5{{ end }}">
+                        <span class="w-2 h-2 rounded-full {{ if .UATActive }}bg-emerald-400 shadow-sm shadow-emerald-500/50{{ else }}bg-slate-600{{ end }}"></span>
+                        UAT
+                        <span class="text-[10.5px] {{ if eq .SelectedEnv "uat" }}text-purple-200{{ else }}text-slate-500{{ end }}">{{ if .UATActive }}(Active){{ else }}(Not Deployed){{ end }}</span>
+                    </button>
+                    <button type="button" onclick="switchEnvironment('preprod')" class="px-3 py-1.5 rounded-lg font-bold flex items-center gap-2 transition-all cursor-pointer {{ if eq .SelectedEnv "preprod" }}bg-[#7c3aed] text-white shadow-md{{ else }}text-slate-400 hover:text-white hover:bg-white/5{{ end }}">
+                        <span class="w-2 h-2 rounded-full {{ if .PreProdActive }}bg-emerald-400 shadow-sm shadow-emerald-500/50{{ else }}bg-slate-600{{ end }}"></span>
+                        PreProd
+                        <span class="text-[10.5px] {{ if eq .SelectedEnv "preprod" }}text-purple-200{{ else }}text-slate-500{{ end }}">{{ if .PreProdActive }}(Active){{ else }}(Not Deployed){{ end }}</span>
+                    </button>
+                    <button type="button" onclick="switchEnvironment('prod')" class="px-3 py-1.5 rounded-lg font-bold flex items-center gap-2 transition-all cursor-pointer {{ if eq .SelectedEnv "prod" }}bg-[#7c3aed] text-white shadow-md{{ else }}text-slate-400 hover:text-white hover:bg-white/5{{ end }}">
+                        <span class="w-2 h-2 rounded-full {{ if .ProdActive }}bg-emerald-400 shadow-sm shadow-emerald-500/50{{ else }}bg-slate-600{{ end }}"></span>
+                        Prod
+                        <span class="text-[10.5px] {{ if eq .SelectedEnv "prod" }}text-purple-200{{ else }}text-slate-500{{ end }}">{{ if .ProdActive }}(Active){{ else }}(Not Deployed){{ end }}</span>
+                    </button>
+                </div>
             </div>
         </div>
         <div class="mt-4 flex flex-wrap items-center md:ml-4 md:mt-0 gap-2.5">
@@ -360,6 +410,9 @@
                         <button type="button" onclick="toggleMeshStream(this)" id="meshStreamBtn" class="px-2.5 py-1 bg-[#121212] hover:bg-[#1f1f1f] border border-[#282828] text-slate-300 rounded-lg text-xs font-mono transition-colors cursor-pointer">
                             Pause Animation
                         </button>
+                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-purple-500/15 text-[#a78bfa] text-xs font-mono border border-purple-500/30 uppercase font-bold">
+                            ENV: {{ .SelectedEnv }}
+                        </span>
                         <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-500/10 text-[#3ecf8e] text-xs font-mono border border-emerald-500/20">
                             <span class="w-1.5 h-1.5 rounded-full bg-[#3ecf8e]"></span>
                             ap-southeast-3
@@ -367,6 +420,18 @@
                     </div>
                 </div>
             </div>
+
+            {{ if not .TerraformExists }}
+            <div class="p-3.5 bg-amber-500/10 border-b border-amber-500/20 text-xs font-mono text-amber-300 flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-amber-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                    <span><strong>Environment {{ .SelectedEnv | upper }} Not Provisioned:</strong> No <code>terraform.tfvars</code> found at target path. Architecture map below shows default template schema.</span>
+                </div>
+                <a href="/tickets/new" class="px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-500/30 font-bold transition-colors">
+                    + Request Provisioning
+                </a>
+            </div>
+            {{ end }}
 
             <!-- SVG Topology Interactive Canvas -->
             <div class="relative w-full h-[420px] bg-[#121212] overflow-hidden bg-grid-matrix cursor-default" id="topologyViewport">
@@ -1017,16 +1082,16 @@
                         <thead class="bg-[#121212] text-slate-400 uppercase text-[11px]">
                             <tr>
                                 <th class="px-4 py-3 text-left font-bold">Environment Variable / Key</th>
-                                <th class="px-4 py-3 text-left font-bold">UAT (Staging)</th>
-                                <th class="px-4 py-3 text-left font-bold">PreProd</th>
-                                <th class="px-4 py-3 text-left font-bold">Prod (Live)</th>
+                                <th class="px-4 py-3 text-left font-bold {{ if eq $.SelectedEnv "uat" }}text-[#a78bfa] bg-purple-500/10 border-b-2 border-purple-500{{ end }}">UAT (Staging) {{ if eq $.SelectedEnv "uat" }}<span class="text-[10px]">● SELECTED</span>{{ end }}</th>
+                                <th class="px-4 py-3 text-left font-bold {{ if eq $.SelectedEnv "preprod" }}text-[#a78bfa] bg-purple-500/10 border-b-2 border-purple-500{{ end }}">PreProd {{ if eq $.SelectedEnv "preprod" }}<span class="text-[10px]">● SELECTED</span>{{ end }}</th>
+                                <th class="px-4 py-3 text-left font-bold {{ if eq $.SelectedEnv "prod" }}text-[#a78bfa] bg-purple-500/10 border-b-2 border-purple-500{{ end }}">Prod (Live) {{ if eq $.SelectedEnv "prod" }}<span class="text-[10px]">● SELECTED</span>{{ end }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-[#282828]/60 text-slate-300">
                             {{ range .EnvVars }}
                             <tr class="hover:bg-[#1f1f1f] transition-colors">
                                 <td class="px-4 py-3 font-bold text-white">{{ .Key }}</td>
-                                <td class="px-4 py-3">
+                                <td class="px-4 py-3 {{ if eq $.SelectedEnv "uat" }}bg-purple-500/5 font-semibold{{ end }}">
                                     {{ if eq .UAT "Configured in SSM" }}
                                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-[#3ecf8e] border border-emerald-500/30">SSM Vault</span>
                                     {{ else if .UAT }}
@@ -1035,7 +1100,7 @@
                                     <span class="text-slate-500 italic">N/A</span>
                                     {{ end }}
                                 </td>
-                                <td class="px-4 py-3">
+                                <td class="px-4 py-3 {{ if eq $.SelectedEnv "preprod" }}bg-purple-500/5 font-semibold{{ end }}">
                                     {{ if eq .PreProd "Configured in SSM" }}
                                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-[#3ecf8e] border border-emerald-500/30">SSM Vault</span>
                                     {{ else if .PreProd }}
@@ -1044,7 +1109,7 @@
                                     <span class="text-slate-500 italic">N/A</span>
                                     {{ end }}
                                 </td>
-                                <td class="px-4 py-3">
+                                <td class="px-4 py-3 {{ if eq $.SelectedEnv "prod" }}bg-purple-500/5 font-semibold{{ end }}">
                                     {{ if eq .Prod "Configured in SSM" }}
                                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30">⚠️ SSM Vault</span>
                                     {{ else if .Prod }}
@@ -1221,6 +1286,12 @@ function openEditModal(id, name, desc, domain, country, status, repoUrl, request
 
 function closeEditModal() {
     document.getElementById('edit-modal').classList.add('hidden');
+}
+
+function switchEnvironment(env) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('env', env);
+    window.location.href = url.toString();
 }
 
 function switchTab(tabId) {

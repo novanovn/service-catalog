@@ -343,8 +343,13 @@ func ResolveCanonicalPipelineName(ctx context.Context, domain, country, serviceN
 	return fmt.Sprintf("lmd-oona-%s-%s-%s", countryLower, domainLower, serviceName)
 }
 
-// ResolveTerraformPath checks multiple candidate folder names to find where the Terraform path exists on a branch
+// ResolveTerraformPath checks multiple candidate folder names to find where the Terraform path exists on a branch in UAT
 func ResolveTerraformPath(ctx context.Context, domain, country, serviceName, branch string) (string, bool) {
+	return ResolveTerraformPathForEnv(ctx, domain, country, "uat", serviceName, branch)
+}
+
+// ResolveTerraformPathForEnv checks candidate folder names for a specific environment (uat, preprod, prod)
+func ResolveTerraformPathForEnv(ctx context.Context, domain, country, env, serviceName, branch string) (string, bool) {
 	domainLower := strings.ToLower(domain)
 	countryLower := strings.ToLower(country)
 	if domainLower == "" {
@@ -353,6 +358,10 @@ func ResolveTerraformPath(ctx context.Context, domain, country, serviceName, bra
 	if countryLower == "" {
 		countryLower = "ph"
 	}
+	envLower := strings.ToLower(env)
+	if envLower == "" {
+		envLower = "uat"
+	}
 
 	cleanName := strings.TrimSuffix(serviceName, "-clone")
 	cleanShortName := strings.TrimPrefix(cleanName, "lmd-oona-ph-integration-")
@@ -360,9 +369,9 @@ func ResolveTerraformPath(ctx context.Context, domain, country, serviceName, bra
 	cleanShortName = strings.TrimPrefix(cleanShortName, "lmd-oona-")
 
 	candidatePaths := []string{
-		fmt.Sprintf("02-app-setup/%s/%s/uat/services/%s", domainLower, countryLower, serviceName),
-		fmt.Sprintf("02-app-setup/%s/%s/uat/services/%s", domainLower, countryLower, cleanName),
-		fmt.Sprintf("02-app-setup/%s/%s/uat/services/%s", domainLower, countryLower, cleanShortName),
+		fmt.Sprintf("02-app-setup/%s/%s/%s/services/%s", domainLower, countryLower, envLower, serviceName),
+		fmt.Sprintf("02-app-setup/%s/%s/%s/services/%s", domainLower, countryLower, envLower, cleanName),
+		fmt.Sprintf("02-app-setup/%s/%s/%s/services/%s", domainLower, countryLower, envLower, cleanShortName),
 	}
 
 	for _, p := range candidatePaths {

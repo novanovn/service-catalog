@@ -320,15 +320,34 @@ func RenderServiceDetail(w http.ResponseWriter, r *http.Request) {
 		countryLower = "ph"
 	}
 
-	terraformPath := fmt.Sprintf("02-app-setup/%s/%s/uat/services/%s", domainLower, countryLower, serviceName)
+	selectedEnv := strings.ToLower(strings.TrimSpace(r.URL.Query().Get("env")))
+	if selectedEnv != "uat" && selectedEnv != "preprod" && selectedEnv != "prod" {
+		selectedEnv = "uat"
+	}
+
+	candidateBranches := []string{branch, "ci/portal"}
+
+	// Check whether each environment is provisioned in Terraform IaC
+	checkEnvActive := func(envName string) bool {
+		for _, br := range candidateBranches {
+			if _, found := ResolveTerraformPathForEnv(r.Context(), domain, country, envName, serviceName, br); found {
+				return true
+			}
+		}
+		return false
+	}
+	uatActive := checkEnvActive("uat")
+	preprodActive := checkEnvActive("preprod")
+	prodActive := checkEnvActive("prod")
+
+	terraformPath := fmt.Sprintf("02-app-setup/%s/%s/%s/services/%s", domainLower, countryLower, selectedEnv, serviceName)
 	terraformURL := fmt.Sprintf("https://github.com/oona-insurance/oona-dtc-country-terraform-iac/tree/%s/%s", branch, terraformPath)
 	terraformExists := false
 	tfRepoID := ""
 
-	// Multi-branch scanner: fast lookup across active branch and ci/portal
-	candidateBranches := []string{branch, "ci/portal"}
+	// Multi-branch scanner: fast lookup across active branch and ci/portal for selected environment
 	for _, br := range candidateBranches {
-		if resolvedP, found := ResolveTerraformPath(r.Context(), domain, country, serviceName, br); found {
+		if resolvedP, found := ResolveTerraformPathForEnv(r.Context(), domain, country, selectedEnv, serviceName, br); found {
 			terraformExists = true
 			terraformPath = resolvedP
 			terraformURL = fmt.Sprintf("https://github.com/oona-insurance/oona-dtc-country-terraform-iac/tree/%s/%s", br, resolvedP)
@@ -405,9 +424,12 @@ func RenderServiceDetail(w http.ResponseWriter, r *http.Request) {
 	awsRuntime := "nodejs24.x"
 	awsMemory := "256 MB"
 
-	if serviceStatus == "LIVE" || serviceStatus == "APPROVED" {
+	if (selectedEnv == "uat" && uatActive) || (selectedEnv == "preprod" && preprodActive) || (selectedEnv == "prod" && prodActive) {
 		awsLastModified = time.Now().UTC().Format("2006-01-02 15:04:05 UTC")
-		awsLastInvoked = "Active (Ready to invoke)"
+		awsLastInvoked = fmt.Sprintf("Active in %s (Ready to invoke)", strings.ToUpper(selectedEnv))
+	} else {
+		awsLastModified = fmt.Sprintf("Not deployed in %s", strings.ToUpper(selectedEnv))
+		awsLastInvoked = fmt.Sprintf("No active instance in %s", strings.ToUpper(selectedEnv))
 	}
 
 	// Fetch raw tfvars to parse full function config (Runtime, Memory, Triggers)
@@ -464,6 +486,10 @@ func RenderServiceDetail(w http.ResponseWriter, r *http.Request) {
 		AWSRegion         string
 		AWSRuntime        string
 		AWSMemory         string
+		SelectedEnv       string
+		UATActive         bool
+		PreProdActive     bool
+		ProdActive        bool
 		EnvVars           []EnvVarDiffRow
 		Topology          infra.ServiceTopologyGraph
 		JenkinsExists     bool
@@ -490,6 +516,10 @@ func RenderServiceDetail(w http.ResponseWriter, r *http.Request) {
 		SelectedBranch:    branch,
 		AvailableBranches: availableBranches,
 		Status:            serviceStatus,
+		SelectedEnv:       selectedEnv,
+		UATActive:         uatActive,
+		PreProdActive:     preprodActive,
+		ProdActive:        prodActive,
 		RequestorEmail:    requestorEmail,
 		JiraID:            jiraID,
 		AWSLastModified:   awsLastModified,

@@ -4,6 +4,7 @@ import (
 	"html/template"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // getTemplateDir finds the template directory regardless of where tests or binary is executed from
@@ -27,6 +28,8 @@ func parsePage(pageFileName string) (*template.Template, error) {
 	funcMap := template.FuncMap{
 		"add": func(a, b int) int { return a + b },
 		"sub": func(a, b int) int { return a - b },
+		"upper": strings.ToUpper,
+		"lower": strings.ToLower,
 		"contains": func(list []string, item string) bool {
 			for _, s := range list {
 				if s == item {
