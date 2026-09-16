@@ -13,6 +13,7 @@
     </script>
     <script src="/static/js/htmx.min.js"></script>
     <script src="/static/js/lucide.min.js"></script>
+    <script src="/static/js/d3.v7.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -948,7 +949,7 @@
                 <span class="ml-3 text-xs sidebar-text">Service Catalog</span>
                 <span class="sidebar-tooltip">Service Catalog</span>
             </a>
-            <a href="/service-map" class="sidebar-nav-item relative flex items-center px-3.5 py-2.5 text-slate-300 hover:text-white rounded-xl transition-all group {{ if eq .Title "Service Map" }}bg-purple-500/15 text-purple-400 font-semibold ring-1 ring-purple-500/30{{ end }}">
+            <a href="/service-map" hx-boost="false" class="sidebar-nav-item relative flex items-center px-3.5 py-2.5 text-slate-300 hover:text-white rounded-xl transition-all group {{ if eq .Title "Service Map" }}bg-purple-500/15 text-purple-400 font-semibold ring-1 ring-purple-500/30{{ end }}">
                 {{ if eq .Title "Service Map" }}<span class="sidebar-active-bar"></span>{{ end }}
                 <i data-lucide="network" class="icon-network w-5 h-5 flex-shrink-0 {{ if eq .Title "Service Map" }}text-purple-400{{ else }}text-slate-400 group-hover:text-white{{ end }}"></i>
                 <span class="ml-3 text-xs sidebar-text">Service Map</span>
