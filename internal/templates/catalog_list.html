@@ -21,23 +21,6 @@
         background: #ffffff;
         border-color: #e2e8f0;
     }
-    .catalog-seg-btn {
-        appearance: none;
-        border: 0;
-        background: transparent;
-        color: #8a8f98;
-        font-size: 12px;
-        font-weight: 600;
-        padding: 6px 11px;
-        border-radius: 5px;
-        cursor: pointer;
-        line-height: 1.2;
-    }
-    .catalog-seg-btn:hover { color: #f7f8f8; background: rgba(255,255,255,0.04); }
-    html.light-mode .catalog-seg-btn { color: #64748b; }
-    html.light-mode .catalog-seg-btn:hover { color: #0f172a; background: #f1f5f9; }
-    .catalog-seg-btn.is-active { background: #5e6ad2; color: #ffffff; }
-    html.light-mode .catalog-seg-btn.is-active { background: #4f46e5; color: #ffffff; }
     .catalog-search {
         height: 32px;
         width: 220px;
@@ -80,31 +63,38 @@
     }
     .scope-banner a { font-weight: 700; text-decoration: underline; cursor: pointer; }
 
-    .catalog-shelf { margin-top: 1rem; border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; overflow: hidden; }
-    html.light-mode .catalog-shelf { border-color: #e2e8f0; }
-    .catalog-shelf:first-child { margin-top: 0; }
+    /* ===== Main Shelf (Country) ===== */
+    .main-shelf {
+        margin-top: 1rem;
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    html.light-mode .main-shelf { border-color: #e2e8f0; }
+    .main-shelf:first-child { margin-top: 0; }
 
-    .catalog-shelf-head {
+    .main-shelf-head {
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 1rem;
-        padding: 11px 14px;
+        padding: 13px 16px;
         cursor: pointer;
-        background: rgba(255,255,255,0.02);
+        background: rgba(255,255,255,0.035);
         user-select: none;
     }
-    .catalog-shelf-head:hover { background: rgba(255,255,255,0.04); }
-    html.light-mode .catalog-shelf-head { background: #f8fafc; }
-    html.light-mode .catalog-shelf-head:hover { background: #f1f5f9; }
+    .main-shelf-head:hover { background: rgba(255,255,255,0.06); }
+    html.light-mode .main-shelf-head { background: #f1f5f9; }
+    html.light-mode .main-shelf-head:hover { background: #e2e8f0; }
 
-    .shelf-folder-icon { flex-shrink: 0; color: #8a8f98; width: 16px; height: 16px; }
-    .catalog-shelf.is-mine .shelf-folder-icon { color: #a78bfa; }
+    .main-shelf-icon { flex-shrink: 0; color: #8a8f98; width: 18px; height: 18px; }
+    .main-shelf.is-mine .main-shelf-icon { color: #a78bfa; }
+    .main-shelf-chevron { width: 15px; height: 15px; color: #8a8f98; transition: transform 0.15s ease; flex-shrink: 0; }
+    .main-shelf.is-open > .main-shelf-head .main-shelf-chevron { transform: rotate(90deg); }
+    .main-shelf-body { display: none; padding: 10px; }
+    .main-shelf.is-open .main-shelf-body { display: block; }
 
-    .shelf-chevron { width: 14px; height: 14px; color: #8a8f98; transition: transform 0.15s ease; flex-shrink: 0; }
-    .catalog-shelf.is-open .shelf-chevron { transform: rotate(90deg); }
-
-    .shelf-mine-badge {
+    .mine-badge {
         font-size: 10px;
         font-weight: 700;
         letter-spacing: 0.04em;
@@ -117,32 +107,79 @@
         white-space: nowrap;
     }
 
-    .catalog-shelf-body { display: none; }
-    .catalog-shelf.is-open .catalog-shelf-body { display: block; }
+    /* ===== Sub Shelf (Environment) ===== */
+    .sub-shelf {
+        margin-top: 8px;
+        border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 9px;
+        overflow: hidden;
+    }
+    .sub-shelf:first-child { margin-top: 0; }
+    html.light-mode .sub-shelf { border-color: #e9edf3; }
+
+    .sub-shelf-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 9px 13px;
+        cursor: pointer;
+        background: rgba(255,255,255,0.015);
+        user-select: none;
+    }
+    .sub-shelf-head:hover { background: rgba(255,255,255,0.035); }
+    html.light-mode .sub-shelf-head { background: #fbfcfd; }
+    html.light-mode .sub-shelf-head:hover { background: #f8fafc; }
+
+    .env-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; background: #8a8f98; }
+    .env-dot.env-prod { background: #34d399; }
+    .env-dot.env-preprod { background: #38bdf8; }
+    .env-dot.env-uat { background: #fbbf24; }
+    .env-dot.env-unassigned { background: #64748b; }
+
+    .sub-shelf-chevron { width: 13px; height: 13px; color: #8a8f98; transition: transform 0.15s ease; flex-shrink: 0; }
+    .sub-shelf.is-open > .sub-shelf-head .sub-shelf-chevron { transform: rotate(90deg); }
+    .sub-shelf-body { display: none; }
+    .sub-shelf.is-open .sub-shelf-body { display: block; }
 
     .catalog-list {
         background: rgba(255,255,255,0.01);
-        border-top: 1px solid rgba(255,255,255,0.08);
+        border-top: 1px solid rgba(255,255,255,0.06);
     }
     html.light-mode .catalog-list {
         background: #ffffff;
-        border-top-color: #e2e8f0;
+        border-top-color: #eef1f5;
     }
     .catalog-row {
         display: grid;
         grid-template-columns: minmax(0, 1.7fr) minmax(140px, 0.7fr) minmax(0, 1.1fr) 108px;
         gap: 12px;
         align-items: center;
-        padding: 10px 14px;
+        padding: 9px 13px;
         text-decoration: none;
         color: inherit;
-        border-top: 1px solid rgba(255,255,255,0.05);
-        min-height: 48px;
+        border-top: 1px solid rgba(255,255,255,0.045);
+        min-height: 44px;
     }
     .catalog-row:first-child { border-top: 0; }
     .catalog-row:hover { background: rgba(255,255,255,0.035); }
     html.light-mode .catalog-row { border-top-color: #f1f5f9; }
     html.light-mode .catalog-row:hover { background: #f8fafc; }
+
+    .domain-badge {
+        display: inline-flex;
+        align-items: center;
+        font-size: 10px;
+        font-weight: 600;
+        color: #94a3b8;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 4px;
+        padding: 1px 5px;
+        white-space: nowrap;
+    }
+    html.light-mode .domain-badge { background: #f1f5f9; border-color: #e2e8f0; color: #64748b; }
+
     .catalog-status {
         display: inline-flex;
         align-items: center;
@@ -154,53 +191,25 @@
         color: #8a8f98;
         white-space: nowrap;
     }
-    .catalog-status-dot {
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-        background: #8a8f98;
-        flex-shrink: 0;
-    }
+    .catalog-status-dot { width: 6px; height: 6px; border-radius: 50%; background: #8a8f98; flex-shrink: 0; }
     .catalog-status.is-live { color: #34d399; }
     .catalog-status.is-live .catalog-status-dot { background: #34d399; }
     .catalog-status.is-pending { color: #fbbf24; }
     .catalog-status.is-pending .catalog-status-dot { background: #fbbf24; }
     html.light-mode .catalog-status.is-pending { color: #b45309; }
 
-    .catalog-shelf-empty-body {
-        padding: 14px;
+    .sub-shelf-empty-body {
+        padding: 12px 13px;
         font-size: 12px;
         color: #64748b;
-        border-top: 1px solid rgba(255,255,255,0.05);
+        border-top: 1px solid rgba(255,255,255,0.045);
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 12px;
     }
-    html.light-mode .catalog-shelf-empty-body { border-top-color: #f1f5f9; }
+    html.light-mode .sub-shelf-empty-body { border-top-color: #f1f5f9; }
 
-    .catalog-empty-summary {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        margin-top: 1.25rem;
-        padding: 9px 12px;
-        border: 1px solid rgba(255,255,255,0.08);
-        border-radius: 8px;
-        background: transparent;
-        color: #d0d6e0;
-        font-size: 12px;
-        font-weight: 500;
-        cursor: pointer;
-        width: 100%;
-        text-align: left;
-    }
-    .catalog-empty-summary:hover { background: rgba(255,255,255,0.03); }
-    html.light-mode .catalog-empty-summary {
-        border-color: #e2e8f0;
-        color: #334155;
-    }
     @media (max-width: 860px) {
         .catalog-row {
             grid-template-columns: 1fr auto;
@@ -225,17 +234,11 @@
                 <h2 class="text-[22px] font-semibold tracking-tight text-white" style="letter-spacing:-0.03em;">Service catalog</h2>
                 <p class="text-[13px] text-slate-400">
                     {{ .TotalServices }} {{ if eq .TotalServices 1 }}service{{ else }}services{{ end }}
-                    · {{ len .Shelves }} folders shown
+                    · {{ len .Countries }} main shelf{{ if ne (len .Countries) 1 }}ves{{ end }} shown
                 </p>
             </div>
         </div>
         <div class="flex flex-col sm:flex-row sm:items-center gap-2.5">
-            <div class="catalog-seg" role="tablist" aria-label="Filter by region">
-                <button type="button" role="tab" onclick="filterCountry('all')" id="tab-country-all" class="catalog-seg-btn is-active" aria-selected="true">All</button>
-                <button type="button" role="tab" onclick="filterCountry('ph')" id="tab-country-ph" class="catalog-seg-btn" aria-selected="false">PH</button>
-                <button type="button" role="tab" onclick="filterCountry('id')" id="tab-country-id" class="catalog-seg-btn" aria-selected="false">ID</button>
-                <button type="button" role="tab" onclick="filterCountry('shared')" id="tab-country-shared" class="catalog-seg-btn" aria-selected="false">Shared</button>
-            </div>
             <div class="relative">
                 <i data-lucide="search" class="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-500"></i>
                 <input type="search" id="shelf-search" oninput="applyCatalogFilters()" class="catalog-search" placeholder="Filter…" autocomplete="off">
@@ -250,129 +253,134 @@
         </div>
     </div>
 
-    {{ if .HasFolderScope }}
+    {{ if .HasCountryScope }}
     <div class="scope-banner">
         <span>
-            📁 Showing <strong>{{ len .Shelves }}</strong> folder{{ if ne (len .Shelves) 1 }}s{{ end }} assigned to you.
-            {{ if .OtherShelvesCount }}{{ .OtherShelvesCount }} other folder{{ if ne .OtherShelvesCount 1 }}s{{ end }} in the org catalog are hidden.{{ end }}
+            📁 Showing <strong>{{ len .Countries }}</strong> main shelf{{ if ne (len .Countries) 1 }}ves{{ end }} assigned to you.
+            {{ if .OtherCountriesCount }}{{ .OtherCountriesCount }} other main shelf{{ if ne .OtherCountriesCount 1 }}ves{{ end }} in the org catalog are hidden.{{ end }}
         </span>
-        {{ if not .ShowAllFolders }}
-        <a href="?all=true">Show all folders →</a>
+        {{ if not .ShowAllCountries }}
+        <a href="?all=true">Show all main shelves →</a>
         {{ else }}
-        <a href="/catalog">Show only my folders →</a>
+        <a href="/catalog">Show only my main shelves →</a>
         {{ end }}
     </div>
     {{ end }}
 
-    <div id="shelves-container" class="mt-4 space-y-3">
-        {{ range $i, $shelf := .Shelves }}
-        <section class="catalog-shelf shelf-block {{ if $shelf.IsMyShelf }}is-mine{{ end }} {{ if eq $i 0 }}is-open{{ end }}" data-shelf="{{ $shelf.Code }}" data-country="{{ $shelf.CountryCode }}" data-empty="{{ if $shelf.Services }}false{{ else }}true{{ end }}">
-            <div class="catalog-shelf-head" onclick="toggleShelf(this.closest('.catalog-shelf'))">
+    <div id="shelves-container" class="mt-4">
+        {{ range $ci, $country := .Countries }}
+        <section class="main-shelf {{ if $country.IsMine }}is-mine{{ end }} {{ if eq $ci 0 }}is-open{{ end }}" data-main-shelf="{{ $country.Code }}">
+            <div class="main-shelf-head" onclick="toggleMainShelf(this.closest('.main-shelf'))">
                 <div class="flex items-center gap-2.5 min-w-0">
-                    <svg class="shelf-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                    <svg class="shelf-folder-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"></path></svg>
+                    <svg class="main-shelf-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    <svg class="main-shelf-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"></path></svg>
                     <div class="min-w-0">
-                        <h3 class="text-[14px] font-semibold text-white tracking-tight truncate">
-                            {{ $shelf.Name }}
-                            {{ if $shelf.IsMyShelf }}<span class="shelf-mine-badge ml-1.5">Mine</span>{{ end }}
+                        <h3 class="text-[15px] font-semibold text-white tracking-tight truncate">
+                            {{ $country.Name }}
+                            {{ if $country.IsMine }}<span class="mine-badge ml-1.5">Mine</span>{{ end }}
                         </h3>
-                        <p class="mt-0.5 text-[12px] text-slate-400">
-                            {{ if eq $shelf.CountryCode "ph" }}Philippines{{ else if eq $shelf.CountryCode "id" }}Indonesia{{ else }}Global / shared{{ end }}
-                            <span class="text-slate-600">·</span>
-                            <span class="font-mono text-slate-400">{{ $shelf.Code }}</span>
-                        </p>
+                        <p class="mt-0.5 text-[12px] text-slate-400 font-mono">{{ $country.Code }} <span class="text-slate-600">· Main Shelf</span></p>
                     </div>
                 </div>
-                <p class="text-[12px] font-medium text-slate-400 tabular-nums whitespace-nowrap shelf-count">
-                    {{ len $shelf.Services }} {{ if eq (len $shelf.Services) 1 }}service{{ else }}services{{ end }}
+                <p class="text-[12px] font-medium text-slate-400 tabular-nums whitespace-nowrap">
+                    {{ $country.Total }} {{ if eq $country.Total 1 }}service{{ else }}services{{ end }}
                 </p>
             </div>
 
-            <div class="catalog-shelf-body">
-                {{ if $shelf.Services }}
-                <div class="catalog-list">
-                    {{ range $shelf.Services }}
-                    <a href="/catalog/{{ .Name }}" class="catalog-row service-item-card" data-name="{{ .Name }}" data-status="{{ .Status }}" data-domain="{{ .Domain }}">
-                        <div class="catalog-row-id min-w-0">
-                            <p class="text-[13px] font-semibold text-white truncate" title="{{ .Name }}">{{ .Name }}</p>
-                            {{ if .Description }}
-                            <p class="mt-0.5 text-[12px] text-slate-400 line-clamp-1" title="{{ .Description }}">{{ .Description }}</p>
+            <div class="main-shelf-body">
+                {{ range $ei, $env := $country.EnvGroups }}
+                <div class="sub-shelf {{ if and (eq $ci 0) (eq $ei 0) }}is-open{{ end }}" data-sub-shelf="{{ $env.Code }}" data-empty="{{ if $env.Services }}false{{ else }}true{{ end }}">
+                    <div class="sub-shelf-head" onclick="toggleSubShelf(this.closest('.sub-shelf'))">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <svg class="sub-shelf-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                            <span class="env-dot env-{{ $env.Code }}"></span>
+                            <h4 class="text-[13px] font-semibold text-white">{{ $env.Label }}</h4>
+                            <span class="text-[11px] text-slate-500 font-mono">· Sub Shelf</span>
+                        </div>
+                        <p class="text-[11px] font-medium text-slate-400 tabular-nums whitespace-nowrap">
+                            {{ len $env.Services }} {{ if eq (len $env.Services) 1 }}service{{ else }}services{{ end }}
+                        </p>
+                    </div>
+
+                    <div class="sub-shelf-body">
+                        {{ if $env.Services }}
+                        <div class="catalog-list">
+                            {{ range $env.Services }}
+                            <a href="/catalog/{{ .Name }}" class="catalog-row service-item-card" data-name="{{ .Name }}" data-status="{{ .Status }}" data-domain="{{ .Domain }}">
+                                <div class="catalog-row-id min-w-0">
+                                    <p class="text-[13px] font-semibold text-white truncate" title="{{ .Name }}">{{ .Name }}</p>
+                                    {{ if .Description }}
+                                    <p class="mt-0.5 text-[12px] text-slate-400 line-clamp-1" title="{{ .Description }}">{{ .Description }}</p>
+                                    {{ end }}
+                                </div>
+                                <div class="catalog-row-meta min-w-0 flex items-center gap-1.5 flex-wrap">
+                                    {{ if .Domain }}<span class="domain-badge">{{ .Domain }}</span>{{ end }}
+                                    {{ if .JiraID }}<span class="text-[11px] text-slate-500 font-mono">{{ .JiraID }}</span>{{ end }}
+                                </div>
+                                <div class="catalog-row-pipe min-w-0 font-mono text-[11px] text-slate-400 truncate" title="{{ .PipelineName }}">
+                                    {{ if .PipelineName }}{{ .PipelineName }}{{ else }}—{{ end }}
+                                </div>
+                                <div class="catalog-row-status justify-self-end">
+                                    {{ if eq .Status "LIVE" }}
+                                    <span class="catalog-status is-live"><span class="catalog-status-dot"></span>Live</span>
+                                    {{ else if eq .Status "PENDING_INFRA" }}
+                                    <span class="catalog-status is-pending"><span class="catalog-status-dot"></span>Pending</span>
+                                    {{ else }}
+                                    <span class="catalog-status"><span class="catalog-status-dot"></span>{{ if .Status }}{{ .Status }}{{ else }}Unknown{{ end }}</span>
+                                    {{ end }}
+                                </div>
+                            </a>
                             {{ end }}
                         </div>
-                        <div class="catalog-row-meta min-w-0 text-[12px] text-slate-400">
-                            {{ if .Domain }}{{ .Domain }}{{ else }}—{{ end }}
-                            {{ if .Country }}<span class="text-slate-600">·</span> {{ .Country }}{{ end }}
-                            {{ if .JiraID }}<span class="text-slate-600">·</span> <span class="font-mono">{{ .JiraID }}</span>{{ end }}
+                        {{ else }}
+                        <div class="sub-shelf-empty-body">
+                            <span>No services in this environment yet.</span>
+                            <a href="/tickets/new" class="text-indigo-400 hover:text-indigo-300 font-semibold whitespace-nowrap">+ Onboard first service</a>
                         </div>
-                        <div class="catalog-row-pipe min-w-0 font-mono text-[11px] text-slate-400 truncate" title="{{ .PipelineName }}">
-                            {{ if .PipelineName }}{{ .PipelineName }}{{ else }}—{{ end }}
-                        </div>
-                        <div class="catalog-row-status justify-self-end">
-                            {{ if eq .Status "LIVE" }}
-                            <span class="catalog-status is-live"><span class="catalog-status-dot"></span>Live</span>
-                            {{ else if eq .Status "PENDING_INFRA" }}
-                            <span class="catalog-status is-pending"><span class="catalog-status-dot"></span>Pending</span>
-                            {{ else }}
-                            <span class="catalog-status"><span class="catalog-status-dot"></span>{{ if .Status }}{{ .Status }}{{ else }}Unknown{{ end }}</span>
-                            {{ end }}
-                        </div>
-                    </a>
-                    {{ end }}
-                </div>
-                {{ else }}
-                <div class="catalog-shelf-empty-body">
-                    <span>This folder is empty.</span>
-                    <a href="/tickets/new" class="text-indigo-400 hover:text-indigo-300 font-semibold whitespace-nowrap">+ Onboard first service</a>
+                        {{ end }}
+                    </div>
                 </div>
                 {{ end }}
             </div>
         </section>
         {{ else }}
         <div class="rounded-lg border border-slate-800 px-4 py-12 text-center">
-            <p class="text-[14px] font-semibold text-white">No folders to show</p>
+            <p class="text-[14px] font-semibold text-white">No main shelves to show</p>
             <p class="mt-1 text-[13px] text-slate-400">
-                {{ if .HasFolderScope }}You have not been attached to any folders yet. Ask an admin to assign you in User Management.{{ else }}Onboard the first microservice to populate the catalog.{{ end }}
+                {{ if .HasCountryScope }}You have not been attached to any main shelf yet. Ask an admin to assign you in User Management.{{ else }}Onboard the first microservice to populate the catalog.{{ end }}
             </p>
         </div>
         {{ end }}
     </div>
 
-    <p id="catalog-empty-filter" class="hidden mt-6 text-[13px] text-slate-400">No folders match this filter.</p>
+    <p id="catalog-empty-filter" class="hidden mt-6 text-[13px] text-slate-400">No shelves match this filter.</p>
+
+    <p class="mt-4 text-[11px] text-slate-500 italic">
+        Sub Shelf (environment) grouping is based on the ticket's current approval status, not a live check of deployed Terraform resources per environment.
+    </p>
 </div>
 
 <script>
     (function () {
-        let activeCountry = 'all';
         let allExpanded = false;
 
-        function setActiveTab(country) {
-            document.querySelectorAll('.catalog-seg-btn').forEach(function (btn) {
-                const on = btn.id === 'tab-country-' + country;
-                btn.classList.toggle('is-active', on);
-                btn.setAttribute('aria-selected', on ? 'true' : 'false');
-            });
-        }
-
-        function countryMatch(shelfCountry, filter) {
-            if (filter === 'all') return true;
-            if (filter === 'shared') return shelfCountry === 'all';
-            return shelfCountry === filter;
-        }
-
-        window.filterCountry = function (country) {
-            activeCountry = country;
-            setActiveTab(country);
-            applyCatalogFilters();
+        window.toggleMainShelf = function (el) {
+            if (!el) return;
+            el.classList.toggle('is-open');
         };
 
-        window.toggleShelf = function (shelfEl) {
-            if (!shelfEl) return;
-            shelfEl.classList.toggle('is-open');
+        window.toggleSubShelf = function (el) {
+            if (!el) return;
+            el.classList.toggle('is-open');
         };
 
         window.toggleAllShelves = function () {
             allExpanded = !allExpanded;
-            document.querySelectorAll('.shelf-block').forEach(function (shelf) {
+            document.querySelectorAll('.main-shelf').forEach(function (shelf) {
+                if (shelf.style.display === 'none') return;
+                shelf.classList.toggle('is-open', allExpanded);
+            });
+            document.querySelectorAll('.sub-shelf').forEach(function (shelf) {
                 if (shelf.style.display === 'none') return;
                 shelf.classList.toggle('is-open', allExpanded);
             });
@@ -382,40 +390,49 @@
 
         window.applyCatalogFilters = function () {
             const query = (document.getElementById('shelf-search').value || '').toLowerCase().trim();
-            let visibleShelves = 0;
+            let visibleMainShelves = 0;
 
-            document.querySelectorAll('.shelf-block').forEach(function (shelf) {
-                const shelfCountry = (shelf.getAttribute('data-country') || '').toLowerCase();
-                const inCountry = countryMatch(shelfCountry, activeCountry);
-                let visibleServices = 0;
-                let anyServiceMatch = false;
+            document.querySelectorAll('.main-shelf').forEach(function (mainShelf) {
+                let visibleSubShelves = 0;
 
-                shelf.querySelectorAll('.service-item-card').forEach(function (row) {
-                    const hay = ((row.getAttribute('data-name') || '') + ' ' + row.innerText).toLowerCase();
-                    const matches = !query || hay.indexOf(query) !== -1;
-                    row.style.display = matches ? '' : 'none';
-                    if (matches) {
-                        visibleServices += 1;
-                        if (query) anyServiceMatch = true;
+                mainShelf.querySelectorAll('.sub-shelf').forEach(function (subShelf) {
+                    let visibleServices = 0;
+                    let anyMatch = false;
+
+                    subShelf.querySelectorAll('.service-item-card').forEach(function (row) {
+                        const hay = ((row.getAttribute('data-name') || '') + ' ' + row.innerText).toLowerCase();
+                        const matches = !query || hay.indexOf(query) !== -1;
+                        row.style.display = matches ? '' : 'none';
+                        if (matches) {
+                            visibleServices += 1;
+                            if (query) anyMatch = true;
+                        }
+                    });
+
+                    const subShelfNameMatch = query && (subShelf.querySelector('h4') || {}).textContent.toLowerCase().indexOf(query) !== -1;
+                    const showSub = !query || anyMatch || subShelfNameMatch;
+                    subShelf.style.display = showSub ? '' : 'none';
+                    if (showSub) {
+                        visibleSubShelves += 1;
+                        if (query && (anyMatch || subShelfNameMatch)) {
+                            subShelf.classList.add('is-open');
+                        }
                     }
                 });
 
-                const shelfNameMatch = query && (shelf.querySelector('h3') || {}).textContent.toLowerCase().indexOf(query) !== -1;
-                const matchesQuery = !query || anyServiceMatch || shelfNameMatch;
-                const show = inCountry && matchesQuery;
-
-                shelf.style.display = show ? '' : 'none';
-                if (show) {
-                    visibleShelves += 1;
-                    // Smart auto-expand: open shelves that match an active search query
-                    if (query && (anyServiceMatch || shelfNameMatch)) {
-                        shelf.classList.add('is-open');
+                const mainShelfNameMatch = query && (mainShelf.querySelector('h3') || {}).textContent.toLowerCase().indexOf(query) !== -1;
+                const showMain = !query || visibleSubShelves > 0 || mainShelfNameMatch;
+                mainShelf.style.display = showMain ? '' : 'none';
+                if (showMain) {
+                    visibleMainShelves += 1;
+                    if (query && (visibleSubShelves > 0 || mainShelfNameMatch)) {
+                        mainShelf.classList.add('is-open');
                     }
                 }
             });
 
             const empty = document.getElementById('catalog-empty-filter');
-            if (empty) empty.classList.toggle('hidden', visibleShelves > 0);
+            if (empty) empty.classList.toggle('hidden', visibleMainShelves > 0);
         };
 
         applyCatalogFilters();

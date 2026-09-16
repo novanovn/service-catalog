@@ -23,15 +23,39 @@ import (
 	"service-catalog/internal/worker/infra"
 )
 
-// ShelfView represents a grouping shelf of microservices
-type ShelfView struct {
-	Code        string
-	CountryCode string
-	Name        string
-	Description string
-	Icon        string
-	Services    []CatalogEntry
-	IsMyShelf   bool
+// EnvGroup represents one environment (UAT/PreProd/Prod) bucket within a country,
+// holding only the services whose current ticket status maps to that environment.
+type EnvGroup struct {
+	Code     string // uat | preprod | prod | unassigned
+	Label    string
+	Services []CatalogEntry
+}
+
+// CountryGroup is the top-level grouping in the new Country -> Env -> Service hierarchy.
+type CountryGroup struct {
+	Code      string // ph | id
+	Name      string
+	EnvGroups []EnvGroup
+	Total     int
+	IsMine    bool
+}
+
+// deriveEnvFromStatus maps a catalog entry's ticket-derived status to an environment
+// bucket. This is a heuristic based on pipeline approval progress, NOT a live check
+// of which Terraform env directories/tfvars actually exist for the service — doing
+// that per-service across 300+ services on every /catalog load would be too slow.
+// The UI must present this honestly as "based on approval status", not as a verified
+// infra fact (see catalog_list.html env group subtitle).
+func deriveEnvFromStatus(status string) string {
+	switch strings.ToUpper(status) {
+	case "LIVE":
+		return "prod"
+	case "DEPLOYING", "PENDING_REVIEW":
+		return "uat"
+	default:
+		// DRAFT, SCANNING, PENDING_INFRA, REJECTED, unknown
+		return "unassigned"
+	}
 }
 
 // getUserShelfScope returns (assignedShelves, hasGlobalAccess) for the given claims.
@@ -71,16 +95,21 @@ func RenderCatalogList(w http.ResponseWriter, r *http.Request) {
 	claims, _ := r.Context().Value(userCtxKey).(*auth.Claims)
 
 	// Parse query params
-	selectedCountry := strings.ToLower(strings.TrimSpace(r.URL.Query().Get("country")))
-	selectedShelf := strings.ToLower(strings.TrimSpace(r.URL.Query().Get("shelf")))
-	showAllFolders := r.URL.Query().Get("all") == "true"
+	showAllCountries := r.URL.Query().Get("all") == "true"
 
 	myShelves, hasGlobalAccess := getUserShelfScope(r.Context(), claims)
-	myShelfSet := make(map[string]bool)
+	// Shelf codes are "<country>:<domain>" (e.g. "id:coreplus"). Per current design,
+	// folder assignment scopes access at the COUNTRY level: being assigned any shelf
+	// under "id" grants visibility into all of PH/ID's services regardless of domain,
+	// since domain is now a per-row badge rather than a separate folder level.
+	myCountrySet := make(map[string]bool)
 	for _, s := range myShelves {
-		myShelfSet[strings.ToLower(s)] = true
+		parts := strings.SplitN(strings.ToLower(s), ":", 2)
+		if len(parts) > 0 && parts[0] != "" && parts[0] != "all" {
+			myCountrySet[parts[0]] = true
+		}
 	}
-	hasFolderScope := !hasGlobalAccess && len(myShelves) > 0
+	hasCountryScope := !hasGlobalAccess && len(myCountrySet) > 0
 
 	allServices := ServiceCatalog.ListAll()
 
@@ -108,117 +137,106 @@ func RenderCatalogList(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Group services into Shelves
-	shelvesConfig := SystemParams.GetActiveShelves()
-	shelfMap := make(map[string]*ShelfView)
-
-	for _, s := range shelvesConfig {
-		parts := strings.Split(s.Code, ":")
-		cntry := "all"
-		if len(parts) > 1 {
-			cntry = parts[0]
-		}
-		shelfMap[s.Code] = &ShelfView{
-			Code:        s.Code,
-			CountryCode: cntry,
-			Name:        s.Name,
-			Description: s.Description,
-			Services:    []CatalogEntry{},
-		}
+	// --- New hierarchy: Country -> Environment -> Service (Domain shown as a row badge) ---
+	envOrder := []struct{ code, label string }{
+		{"prod", "Production"},
+		{"preprod", "Pre-Production"},
+		{"uat", "UAT"},
+		{"unassigned", "Not Yet Deployed"},
 	}
 
-	// Map each service to its shelf
+	countryLabels := map[string]string{"ph": "Philippines", "id": "Indonesia"}
+	countryMap := make(map[string]*CountryGroup)
+	countryOrder := []string{"ph", "id"} // stable, deterministic ordering
+
+	getOrCreateCountry := func(code string) *CountryGroup {
+		if cg, ok := countryMap[code]; ok {
+			return cg
+		}
+		label := countryLabels[code]
+		if label == "" {
+			label = strings.ToUpper(code)
+		}
+		cg := &CountryGroup{Code: code, Name: label}
+		countryMap[code] = cg
+		if code != "ph" && code != "id" {
+			countryOrder = append(countryOrder, code)
+		}
+		return cg
+	}
+
+	// Always show PH and ID as main shelves even if they currently have zero services,
+	// so the top-level hierarchy stays predictable and never nil-panics below.
+	getOrCreateCountry("ph")
+	getOrCreateCountry("id")
+
+	// Bucket every service into country -> env
+	type bucketKey struct{ country, env string }
+	buckets := make(map[bucketKey][]CatalogEntry)
 	for _, svc := range allServices {
 		countryLower := strings.ToLower(svc.Country)
-		domainLower := strings.ToLower(svc.Domain)
 		if countryLower == "" {
 			countryLower = "ph"
 		}
-		if domainLower == "" {
-			domainLower = "integration"
-		}
+		envCode := deriveEnvFromStatus(svc.Status)
+		getOrCreateCountry(countryLower) // ensure it exists even if empty later
+		buckets[bucketKey{countryLower, envCode}] = append(buckets[bucketKey{countryLower, envCode}], svc)
+	}
 
-		targetKey := fmt.Sprintf("%s:%s", countryLower, domainLower)
-		if targetShelf, exists := shelfMap[targetKey]; exists {
-			targetShelf.Services = append(targetShelf.Services, svc)
+	// Build ordered EnvGroups per country (only include env buckets that exist for that country,
+	// but always show all 4 buckets so the folder hierarchy stays predictable/scannable)
+	for _, code := range countryOrder {
+		cg := countryMap[code]
+		total := 0
+		for _, e := range envOrder {
+			svcs := buckets[bucketKey{code, e.code}]
+			total += len(svcs)
+			cg.EnvGroups = append(cg.EnvGroups, EnvGroup{Code: e.code, Label: e.label, Services: svcs})
+		}
+		cg.Total = total
+		cg.IsMine = myCountrySet[code]
+	}
+
+	var myCountries []CountryGroup
+	var otherCountries []CountryGroup
+	for _, code := range countryOrder {
+		cg := *countryMap[code]
+		if hasCountryScope && cg.IsMine {
+			myCountries = append(myCountries, cg)
+		} else if hasCountryScope {
+			otherCountries = append(otherCountries, cg)
 		} else {
-			// Fallback by country or all:devops
-			fallbackKey := fmt.Sprintf("all:%s", domainLower)
-			if targetShelf, exists := shelfMap[fallbackKey]; exists {
-				targetShelf.Services = append(targetShelf.Services, svc)
-			} else {
-				// Default to first matching country shelf or create dynamic
-				matched := false
-				for _, sh := range shelfMap {
-					if strings.EqualFold(sh.CountryCode, countryLower) {
-						sh.Services = append(sh.Services, svc)
-						matched = true
-						break
-					}
-				}
-				if !matched && len(shelfMap) > 0 {
-					for _, sh := range shelfMap {
-						sh.Services = append(sh.Services, svc)
-						break
-					}
-				}
-			}
+			myCountries = append(myCountries, cg)
 		}
 	}
 
-	var myShelvesList []ShelfView
-	var otherShelvesList []ShelfView
-	for _, sc := range shelvesConfig {
-		if sh, ok := shelfMap[sc.Code]; ok {
-			view := *sh
-			view.IsMyShelf = myShelfSet[strings.ToLower(sc.Code)]
-			if hasFolderScope && view.IsMyShelf {
-				myShelvesList = append(myShelvesList, view)
-			} else if hasFolderScope {
-				otherShelvesList = append(otherShelvesList, view)
-			} else {
-				myShelvesList = append(myShelvesList, view)
-			}
-		}
-	}
-
-	// When the user is folder-scoped, pin their shelves first; only include the rest
-	// of the org's 300+ shelves if they explicitly ask to see everything (?all=true).
-	shelvesList := myShelvesList
-	otherShelvesCount := 0
-	if hasFolderScope {
-		otherShelvesCount = len(otherShelvesList)
-		if showAllFolders {
-			shelvesList = append(shelvesList, otherShelvesList...)
+	countryGroups := myCountries
+	otherCountriesCount := 0
+	if hasCountryScope {
+		otherCountriesCount = len(otherCountries)
+		if showAllCountries {
+			countryGroups = append(countryGroups, otherCountries...)
 		}
 	}
 
 	data := struct {
-		Title             string
-		User              *auth.Claims
-		Services          []CatalogEntry
-		Shelves           []ShelfView
-		Countries         []SystemParam
-		Domains           []SystemParam
-		SelectedCountry   string
-		SelectedShelf     string
-		TotalServices     int
-		HasFolderScope    bool
-		ShowAllFolders    bool
-		OtherShelvesCount int
+		Title               string
+		User                *auth.Claims
+		Services            []CatalogEntry
+		Countries           []CountryGroup
+		TotalServices       int
+		HasCountryScope     bool
+		ShowAllCountries    bool
+		OtherCountriesCount int
 	}{
-		Title:             "Service Catalog",
-		User:              claims,
-		Services:          allServices,
-		Shelves:           shelvesList,
-		Countries:         SystemParams.GetActiveCountries(),
-		Domains:           SystemParams.GetActiveDomains(),
-		SelectedCountry:   selectedCountry,
-		SelectedShelf:     selectedShelf,
-		TotalServices:     len(allServices),
-		HasFolderScope:    hasFolderScope,
-		ShowAllFolders:    showAllFolders,
-		OtherShelvesCount: otherShelvesCount,
+		Title:               "Service Catalog",
+		User:                claims,
+		Services:            allServices,
+		Countries:           countryGroups,
+		TotalServices:       len(allServices),
+		HasCountryScope:     hasCountryScope,
+		ShowAllCountries:    showAllCountries,
+		OtherCountriesCount: otherCountriesCount,
 	}
 
 	tmpl.ExecuteTemplate(w, "base", data)
