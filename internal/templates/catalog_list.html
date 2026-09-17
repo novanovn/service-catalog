@@ -1,6 +1,7 @@
 {{ define "content" }}
 <style>
     .catalog-page { max-width: 1200px; }
+    
     .catalog-kicker {
         font-size: 11px;
         font-weight: 600;
@@ -11,14 +12,14 @@
     html.light-mode .catalog-kicker { color: #64748b; }
 
     .catalog-search-input {
-        height: 36px;
-        width: 260px;
-        border-radius: 10px;
+        height: 38px;
+        width: 280px;
+        border-radius: 12px;
         background: rgba(255,255,255,0.035);
         border: 1px solid rgba(255,255,255,0.08);
         color: #f7f8f8;
         font-size: 13px;
-        padding: 0 12px 0 34px;
+        padding: 0 12px 0 36px;
         outline: none;
         transition: all 0.2s ease;
     }
@@ -29,11 +30,34 @@
     }
     html.light-mode .catalog-search-input {
         background: #ffffff;
-        border-color: #e2e8f0;
+        border-color: #cbd5e1;
         color: #0f172a;
     }
 
-    /* My-Shelves scope banner */
+    /* 2D Folder Card Styles */
+    .folder-card {
+        background: #171717;
+        border: 1px solid #282828;
+        border-radius: 16px;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        position: relative;
+        overflow: hidden;
+    }
+    .folder-card:hover {
+        border-color: rgba(124, 58, 237, 0.5);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.5);
+    }
+    html.light-mode .folder-card {
+        background: #ffffff;
+        border-color: #e2e8f0;
+    }
+    html.light-mode .folder-card:hover {
+        border-color: #7c3aed;
+        box-shadow: 0 8px 24px -6px rgba(124, 58, 237, 0.12);
+    }
+
+    /* Scope Banner */
     .scope-banner {
         display: flex;
         align-items: center;
@@ -52,14 +76,14 @@
         border-color: #ddd6fe;
         color: #6d28d9;
     }
-    .scope-banner a { font-weight: 700; text-decoration: underline; cursor: pointer; }
 </style>
 
 <div class="catalog-page mx-auto pb-16">
-    <!-- Header bar -->
+    
+    <!-- Top Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-[#282828]">
         <div>
-            <p class="catalog-kicker">Repository &amp; Runtime Registry</p>
+            <p class="catalog-kicker">Hierarchical Shelves Explorer</p>
             <div class="flex items-center gap-3 mt-1">
                 <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Service Catalog</h1>
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-purple-500/15 text-[#a78bfa] border border-purple-500/30">
@@ -67,15 +91,14 @@
                 </span>
             </div>
             <p class="text-xs sm:text-sm text-slate-400 mt-1">
-                Explore microservices across regional Main Shelves (Country) and functional Sub Shelves (Domain).
+                Browse microservice repositories organized by regional Main Shelves and functional Domain Sub Shelves.
             </p>
         </div>
 
         <div class="flex items-center gap-3 self-start sm:self-auto flex-wrap">
-            <!-- Search input -->
             <div class="relative">
                 <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                <input type="text" id="catalog-search" class="catalog-search-input" placeholder="Search 300+ services, domains, repos..." oninput="handleCatalogSearch(this.value)">
+                <input type="text" id="catalog-search" class="catalog-search-input" placeholder="Search services across shelves..." oninput="handleExplorerSearch(this.value)">
             </div>
 
             <a href="/tickets/new" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white bg-[#7c3aed] hover:bg-[#6d28d9] transition-all shadow-sm shadow-purple-900/40 cursor-pointer">
@@ -92,289 +115,455 @@
             {{ if .OtherCountriesCount }}{{ .OtherCountriesCount }} other main shelf{{ if ne .OtherCountriesCount 1 }}ves{{ end }} in the org catalog are hidden.{{ end }}
         </span>
         {{ if not .ShowAllCountries }}
-        <a href="?all=true">Show all main shelves →</a>
+        <a href="?all=true" class="font-bold underline">Show all main shelves →</a>
         {{ else }}
-        <a href="/catalog">Show only my main shelves →</a>
+        <a href="/catalog" class="font-bold underline">Show only my main shelves →</a>
         {{ end }}
     </div>
     {{ end }}
 
-    <!-- Main Shelf Selector: Top Segmented Switcher (No Nested Collapse) -->
-    <div class="flex items-center gap-2 mt-5 border-b border-[#282828] pb-3 overflow-x-auto">
-        <span class="text-xs font-mono font-bold uppercase tracking-wider text-slate-400 mr-1 flex items-center gap-1.5">
-            <svg class="w-3.5 h-3.5 text-purple-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"></path></svg>
-            Main Shelf:
-        </span>
-        {{ range .Countries }}
-        <button type="button" onclick="selectCountryShelf('{{ .Code }}')"
-                class="country-tab-btn px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer {{ if eq .Code $.SelectedCountry }}bg-[#7c3aed] text-white shadow-md shadow-purple-900/30{{ else }}bg-[#171717] text-slate-400 border border-[#282828] hover:text-white hover:bg-white/5{{ end }}"
-                data-country-target="{{ .Code }}">
-            <span>{{ .Flag }}</span>
-            <span>{{ .Name }}</span>
-            <span class="text-[11px] px-1.5 py-0.5 rounded-full {{ if eq .Code $.SelectedCountry }}bg-purple-900/60 text-purple-200{{ else }}bg-black/40 text-slate-400{{ end }} font-mono">
-                {{ .Total }}
-            </span>
-            {{ if .IsMine }}
-            <span class="text-[9px] uppercase tracking-wider font-extrabold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">Mine</span>
-            {{ end }}
-        </button>
-        {{ end }}
+    <!-- Breadcrumbs Navigation Bar (Drill-Down Explorer) -->
+    <div class="flex items-center justify-between gap-4 mt-5 py-3 px-4 rounded-xl bg-[#171717] border border-[#282828] text-xs font-mono">
+        <nav class="flex items-center gap-2 overflow-x-auto min-w-0" aria-label="Breadcrumb">
+            {{ range $i, $bc := .Breadcrumbs }}
+                {{ if gt $i 0 }}
+                <svg class="w-3.5 h-3.5 text-slate-600 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                {{ end }}
 
-        {{ if and (not .HasCountryScope) (gt (len .Countries) 1) }}
-        <button type="button" onclick="selectCountryShelf('all')"
-                class="country-tab-btn px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer {{ if eq $.SelectedCountry "all" }}bg-[#7c3aed] text-white shadow-md shadow-purple-900/30{{ else }}bg-[#171717] text-slate-400 border border-[#282828] hover:text-white hover:bg-white/5{{ end }}"
-                data-country-target="all">
-            <span>🌐</span>
-            <span>All Main Shelves</span>
-            <span class="text-[11px] px-1.5 py-0.5 rounded-full {{ if eq $.SelectedCountry "all" }}bg-purple-900/60 text-purple-200{{ else }}bg-black/40 text-slate-400{{ end }} font-mono">
-                {{ .TotalServices }}
-            </span>
-        </button>
+                {{ if $bc.IsActive }}
+                <span class="font-bold text-purple-300 truncate py-0.5 px-2 rounded-md bg-purple-500/10 border border-purple-500/20">
+                    {{ $bc.Label }}
+                </span>
+                {{ else }}
+                <a href="{{ $bc.URL }}" class="text-slate-400 hover:text-white transition-colors truncate hover:underline">
+                    {{ $bc.Label }}
+                </a>
+                {{ end }}
+            {{ end }}
+        </nav>
+
+        {{ if eq .Level "domain" }}
+        <a href="/catalog?country={{ .ActiveCountry.Code }}" class="inline-flex items-center gap-1 text-[11px] font-bold text-slate-400 hover:text-white transition-colors flex-shrink-0">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            Up to Domains
+        </a>
+        {{ else if eq .Level "country" }}
+        <a href="/catalog" class="inline-flex items-center gap-1 text-[11px] font-bold text-slate-400 hover:text-white transition-colors flex-shrink-0">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            Up to Main Shelves
+        </a>
         {{ end }}
     </div>
 
-    <!-- Country Shelves Content Container -->
-    <div id="country-shelves-root" class="mt-6">
-        {{ range .Countries }}
-        <div id="shelf-panel-{{ .Code }}" class="country-shelf-panel {{ if and (ne $.SelectedCountry "all") (ne .Code $.SelectedCountry) }}hidden{{ end }}" data-country="{{ .Code }}">
-            <!-- Country Title Header -->
-            <div class="flex items-center justify-between mb-4 pb-2 border-b border-[#242424]">
-                <div class="flex items-center gap-2">
-                    <span class="text-xl">{{ .Flag }}</span>
-                    <h2 class="text-lg font-extrabold text-white tracking-tight">{{ .Name }} Main Shelf</h2>
-                    <span class="text-xs text-slate-400 font-mono">({{ .Code | upper }})</span>
+    <!-- Live Search Container (Swapped in when user searches) -->
+    <div id="search-results-panel" class="hidden mt-6">
+        <div class="flex items-center justify-between pb-3 border-b border-[#282828] mb-6">
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-mono font-bold text-purple-400 uppercase tracking-wider">Search Results:</span>
+                <span id="search-query-display" class="text-xs text-white font-mono font-bold"></span>
+                <span id="search-count-badge" class="px-2 py-0.5 text-[11px] font-mono rounded-full bg-purple-900/40 text-purple-300 border border-purple-800/50"></span>
+            </div>
+            <button type="button" onclick="clearExplorerSearch()" class="text-xs font-bold text-slate-400 hover:text-white transition-colors">
+                ✕ Clear Search
+            </button>
+        </div>
+
+        <div id="search-results-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            <!-- Dynamically populated via JS -->
+        </div>
+
+        <div id="search-empty-notice" class="hidden rounded-2xl border border-[#282828] bg-[#171717] px-6 py-12 text-center">
+            <p class="text-sm font-bold text-white">No services match your search</p>
+            <p class="text-xs text-slate-400 mt-1">Try searching for a different microservice name, domain, or repository.</p>
+        </div>
+    </div>
+
+    <!-- MAIN BROWSER CONTENT (Visible when search is inactive) -->
+    <div id="explorer-view-root" class="mt-6">
+
+        <!-- ============================================================= -->
+        <!-- LEVEL 1: ROOT VIEW (Main Shelves / Countries as Folders)     -->
+        <!-- ============================================================= -->
+        {{ if eq .Level "root" }}
+        <div class="space-y-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-lg font-extrabold text-white tracking-tight">Main Shelves (Regional Directories)</h2>
+                    <p class="text-xs text-slate-400 mt-0.5">Select a regional root folder to explore functional domains and services.</p>
                 </div>
-                <span class="text-xs font-mono text-slate-400">
-                    {{ .Total }} microservice{{ if ne .Total 1 }}s{{ end }} registered
+                <span class="text-xs font-mono text-slate-400 font-bold">
+                    {{ len .Countries }} Regions
                 </span>
             </div>
 
-            <!-- Sub Shelves (Domain Groups) -->
-            {{ range .SubShelves }}
-            <div class="sub-shelf-card bg-[#171717] border border-[#282828] rounded-2xl mb-6 overflow-hidden shadow-xs transition-all" data-shelf="{{ .Code }}" data-domain="{{ .DomainKey }}">
-                <!-- Domain Header -->
-                <div class="p-4 sm:px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#242424] bg-[#141414]">
-                    <div class="flex items-center gap-3 min-w-0">
-                        <div class="w-8 h-8 rounded-lg bg-purple-500/10 border border-purple-500/20 text-[#a78bfa] flex items-center justify-center flex-shrink-0">
-                            <!-- 2D Monoline Vector Folder Icon -->
-                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                {{ range .Countries }}
+                <a href="/catalog?country={{ .Code }}" class="folder-card p-6 block group">
+                    <div class="flex items-start justify-between">
+                        <!-- 2D Monoline Folder SVG Icon -->
+                        <div class="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 text-[#a78bfa] flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
                         </div>
-                        <div class="min-w-0">
-                            <div class="flex items-center gap-2 flex-wrap">
-                                <h3 class="text-sm font-bold text-white tracking-tight truncate">{{ .Name }}</h3>
-                                <span class="text-[10px] font-mono px-2 py-0.5 rounded-md bg-white/[0.04] text-slate-400 border border-white/[0.06]">{{ .Code }}</span>
-                            </div>
-                            {{ if .Description }}
-                            <p class="text-xs text-slate-400 mt-0.5 truncate">{{ .Description }}</p>
-                            {{ end }}
-                        </div>
+                        <span class="text-2xl">{{ .Flag }}</span>
                     </div>
-                    <div class="flex items-center gap-3 self-end sm:self-auto">
-                        <span class="text-xs font-mono text-slate-300 font-bold bg-white/[0.03] px-2.5 py-1 rounded-lg border border-white/[0.06]">
+
+                    <div class="mt-4">
+                        <div class="flex items-center gap-2">
+                            <h3 class="text-base font-bold text-white group-hover:text-purple-300 transition-colors">
+                                {{ .Name }} Main Shelf
+                            </h3>
+                            <span class="text-[10px] font-mono px-2 py-0.5 rounded-md bg-white/[0.04] text-slate-400 border border-white/[0.06]">
+                                {{ .Code | upper }}
+                            </span>
+                        </div>
+                        <p class="text-xs text-slate-400 mt-1">Regional microservices, core integration suites, and cloud infrastructure.</p>
+                    </div>
+
+                    <div class="mt-6 pt-4 border-t border-[#242424] flex items-center justify-between text-xs font-mono">
+                        <div class="flex items-center gap-3 text-slate-400">
+                            <span>📁 <strong>{{ len .SubShelves }}</strong> Sub Shelves</span>
+                            <span>•</span>
+                            <span>📦 <strong>{{ .Total }}</strong> {{ if eq .Total 1 }}Service{{ else }}Services{{ end }}</span>
+                        </div>
+                        <span class="text-purple-400 font-bold group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">
+                            Open Shelf &rarr;
+                        </span>
+                    </div>
+                </a>
+                {{ end }}
+            </div>
+        </div>
+        {{ end }}
+
+
+        <!-- ============================================================= -->
+        <!-- LEVEL 2: COUNTRY VIEW (Sub Shelves / Domains as Folders)      -->
+        <!-- ============================================================= -->
+        {{ if eq .Level "country" }}
+        <div class="space-y-4">
+            <div class="flex items-center justify-between pb-2 border-b border-[#242424]">
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">{{ .ActiveCountry.Flag }}</span>
+                    <h2 class="text-lg font-extrabold text-white tracking-tight">{{ .ActiveCountry.Name }} Main Shelf</h2>
+                    <span class="text-xs font-mono text-slate-400">({{ .ActiveCountry.Code | upper }})</span>
+                </div>
+                <span class="text-xs font-mono text-slate-400">
+                    {{ len .ActiveCountry.SubShelves }} Domain Shelves · {{ .ActiveCountry.Total }} Microservices
+                </span>
+            </div>
+
+            <p class="text-xs text-slate-400">
+                Select a functional domain folder below to inspect its registered microservices and runtime environments.
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mt-4">
+                {{ range .ActiveCountry.SubShelves }}
+                <a href="/catalog?country={{ $.ActiveCountry.Code }}&domain={{ .DomainKey }}" class="folder-card p-5 block group {{ if gt .Total 0 }}border-purple-500/30{{ end }}">
+                    <div class="flex items-start justify-between">
+                        <!-- 2D Monoline Folder SVG Icon -->
+                        <div class="w-10 h-10 rounded-xl {{ if gt .Total 0 }}bg-purple-500/15 text-purple-300 border border-purple-500/30{{ else }}bg-white/[0.04] text-slate-400 border border-white/[0.06]{{ end }} flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                        </div>
+                        <span class="text-[11px] font-mono px-2 py-0.5 rounded-full {{ if gt .Total 0 }}bg-purple-900/50 text-purple-200 border border-purple-700/40 font-bold{{ else }}bg-black/30 text-slate-500 font-normal{{ end }}">
                             {{ .Total }} {{ if eq .Total 1 }}service{{ else }}services{{ end }}
                         </span>
                     </div>
-                </div>
 
-                <!-- Domain Services Table -->
-                <div class="p-0">
-                    {{ if .Services }}
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs border-collapse">
-                            <thead>
-                                <tr class="border-b border-[#242424] text-slate-400 uppercase tracking-wider font-mono text-[10.5px] bg-[#171717]">
-                                    <th class="py-3 px-6 font-semibold">Service Name &amp; Repository</th>
-                                    <th class="py-3 px-6 font-semibold">Lifecycle Environments</th>
-                                    <th class="py-3 px-6 font-semibold">Status</th>
-                                    <th class="py-3 px-6 font-semibold text-right">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-[#222222]">
-                                {{ range .Services }}
-                                <tr class="service-table-row hover:bg-white/[0.02] transition-colors" data-name="{{ .Name }}" data-domain="{{ .Domain }}" data-pipe="{{ .PipelineName }}" data-desc="{{ .Description }}">
-                                    <td class="py-4 px-6 min-w-[280px]">
-                                        <div class="flex flex-col">
-                                            <a href="/catalog/{{ .Name }}" class="text-sm font-bold text-white hover:text-purple-400 transition-colors flex items-center gap-1.5">
-                                                {{ .Name }}
-                                            </a>
-                                            {{ if .Description }}
-                                            <p class="text-xs text-slate-400 mt-0.5 line-clamp-1" title="{{ .Description }}">{{ .Description }}</p>
-                                            {{ end }}
-                                            {{ if .RepoURL }}
-                                            <a href="{{ .RepoURL }}" target="_blank" class="inline-flex items-center gap-1.5 text-[11px] font-mono text-slate-400 hover:text-slate-200 mt-1 transition-colors w-fit">
-                                                <svg class="w-3 h-3 text-slate-400 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
-                                                <span class="truncate max-w-xs">{{ .RepoURL }}</span>
-                                            </a>
-                                            {{ end }}
-                                        </div>
-                                    </td>
-                                    <td class="py-4 px-6 min-w-[240px]">
-                                        <!-- Multi-Environment Representation (Option B) -->
-                                        <div class="flex items-center gap-1.5 font-mono text-[11px]">
-                                            {{ if hasEnv .DeployedEnvs "uat" }}
-                                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 font-bold">
-                                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> UAT
-                                            </span>
-                                            {{ else }}
-                                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white/[0.02] text-slate-500 border border-white/[0.05]">
-                                                <span class="w-1.5 h-1.5 rounded-full bg-slate-600"></span> UAT
-                                            </span>
-                                            {{ end }}
-
-                                            {{ if hasEnv .DeployedEnvs "preprod" }}
-                                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 font-bold">
-                                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> PreProd
-                                            </span>
-                                            {{ else }}
-                                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white/[0.02] text-slate-500 border border-white/[0.05]">
-                                                <span class="w-1.5 h-1.5 rounded-full bg-slate-600"></span> PreProd
-                                            </span>
-                                            {{ end }}
-
-                                            {{ if hasEnv .DeployedEnvs "prod" }}
-                                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 font-bold">
-                                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Prod
-                                            </span>
-                                            {{ else }}
-                                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white/[0.02] text-slate-500 border border-white/[0.05]">
-                                                <span class="w-1.5 h-1.5 rounded-full bg-slate-600"></span> Prod
-                                            </span>
-                                            {{ end }}
-                                        </div>
-                                    </td>
-                                    <td class="py-4 px-6 whitespace-nowrap">
-                                        {{ if eq .Status "LIVE" }}
-                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> LIVE
-                                        </span>
-                                        {{ else if eq .Status "PENDING_INFRA" }}
-                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 font-mono">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> PENDING INFRA
-                                        </span>
-                                        {{ else }}
-                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-800 text-slate-300 border border-slate-700 font-mono">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span> {{ if .Status }}{{ .Status }}{{ else }}DRAFT{{ end }}
-                                        </span>
-                                        {{ end }}
-                                    </td>
-                                    <td class="py-4 px-6 text-right whitespace-nowrap">
-                                        <a href="/catalog/{{ .Name }}" class="inline-flex items-center gap-1 text-xs font-bold text-[#a78bfa] hover:text-purple-300 transition-colors">
-                                            View Service <span aria-hidden="true">&rarr;</span>
-                                        </a>
-                                    </td>
-                                </tr>
-                                {{ end }}
-                            </tbody>
-                        </table>
+                    <div class="mt-3.5">
+                        <div class="flex items-center gap-1.5">
+                            <h3 class="text-sm font-bold text-white group-hover:text-purple-300 transition-colors truncate">
+                                {{ .Name }}
+                            </h3>
+                        </div>
+                        <span class="text-[10px] font-mono text-slate-500 block mt-0.5">{{ .Code }}</span>
+                        {{ if .Description }}
+                        <p class="text-xs text-slate-400 mt-2 line-clamp-2 leading-relaxed">{{ .Description }}</p>
+                        {{ end }}
                     </div>
-                    {{ else }}
-                    <div class="px-6 py-6 text-center text-xs text-slate-500 bg-[#161616]">
-                        <p>No microservices onboarded to <span class="font-bold text-slate-400">{{ .Name }}</span> yet.</p>
-                        <a href="/tickets/new" class="mt-2 inline-flex items-center gap-1 text-purple-400 hover:text-purple-300 font-bold">
-                            + Onboard new service to this domain
-                        </a>
+
+                    <div class="mt-5 pt-3.5 border-t border-[#242424] flex items-center justify-between text-xs font-mono">
+                        <span class="text-[11px] text-slate-400">Sub Shelf</span>
+                        <span class="text-purple-400 font-bold group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">
+                            Explore Domain &rarr;
+                        </span>
                     </div>
+                </a>
+                {{ end }}
+            </div>
+        </div>
+        {{ end }}
+
+
+        <!-- ============================================================= -->
+        <!-- LEVEL 3: DOMAIN VIEW (Services inside Domain as Folder Cards)  -->
+        <!-- ============================================================= -->
+        {{ if eq .Level "domain" }}
+        <div class="space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#242424]">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-base font-bold text-purple-400">📂 Domain Shelf:</span>
+                        <h2 class="text-xl font-extrabold text-white tracking-tight">{{ .ActiveSubShelf.Name }}</h2>
+                        <span class="text-xs font-mono px-2 py-0.5 rounded-md bg-white/[0.04] text-slate-400 border border-white/[0.06]">
+                            {{ .ActiveSubShelf.Code }}
+                        </span>
+                    </div>
+                    {{ if .ActiveSubShelf.Description }}
+                    <p class="text-xs text-slate-400 mt-1">{{ .ActiveSubShelf.Description }}</p>
                     {{ end }}
                 </div>
+
+                <div class="flex items-center gap-2 self-end sm:self-auto">
+                    <span class="text-xs font-mono font-bold text-slate-300 bg-white/[0.03] px-3 py-1.5 rounded-xl border border-white/[0.06]">
+                        {{ .ActiveSubShelf.Total }} {{ if eq .ActiveSubShelf.Total 1 }}Microservice{{ else }}Microservices{{ end }}
+                    </span>
+                    <a href="/tickets/new" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold text-white bg-[#7c3aed] hover:bg-[#6d28d9] transition-all">
+                        + Onboard Service
+                    </a>
+                </div>
+            </div>
+
+            <!-- Service Folder Cards Grid -->
+            {{ if .ActiveSubShelf.Services }}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mt-4">
+                {{ range .ActiveSubShelf.Services }}
+                <div class="folder-card p-5 flex flex-col justify-between group">
+                    <div>
+                        <!-- Folder Header & Badge -->
+                        <div class="flex items-start justify-between gap-2">
+                            <!-- 2D Vector Service Folder Icon -->
+                            <div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 text-[#a78bfa] flex items-center justify-center flex-shrink-0">
+                                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path><polyline points="8 13 12 17 16 13"></polyline></svg>
+                            </div>
+
+                            <!-- Live Status Badge -->
+                            {{ if eq .Status "LIVE" }}
+                            <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> LIVE
+                            </span>
+                            {{ else if eq .Status "PENDING_INFRA" }}
+                            <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 font-mono">
+                                <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> PENDING INFRA
+                            </span>
+                            {{ else }}
+                            <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-slate-800 text-slate-300 border border-slate-700 font-mono">
+                                <span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span> {{ if .Status }}{{ .Status }}{{ else }}DRAFT{{ end }}
+                            </span>
+                            {{ end }}
+                        </div>
+
+                        <!-- Service Name & Description -->
+                        <div class="mt-3.5">
+                            <a href="/catalog/{{ .Name }}" class="text-sm font-bold text-white group-hover:text-purple-300 transition-colors block truncate" title="{{ .Name }}">
+                                {{ .Name }}
+                            </a>
+                            {{ if .Description }}
+                            <p class="text-xs text-slate-400 mt-1.5 line-clamp-2 leading-relaxed" title="{{ .Description }}">
+                                {{ .Description }}
+                            </p>
+                            {{ end }}
+                            {{ if .RepoURL }}
+                            <a href="{{ .RepoURL }}" target="_blank" class="inline-flex items-center gap-1 text-[11px] font-mono text-slate-400 hover:text-slate-200 mt-2 transition-colors truncate max-w-full">
+                                <svg class="w-3 h-3 text-slate-400 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+                                <span class="truncate">{{ .RepoURL }}</span>
+                            </a>
+                            {{ end }}
+                        </div>
+                    </div>
+
+                    <div class="mt-5 pt-3.5 border-t border-[#242424]">
+                        <!-- Option B Lifecycle Environments Chips -->
+                        <div class="text-[10px] font-mono text-slate-400 uppercase tracking-wider mb-1.5">Environments:</div>
+                        <div class="flex items-center gap-1.5 font-mono text-[10.5px]">
+                            {{ if hasEnv .DeployedEnvs "uat" }}
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 font-bold">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> UAT
+                            </span>
+                            {{ else }}
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/[0.02] text-slate-500 border border-white/[0.05]">
+                                <span class="w-1.5 h-1.5 rounded-full bg-slate-600"></span> UAT
+                            </span>
+                            {{ end }}
+
+                            {{ if hasEnv .DeployedEnvs "preprod" }}
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 font-bold">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> PreProd
+                            </span>
+                            {{ else }}
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/[0.02] text-slate-500 border border-white/[0.05]">
+                                <span class="w-1.5 h-1.5 rounded-full bg-slate-600"></span> PreProd
+                            </span>
+                            {{ end }}
+
+                            {{ if hasEnv .DeployedEnvs "prod" }}
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 font-bold">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Prod
+                            </span>
+                            {{ else }}
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/[0.02] text-slate-500 border border-white/[0.05]">
+                                <span class="w-1.5 h-1.5 rounded-full bg-slate-600"></span> Prod
+                            </span>
+                            {{ end }}
+                        </div>
+
+                        <!-- Open Detail Link -->
+                        <div class="mt-4 pt-2.5 flex items-center justify-end">
+                            <a href="/catalog/{{ .Name }}" class="inline-flex items-center gap-1 text-xs font-bold text-[#a78bfa] hover:text-purple-300 transition-colors">
+                                Open Service &rarr;
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {{ end }}
+            </div>
+            {{ else }}
+            <div class="rounded-2xl border border-[#282828] bg-[#171717] px-6 py-12 text-center mt-4">
+                <div class="w-12 h-12 rounded-xl bg-white/[0.03] border border-white/[0.06] text-slate-500 flex items-center justify-center mx-auto mb-3">
+                    <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                </div>
+                <p class="text-sm font-bold text-white">This domain shelf is currently empty</p>
+                <p class="text-xs text-slate-400 mt-1">No microservices have been onboarded to <span class="font-bold text-slate-300">{{ .ActiveSubShelf.Name }}</span> yet.</p>
+                <a href="/tickets/new" class="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white bg-[#7c3aed] hover:bg-[#6d28d9] transition-all">
+                    + Onboard First Service
+                </a>
             </div>
             {{ end }}
         </div>
-        {{ else }}
-        <div class="rounded-2xl border border-[#282828] bg-[#171717] px-6 py-16 text-center">
-            <p class="text-base font-bold text-white">No main shelves to show</p>
-            <p class="mt-1 text-xs text-slate-400">
-                {{ if .HasCountryScope }}You have not been attached to any main shelf yet. Ask an admin to assign you in User Management.{{ else }}Onboard the first microservice to populate the catalog.{{ end }}
-            </p>
-        </div>
         {{ end }}
-    </div>
 
-    <!-- Empty Search State -->
-    <div id="search-empty-state" class="hidden rounded-2xl border border-[#282828] bg-[#171717] px-6 py-12 text-center mt-6">
-        <svg class="w-8 h-8 text-slate-500 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-        <p class="text-sm font-bold text-white">No services match your search</p>
-        <p class="text-xs text-slate-400 mt-1">Try searching for a different service name, repository, or domain keyword.</p>
     </div>
 </div>
 
+<!-- Embedded JSON Data for Instant Live Search across all services -->
+<script id="catalog-all-services-data" type="application/json">
+[
+{{ range $i, $s := .Services }}
+{{ if gt $i 0 }},{{ end }}
+{
+    "name": {{ $s.Name }},
+    "domain": {{ $s.Domain }},
+    "country": {{ $s.Country }},
+    "description": {{ $s.Description }},
+    "repo_url": {{ $s.RepoURL }},
+    "pipeline_name": {{ $s.PipelineName }},
+    "status": {{ $s.Status }},
+    "deployed_envs": {{ $s.DeployedEnvs }}
+}
+{{ end }}
+]
+</script>
+
 <script>
-    function selectCountryShelf(countryCode) {
-        // 1. Update tab button active styles
-        document.querySelectorAll('.country-tab-btn').forEach(btn => {
-            const target = btn.getAttribute('data-country-target');
-            if (target === countryCode) {
-                btn.className = "country-tab-btn px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer bg-[#7c3aed] text-white shadow-md shadow-purple-900/30";
-                const badge = btn.querySelector('span.font-mono');
-                if (badge) badge.className = "text-[11px] px-1.5 py-0.5 rounded-full bg-purple-900/60 text-purple-200 font-mono";
-            } else {
-                btn.className = "country-tab-btn px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer bg-[#171717] text-slate-400 border border-[#282828] hover:text-white hover:bg-white/5";
-                const badge = btn.querySelector('span.font-mono');
-                if (badge) badge.className = "text-[11px] px-1.5 py-0.5 rounded-full bg-black/40 text-slate-400 font-mono";
-            }
-        });
-
-        // 2. Show/hide country panels
-        document.querySelectorAll('.country-shelf-panel').forEach(panel => {
-            const panelCountry = panel.getAttribute('data-country');
-            if (countryCode === 'all' || panelCountry === countryCode) {
-                panel.classList.remove('hidden');
-            } else {
-                panel.classList.add('hidden');
-            }
-        });
-
-        // 3. Keep URL query param synced without full reload
-        const url = new URL(window.location);
-        url.searchParams.set('country', countryCode);
-        window.history.replaceState({}, '', url);
+    let allCatalogServices = [];
+    try {
+        const raw = document.getElementById('catalog-all-services-data').textContent;
+        allCatalogServices = JSON.parse(raw);
+    } catch(e) {
+        allCatalogServices = [];
     }
 
-    function handleCatalogSearch(query) {
+    function handleExplorerSearch(query) {
         const q = (query || '').trim().toLowerCase();
-        let anyVisible = false;
+        const searchPanel = document.getElementById('search-results-panel');
+        const explorerView = document.getElementById('explorer-view-root');
+        const grid = document.getElementById('search-results-grid');
+        const queryDisplay = document.getElementById('search-query-display');
+        const countBadge = document.getElementById('search-count-badge');
+        const emptyNotice = document.getElementById('search-empty-notice');
 
-        document.querySelectorAll('.sub-shelf-card').forEach(card => {
-            const domainName = (card.getAttribute('data-domain') || '').toLowerCase();
-            const rows = card.querySelectorAll('.service-table-row');
-            let visibleRowsInCard = 0;
+        if (!q) {
+            searchPanel.classList.add('hidden');
+            explorerView.classList.remove('hidden');
+            return;
+        }
 
-            rows.forEach(row => {
-                const name = (row.getAttribute('data-name') || '').toLowerCase();
-                const pipe = (row.getAttribute('data-pipe') || '').toLowerCase();
-                const desc = (row.getAttribute('data-desc') || '').toLowerCase();
-                const dom = (row.getAttribute('data-domain') || '').toLowerCase();
+        // Switch to search results panel
+        explorerView.classList.add('hidden');
+        searchPanel.classList.remove('hidden');
+        queryDisplay.textContent = `"${query}"`;
 
-                const matches = !q || name.includes(q) || pipe.includes(q) || desc.includes(q) || dom.includes(q) || domainName.includes(q);
-
-                if (matches) {
-                    row.style.display = '';
-                    visibleRowsInCard++;
-                    anyVisible = true;
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-
-            // If there's an active search, hide sub-shelves with 0 matching rows
-            if (q) {
-                if (visibleRowsInCard > 0) {
-                    card.style.display = '';
-                } else {
-                    card.style.display = 'none';
-                }
-            } else {
-                card.style.display = '';
-            }
+        const matches = allCatalogServices.filter(s => {
+            return (s.name && s.name.toLowerCase().includes(q)) ||
+                   (s.domain && s.domain.toLowerCase().includes(q)) ||
+                   (s.description && s.description.toLowerCase().includes(q)) ||
+                   (s.repo_url && s.repo_url.toLowerCase().includes(q)) ||
+                   (s.pipeline_name && s.pipeline_name.toLowerCase().includes(q));
         });
 
-        const emptyNotice = document.getElementById('search-empty-state');
-        if (emptyNotice) {
-            if (q && !anyVisible) {
-                emptyNotice.classList.remove('hidden');
-            } else {
-                emptyNotice.classList.add('hidden');
-            }
+        countBadge.textContent = `${matches.length} found`;
+
+        if (matches.length === 0) {
+            grid.innerHTML = '';
+            emptyNotice.classList.remove('hidden');
+            return;
         }
+
+        emptyNotice.classList.add('hidden');
+        grid.innerHTML = matches.map(s => {
+            const hasUAT = s.deployed_envs && s.deployed_envs.some(e => e.toLowerCase() === 'uat');
+            const hasPreProd = s.deployed_envs && s.deployed_envs.some(e => e.toLowerCase() === 'preprod');
+            const hasProd = s.deployed_envs && s.deployed_envs.some(e => e.toLowerCase() === 'prod');
+
+            const uatBadge = hasUAT 
+                ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 font-bold"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> UAT</span>`
+                : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/[0.02] text-slate-500 border border-white/[0.05]"><span class="w-1.5 h-1.5 rounded-full bg-slate-600"></span> UAT</span>`;
+
+            const preprodBadge = hasPreProd 
+                ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 font-bold"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> PreProd</span>`
+                : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/[0.02] text-slate-500 border border-white/[0.05]"><span class="w-1.5 h-1.5 rounded-full bg-slate-600"></span> PreProd</span>`;
+
+            const prodBadge = hasProd 
+                ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 font-bold"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Prod</span>`
+                : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/[0.02] text-slate-500 border border-white/[0.05]"><span class="w-1.5 h-1.5 rounded-full bg-slate-600"></span> Prod</span>`;
+
+            return `
+            <div class="folder-card p-5 flex flex-col justify-between group">
+                <div>
+                    <div class="flex items-start justify-between gap-2">
+                        <div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 text-[#a78bfa] flex items-center justify-center flex-shrink-0">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                        </div>
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">
+                            ● ${s.status || 'LIVE'}
+                        </span>
+                    </div>
+
+                    <div class="mt-3.5">
+                        <a href="/catalog/${s.name}" class="text-sm font-bold text-white group-hover:text-purple-300 transition-colors block truncate">
+                            ${s.name}
+                        </a>
+                        <div class="flex items-center gap-1.5 mt-1 font-mono text-[10.5px] text-slate-400">
+                            <span class="uppercase font-bold text-slate-300">${s.country || 'PH'}</span>
+                            <span>•</span>
+                            <span>${s.domain || 'Core'}</span>
+                        </div>
+                        ${s.description ? `<p class="text-xs text-slate-400 mt-1.5 line-clamp-2">${s.description}</p>` : ''}
+                    </div>
+                </div>
+
+                <div class="mt-5 pt-3.5 border-t border-[#242424]">
+                    <div class="text-[10px] font-mono text-slate-400 uppercase tracking-wider mb-1.5">Environments:</div>
+                    <div class="flex items-center gap-1.5 font-mono text-[10.5px]">
+                        ${uatBadge}
+                        ${preprodBadge}
+                        ${prodBadge}
+                    </div>
+
+                    <div class="mt-4 pt-2.5 flex items-center justify-end">
+                        <a href="/catalog/${s.name}" class="inline-flex items-center gap-1 text-xs font-bold text-[#a78bfa] hover:text-purple-300 transition-colors">
+                            Open Service &rarr;
+                        </a>
+                    </div>
+                </div>
+            </div>
+            `;
+        }).join('');
+    }
+
+    function clearExplorerSearch() {
+        const input = document.getElementById('catalog-search');
+        if (input) input.value = '';
+        handleExplorerSearch('');
     }
 </script>
 {{ end }}

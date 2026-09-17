@@ -43,6 +43,12 @@ type MainShelfCountry struct {
 	SubShelves []SubShelfDomain
 }
 
+type CatalogBreadcrumb struct {
+	Label    string
+	URL      string
+	IsActive bool
+}
+
 // getUserShelfScope returns (assignedShelves, hasGlobalAccess) for the given claims.
 // Admin/DevOps roles and any user with a "*" entry get global access (see everything,
 // nothing pinned as "mine" specifically). A nil claims (unauthenticated/test path)
@@ -82,6 +88,7 @@ func RenderCatalogList(w http.ResponseWriter, r *http.Request) {
 	// Parse query params
 	showAllCountries := r.URL.Query().Get("all") == "true"
 	selectedCountryParam := strings.ToLower(strings.TrimSpace(r.URL.Query().Get("country")))
+	selectedDomainParam := strings.ToLower(strings.TrimSpace(r.URL.Query().Get("domain")))
 
 	myShelves, hasGlobalAccess := getUserShelfScope(r.Context(), claims)
 	// Shelf codes are "<country>:<domain>" (e.g. "id:coreplus"). Per current design,
@@ -289,21 +296,63 @@ func RenderCatalogList(w http.ResponseWriter, r *http.Request) {
 		visibleCountries = append(visibleCountries, hiddenCountries...)
 	}
 
-	selectedCountry := selectedCountryParam
-	if selectedCountry == "" {
-		if len(visibleCountries) > 0 {
-			selectedCountry = visibleCountries[0].Code
-		} else {
-			selectedCountry = "ph"
+	level := "root"
+	var activeCountry *MainShelfCountry
+	var activeSubShelf *SubShelfDomain
+	var breadcrumbs []CatalogBreadcrumb
+
+	breadcrumbs = append(breadcrumbs, CatalogBreadcrumb{
+		Label:    "All Main Shelves",
+		URL:      "/catalog",
+		IsActive: selectedCountryParam == "",
+	})
+
+	if selectedCountryParam != "" {
+		for i := range visibleCountries {
+			if strings.EqualFold(visibleCountries[i].Code, selectedCountryParam) {
+				activeCountry = &visibleCountries[i]
+				break
+			}
+		}
+		if activeCountry != nil {
+			level = "country"
+			breadcrumbs = append(breadcrumbs, CatalogBreadcrumb{
+				Label:    activeCountry.Flag + " " + activeCountry.Name + " Main Shelf",
+				URL:      fmt.Sprintf("/catalog?country=%s", activeCountry.Code),
+				IsActive: selectedDomainParam == "",
+			})
+
+			if selectedDomainParam != "" {
+				for i := range activeCountry.SubShelves {
+					shelf := &activeCountry.SubShelves[i]
+					if strings.EqualFold(shelf.Code, selectedDomainParam) ||
+						strings.EqualFold(shelf.DomainKey, selectedDomainParam) ||
+						strings.HasSuffix(strings.ToLower(shelf.Code), ":"+selectedDomainParam) {
+						activeSubShelf = shelf
+						break
+					}
+				}
+				if activeSubShelf != nil {
+					level = "domain"
+					breadcrumbs = append(breadcrumbs, CatalogBreadcrumb{
+						Label:    "📂 " + activeSubShelf.Name,
+						URL:      fmt.Sprintf("/catalog?country=%s&domain=%s", activeCountry.Code, activeSubShelf.DomainKey),
+						IsActive: true,
+					})
+				}
+			}
 		}
 	}
 
 	data := struct {
 		Title               string
 		User                *auth.Claims
+		Level               string // "root", "country", "domain"
+		Breadcrumbs         []CatalogBreadcrumb
 		Services            []CatalogEntry
 		Countries           []MainShelfCountry
-		SelectedCountry     string
+		ActiveCountry       *MainShelfCountry
+		ActiveSubShelf      *SubShelfDomain
 		TotalServices       int
 		HasCountryScope     bool
 		ShowAllCountries    bool
@@ -311,9 +360,12 @@ func RenderCatalogList(w http.ResponseWriter, r *http.Request) {
 	}{
 		Title:               "Service Catalog",
 		User:                claims,
+		Level:               level,
+		Breadcrumbs:         breadcrumbs,
 		Services:            allServices,
 		Countries:           visibleCountries,
-		SelectedCountry:     selectedCountry,
+		ActiveCountry:       activeCountry,
+		ActiveSubShelf:      activeSubShelf,
 		TotalServices:       len(allServices),
 		HasCountryScope:     hasCountryScope,
 		ShowAllCountries:    showAllCountries,
