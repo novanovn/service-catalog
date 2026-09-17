@@ -353,6 +353,8 @@ func CreateParameterHandler(w http.ResponseWriter, r *http.Request) {
 	switch category {
 	case "countries", "country":
 		normCategory = "country"
+	case "shelves", "shelf":
+		normCategory = "shelf"
 	case "domains", "domain", "products", "product":
 		normCategory = "domain"
 	case "environments", "environment", "envs", "env":
@@ -397,6 +399,8 @@ func CreateParameterHandler(w http.ResponseWriter, r *http.Request) {
 	switch normCategory {
 	case "country":
 		SystemParams.Countries = append(SystemParams.Countries, param)
+	case "shelf":
+		SystemParams.Shelves = append(SystemParams.Shelves, param)
 	case "domain":
 		SystemParams.Domains = append(SystemParams.Domains, param)
 	case "environment":
@@ -446,6 +450,15 @@ func ToggleParameterHandler(w http.ResponseWriter, r *http.Request) {
 			SystemParams.Countries[i].IsActive = !SystemParams.Countries[i].IsActive
 			found = true
 			break
+		}
+	}
+	if !found {
+		for i := range SystemParams.Shelves {
+			if SystemParams.Shelves[i].ID == id {
+				SystemParams.Shelves[i].IsActive = !SystemParams.Shelves[i].IsActive
+				found = true
+				break
+			}
 		}
 	}
 	if !found {
