@@ -29,6 +29,12 @@ SET value = $3, description = $4, is_active = $5, updated_at = NOW()
 WHERE category = $1 AND key_name = $2
 RETURNING id, category, key_name, value, description, is_active, created_at, updated_at;
 
+-- name: UpdateSystemParameterByID :one
+UPDATE system_parameters
+SET key_name = $2, value = $3, description = $4, is_active = $5, updated_at = NOW()
+WHERE id = $1
+RETURNING id, category, key_name, value, description, is_active, created_at, updated_at;
+
 -- name: DeleteSystemParameter :exec
 DELETE FROM system_parameters
 WHERE id = $1;

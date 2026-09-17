@@ -199,6 +199,7 @@ func SetupRouter() *chi.Mux {
 			r.Post("/api/v1/admin/parameters/{id}/edit", EditParameterHandler)
 			r.Post("/api/v1/admin/parameters/{id}/toggle", ToggleParameterHandler)
 			r.Delete("/api/v1/admin/parameters/{id}", DeleteParameterHandler)
+			r.Post("/api/v1/admin/shelves/bulk-move", BulkMoveSubShelvesHandler)
 			r.Get("/api/v1/admin/backup/export", ExportBackupHandler)
 			r.Post("/api/v1/admin/backup/export", ExportBackupHandler)
 			r.Post("/api/v1/admin/backup/restore", RestoreBackupHandler)

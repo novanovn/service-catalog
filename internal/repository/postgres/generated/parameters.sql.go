@@ -212,3 +212,40 @@ func (q *Queries) UpdateSystemParameter(ctx context.Context, arg UpdateSystemPar
 	)
 	return i, err
 }
+
+const updateSystemParameterByID = `-- name: UpdateSystemParameterByID :one
+UPDATE system_parameters
+SET key_name = $2, value = $3, description = $4, is_active = $5, updated_at = NOW()
+WHERE id = $1
+RETURNING id, category, key_name, value, description, is_active, created_at, updated_at
+`
+
+type UpdateSystemParameterByIDParams struct {
+	ID          pgtype.UUID `json:"id"`
+	KeyName     string      `json:"key_name"`
+	Value       string      `json:"value"`
+	Description pgtype.Text `json:"description"`
+	IsActive    bool        `json:"is_active"`
+}
+
+func (q *Queries) UpdateSystemParameterByID(ctx context.Context, arg UpdateSystemParameterByIDParams) (SystemParameter, error) {
+	row := q.db.QueryRow(ctx, updateSystemParameterByID,
+		arg.ID,
+		arg.KeyName,
+		arg.Value,
+		arg.Description,
+		arg.IsActive,
+	)
+	var i SystemParameter
+	err := row.Scan(
+		&i.ID,
+		&i.Category,
+		&i.KeyName,
+		&i.Value,
+		&i.Description,
+		&i.IsActive,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}

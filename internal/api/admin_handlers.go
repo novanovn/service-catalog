@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"encoding/json"
 	"github.com/go-chi/chi/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"service-catalog/internal/auth"
@@ -432,8 +433,8 @@ func ToggleParameterHandler(w http.ResponseWriter, r *http.Request) {
 		var uuid pgtype.UUID
 		if err := uuid.Scan(id); err == nil {
 			if param, err := DB.GetSystemParameterByID(r.Context(), uuid); err == nil {
-				_, _ = DB.UpdateSystemParameter(r.Context(), db.UpdateSystemParameterParams{
-					Category:    param.Category,
+				_, _ = DB.UpdateSystemParameterByID(r.Context(), db.UpdateSystemParameterByIDParams{
+					ID:          uuid,
 					KeyName:     param.KeyName,
 					Value:       param.Value,
 					Description: param.Description,
@@ -509,6 +510,94 @@ func DeleteParameterHandler(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("HX-Trigger", `{"showToast": {"message": "Forbidden: Only administrators can delete shelves", "type": "error"}}`)
 		http.Error(w, "Forbidden: Only administrators can delete shelves", http.StatusForbidden)
 		return
+	}
+
+	// --- S3-style empty guard ---
+	// Determine what kind of parameter this is and whether it is "empty" before allowing deletion.
+	// Main Shelf (country): must have ZERO sub-shelves (shelf category rows prefixed "code:") AND
+	// zero catalog services with country == code.
+	// Sub Shelf (shelf): must have ZERO catalog services mapped to it.
+	// Resolve primarily via PostgreSQL (the UI renders DB UUIDs when DB is connected),
+	// falling back to the hardcoded in-memory store otherwise.
+	var targetCategory, targetCode string
+	if DB != nil {
+		var dbUUID pgtype.UUID
+		if err := dbUUID.Scan(id); err == nil {
+			if param, err := DB.GetSystemParameterByID(r.Context(), dbUUID); err == nil {
+				targetCategory = param.Category
+				targetCode = strings.ToLower(param.KeyName)
+			}
+		}
+	}
+	if targetCategory == "" {
+		SystemParams.mu.RLock()
+		for _, item := range SystemParams.Countries {
+			if item.ID == id {
+				targetCategory = "country"
+				targetCode = strings.ToLower(item.Code)
+				break
+			}
+		}
+		if targetCategory == "" {
+			for _, item := range SystemParams.Shelves {
+				if item.ID == id {
+					targetCategory = "shelf"
+					targetCode = strings.ToLower(item.Code)
+					break
+				}
+			}
+		}
+		SystemParams.mu.RUnlock()
+	}
+
+	if targetCategory == "country" {
+		subShelfCount := 0
+		for _, s := range SystemParams.GetAllShelves() {
+			parts := strings.SplitN(strings.ToLower(s.Code), ":", 2)
+			if len(parts) > 0 && parts[0] == targetCode {
+				subShelfCount++
+			}
+		}
+		serviceCount := 0
+		for _, svc := range ServiceCatalog.ListAll() {
+			if strings.EqualFold(svc.Country, targetCode) {
+				serviceCount++
+			}
+		}
+		if subShelfCount > 0 || serviceCount > 0 {
+			msg := fmt.Sprintf("Main Shelf tidak dapat dihapus: masih berisi %d sub-shelf dan %d service. Kosongkan atau pindahkan (bulk move) sub-shelf terlebih dahulu.", subShelfCount, serviceCount)
+			w.Header().Set("HX-Trigger", fmt.Sprintf(`{"showToast": {"message": %q, "type": "error"}}`, msg))
+			w.WriteHeader(http.StatusConflict)
+			w.Write([]byte(msg))
+			return
+		}
+	}
+
+	if targetCategory == "shelf" {
+		targetParts := strings.SplitN(targetCode, ":", 2)
+		targetCountry := targetParts[0]
+		targetDomain := ""
+		if len(targetParts) == 2 {
+			targetDomain = targetParts[1]
+		}
+		serviceCount := 0
+		for _, svc := range ServiceCatalog.ListAll() {
+			c := strings.ToLower(strings.TrimSpace(svc.Country))
+			if c == "" {
+				c = "ph"
+			}
+			d := strings.ToLower(strings.TrimSpace(svc.Domain))
+			if c == targetCountry && d == targetDomain {
+				serviceCount++
+			}
+		}
+		if serviceCount > 0 {
+			msg := fmt.Sprintf("Sub Shelf tidak dapat dihapus: masih berisi %d service. Pindahkan service ke domain lain terlebih dahulu.", serviceCount)
+			w.Header().Set("HX-Trigger", fmt.Sprintf(`{"showToast": {"message": %q, "type": "error"}}`, msg))
+			w.WriteHeader(http.StatusConflict)
+			w.Write([]byte(msg))
+			return
+		}
 	}
 
 	found := false
@@ -619,8 +708,8 @@ func EditParameterHandler(w http.ResponseWriter, r *http.Request) {
 		var uuid pgtype.UUID
 		if err := uuid.Scan(id); err == nil {
 			if param, err := DB.GetSystemParameterByID(r.Context(), uuid); err == nil {
-				_, _ = DB.UpdateSystemParameter(r.Context(), db.UpdateSystemParameterParams{
-					Category:    param.Category,
+				_, _ = DB.UpdateSystemParameterByID(r.Context(), db.UpdateSystemParameterByIDParams{
+					ID:          uuid,
 					KeyName:     code,
 					Value:       name,
 					Description: pgtype.Text{String: desc, Valid: desc != ""},
@@ -697,5 +786,179 @@ func EditParameterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	http.Redirect(w, r, redirectURL, http.StatusSeeOther)
+}
+
+// BulkMoveSubShelvesHandler handles POST /api/v1/admin/shelves/bulk-move
+// Moves one or more sub-shelves (domains) from a source Main Shelf (country)
+// to a destination Main Shelf (country). This relocates:
+//  1. The shelf's identifier prefix in system_parameters (e.g. "ph:neuron" -> "id:neuron")
+//  2. Every catalog service currently attached to that shelf (catalog.country column)
+//
+// Strictly Admin-Only. Best-effort per-shelf; a single shelf failure does not
+// abort shelves already processed earlier in the same request.
+func BulkMoveSubShelvesHandler(w http.ResponseWriter, r *http.Request) {
+	claims, _ := r.Context().Value(userCtxKey).(*auth.Claims)
+	if claims == nil || claims.Role != "admin" {
+		w.Header().Set("HX-Trigger", `{"showToast": {"message": "Forbidden: Only administrators can move shelves", "type": "error"}}`)
+		http.Error(w, "Forbidden: Only administrators can move shelves", http.StatusForbidden)
+		return
+	}
+
+	if err := r.ParseForm(); err != nil {
+		w.Header().Set("HX-Trigger", `{"showToast": {"message": "Invalid form data", "type": "error"}}`)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	destCountry := strings.ToLower(strings.TrimSpace(r.FormValue("destination_country")))
+	shelfIDs := r.Form["shelf_ids"]
+
+	if destCountry == "" || len(shelfIDs) == 0 {
+		w.Header().Set("HX-Trigger", `{"showToast": {"message": "Destination country and at least one shelf are required", "type": "error"}}`)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	destValid := false
+	for _, c := range SystemParams.GetAllCountries() {
+		if strings.EqualFold(c.Code, destCountry) {
+			destValid = true
+			break
+		}
+	}
+	if !destValid {
+		w.Header().Set("HX-Trigger", `{"showToast": {"message": "Unknown destination Main Shelf", "type": "error"}}`)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	type moveResult struct {
+		ShelfCode     string `json:"shelf_code"`
+		NewCode       string `json:"new_code"`
+		ServicesMoved int    `json:"services_moved"`
+		Error         string `json:"error,omitempty"`
+	}
+	var results []moveResult
+
+	for _, shelfID := range shelfIDs {
+		shelfID = strings.TrimSpace(shelfID)
+		if shelfID == "" {
+			continue
+		}
+
+		var oldCode, domainPart, newCode string
+		found := false
+
+		// Resolve the shelf primarily via PostgreSQL (the UI renders DB UUIDs when DB is
+		// connected), falling back to the hardcoded in-memory store otherwise.
+		var dbUUID pgtype.UUID
+		usedDB := false
+		var dbErr error
+		if DB != nil {
+			if err := dbUUID.Scan(shelfID); err == nil {
+				if param, err := DB.GetSystemParameterByID(r.Context(), dbUUID); err == nil && param.Category == "shelf" {
+					oldCode = param.KeyName
+					parts := strings.SplitN(oldCode, ":", 2)
+					if len(parts) == 2 {
+						domainPart = parts[1]
+					} else {
+						domainPart = oldCode
+					}
+					newCode = fmt.Sprintf("%s:%s", destCountry, domainPart)
+
+					// Pre-flight: reject if destination already has a shelf with the same
+					// domain suffix (unique (category, key_name) constraint would collide).
+					if existing, existErr := DB.GetSystemParameterByCategoryAndKey(r.Context(), db.GetSystemParameterByCategoryAndKeyParams{
+						Category: "shelf",
+						KeyName:  newCode,
+					}); existErr == nil && existing.ID != dbUUID {
+						dbErr = fmt.Errorf("destination Main Shelf already has a '%s' domain shelf (%s)", domainPart, existing.Value)
+					} else {
+						_, updErr := DB.UpdateSystemParameterByID(r.Context(), db.UpdateSystemParameterByIDParams{
+							ID:          dbUUID,
+							KeyName:     newCode,
+							Value:       param.Value,
+							Description: param.Description,
+							IsActive:    param.IsActive,
+						})
+						if updErr != nil {
+							dbErr = updErr
+						} else {
+							found = true
+							usedDB = true
+						}
+					}
+				}
+			}
+		}
+
+		if dbErr != nil {
+			results = append(results, moveResult{ShelfCode: oldCode, Error: dbErr.Error()})
+			continue
+		}
+
+		// Keep the in-memory mirror consistent, matching either by UUID (DB-backed) or
+		// by the hardcoded seed ID (no-DB / fallback mode).
+		SystemParams.mu.Lock()
+		for i := range SystemParams.Shelves {
+			if SystemParams.Shelves[i].ID == shelfID {
+				if !usedDB {
+					oldCode = SystemParams.Shelves[i].Code
+					parts := strings.SplitN(oldCode, ":", 2)
+					if len(parts) == 2 {
+						domainPart = parts[1]
+					} else {
+						domainPart = oldCode
+					}
+					newCode = fmt.Sprintf("%s:%s", destCountry, domainPart)
+					found = true
+				}
+				SystemParams.Shelves[i].Code = newCode
+				break
+			}
+		}
+		SystemParams.mu.Unlock()
+
+		if !found {
+			results = append(results, moveResult{Error: fmt.Sprintf("Shelf ID %s not found", shelfID)})
+			continue
+		}
+
+		oldParts := strings.SplitN(strings.ToLower(oldCode), ":", 2)
+		oldCountry := oldParts[0]
+		movedCount := 0
+		for _, svc := range ServiceCatalog.ListAll() {
+			svcCountry := strings.ToLower(strings.TrimSpace(svc.Country))
+			if svcCountry == "" {
+				svcCountry = "ph"
+			}
+			svcDomain := strings.ToLower(strings.TrimSpace(svc.Domain))
+			if svcCountry == oldCountry && svcDomain == strings.ToLower(domainPart) {
+				updated := svc
+				updated.Country = destCountry
+				ServiceCatalog.Update(svc.ID, updated)
+				movedCount++
+			}
+		}
+
+		results = append(results, moveResult{
+			ShelfCode:     oldCode,
+			NewCode:       newCode,
+			ServicesMoved: movedCount,
+		})
+
+		RecordAudit(r.Context(), r, "BULK_MOVE_SHELF", "system_parameter", shelfID, map[string]interface{}{
+			"from_code":      oldCode,
+			"to_code":        newCode,
+			"services_moved": movedCount,
+		})
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("HX-Trigger", `{"showToast": {"message": "Bulk move completed", "type": "success"}}`)
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"success": true,
+		"results": results,
+	})
 }
 

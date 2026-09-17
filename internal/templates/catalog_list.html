@@ -278,7 +278,11 @@
                             Edit
                         </button>
                         {{ if eq $.User.Role "admin" }}
-                        <button type="button" onclick="openDeleteShelfModal('main', '{{ .ActiveCountry.ID }}', '{{ .ActiveCountry.Code }}', '{{ .ActiveCountry.Name }}', '{{ .ActiveCountry.Total }}')" class="px-2.5 py-1 rounded-lg text-xs font-mono text-rose-400 hover:text-rose-300 bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 transition-colors flex items-center gap-1">
+                        <button type="button" id="btn-toggle-bulk-move" onclick="toggleBulkMoveMode()" class="px-2.5 py-1 rounded-lg text-xs font-mono text-purple-300 hover:text-white bg-purple-500/10 border border-purple-500/20 hover:bg-purple-500/20 transition-colors flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 1l4 4-4 4"></path><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><path d="M7 23l-4-4 4-4"></path><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>
+                            Move Shelves
+                        </button>
+                        <button type="button" onclick="openDeleteShelfModal('main', '{{ .ActiveCountry.ID }}', '{{ .ActiveCountry.Code }}', '{{ .ActiveCountry.Name }}', '{{ .ActiveCountry.Total }}', {{ len .ActiveCountry.SubShelves }})" class="px-2.5 py-1 rounded-lg text-xs font-mono text-rose-400 hover:text-rose-300 bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 transition-colors flex items-center gap-1">
                             <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                             Delete
                         </button>
@@ -287,17 +291,36 @@
                 </div>
             </div>
 
+            <!-- Bulk Move Action Bar (hidden by default, admin only) -->
+            {{ if eq .User.Role "admin" }}
+            <div id="bulk-move-bar" class="hidden items-center justify-between gap-3 px-4 py-3 rounded-xl bg-purple-500/10 border border-purple-500/25">
+                <div class="flex items-center gap-2 text-xs font-mono text-purple-200">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 1l4 4-4 4"></path><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><path d="M7 23l-4-4 4-4"></path><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>
+                    <span><strong id="bulk-move-count">0</strong> Sub Shelf selected — check the boxes on domain folders below</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="openBulkMoveModal()" id="btn-open-bulk-move-modal" disabled class="px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-purple-600/40 cursor-not-allowed opacity-50 transition-all">
+                        Move to Other Main Shelf &rarr;
+                    </button>
+                    <button type="button" onclick="toggleBulkMoveMode()" class="px-3 py-1.5 rounded-lg text-xs font-mono text-slate-300 hover:text-white bg-white/[0.04] border border-white/[0.08] transition-colors">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+            {{ end }}
+
             <p class="text-xs text-slate-400">
                 Select a functional domain folder below to inspect its registered microservices and runtime environments.
             </p>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mt-4">
                 {{ range .ActiveCountry.SubShelves }}
-                <div class="folder-card p-5 block group {{ if gt .Total 0 }}border-purple-500/30{{ end }}">
+                <div class="folder-card sub-shelf-card p-5 block group {{ if gt .Total 0 }}border-purple-500/30{{ end }}" data-shelf-id="{{ .ID }}" data-shelf-code="{{ .Code }}" data-shelf-name="{{ .Name }}" data-shelf-total="{{ .Total }}">
                     <div class="flex items-start justify-between">
                         <!-- 2D Monoline Folder SVG Icon -->
-                        <div class="w-10 h-10 rounded-xl {{ if gt .Total 0 }}bg-purple-500/15 text-purple-300 border border-purple-500/30{{ else }}bg-white/[0.04] text-slate-400 border border-white/[0.06]{{ end }} flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
-                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                        <div class="w-10 h-10 rounded-xl {{ if gt .Total 0 }}bg-purple-500/15 text-purple-300 border border-purple-500/30{{ else }}bg-white/[0.04] text-slate-400 border border-white/[0.06]{{ end }} flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform relative">
+                            <svg class="w-5 h-5 bulk-move-hide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                            <input type="checkbox" class="bulk-move-checkbox hidden w-5 h-5 rounded border-2 border-purple-400 bg-transparent text-purple-500 focus:ring-purple-500 cursor-pointer" onchange="onBulkMoveCheckboxChange()">
                         </div>
                         
                         <div class="flex items-center gap-2">
@@ -306,7 +329,7 @@
                             </span>
 
                             <!-- Sub Shelf Edit & Delete Actions -->
-                            <div class="flex items-center gap-1 border-l border-[#282828] pl-1.5">
+                            <div class="flex items-center gap-1 border-l border-[#282828] pl-1.5 bulk-move-hide-icon">
                                 <button type="button" onclick="openEditShelfModal('sub', '{{ .ID }}', '{{ .Code }}', '{{ .Name }}', '{{ .Description }}')" class="p-1 rounded text-slate-400 hover:text-white hover:bg-white/10 transition-colors" title="Edit Sub Shelf">
                                     <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                                 </button>
@@ -319,7 +342,7 @@
                         </div>
                     </div>
 
-                    <a href="/catalog?country={{ $.ActiveCountry.Code }}&domain={{ .DomainKey }}" class="block mt-3.5">
+                    <a href="/catalog?country={{ $.ActiveCountry.Code }}&domain={{ .DomainKey }}" class="block mt-3.5 bulk-move-link">
                         <div class="flex items-center gap-1.5">
                             <h3 class="text-sm font-bold text-white group-hover:text-purple-300 transition-colors truncate">
                                 {{ .Name }}
@@ -333,7 +356,7 @@
 
                     <div class="mt-5 pt-3.5 border-t border-[#242424] flex items-center justify-between text-xs font-mono">
                         <span class="text-[11px] text-slate-400">Sub Shelf</span>
-                        <a href="/catalog?country={{ $.ActiveCountry.Code }}&domain={{ .DomainKey }}" class="text-purple-400 font-bold group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">
+                        <a href="/catalog?country={{ $.ActiveCountry.Code }}&domain={{ .DomainKey }}" class="text-purple-400 font-bold group-hover:translate-x-1 transition-transform inline-flex items-center gap-1 bulk-move-link">
                             Explore Domain &rarr;
                         </a>
                     </div>
@@ -584,7 +607,7 @@
                 <button type="button" onclick="closeDeleteShelfModal()" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-400 hover:text-white bg-white/[0.03] border border-white/[0.06] transition-colors">
                     Cancel
                 </button>
-                <button type="button" onclick="proceedToDeleteStep2()" class="px-4 py-2 rounded-xl text-xs font-bold text-white bg-amber-600 hover:bg-amber-500 transition-all flex items-center gap-1.5 shadow-sm shadow-amber-900/40">
+                <button type="button" id="btn-continue-delete-step2" onclick="proceedToDeleteStep2()" class="px-4 py-2 rounded-xl text-xs font-bold text-white bg-amber-600 hover:bg-amber-500 transition-all flex items-center gap-1.5 shadow-sm shadow-amber-900/40">
                     Continue to Step 2 &rarr;
                 </button>
             </div>
@@ -625,6 +648,56 @@
             </div>
         </div>
 
+    </div>
+</div>
+
+<!-- ============================================================= -->
+<!-- MODAL: BULK MOVE SUB-SHELVES TO ANOTHER MAIN SHELF (Admin Only) -->
+<!-- ============================================================= -->
+<div id="bulk-move-modal" class="fixed inset-0 z-[10000] hidden flex items-center justify-center p-4">
+    <div onclick="closeBulkMoveModal()" class="fixed inset-0 bg-black/80 backdrop-blur-xs transition-opacity"></div>
+    <div class="relative w-full max-w-lg rounded-2xl bg-[#171717] border border-[#282828] shadow-2xl p-6 overflow-hidden z-10">
+        <div class="flex items-center gap-3 pb-3 border-b border-[#242424] mb-4">
+            <div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-300 flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 1l4 4-4 4"></path><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><path d="M7 23l-4-4 4-4"></path><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>
+            </div>
+            <div>
+                <h3 class="text-sm font-bold text-white">Bulk Move Sub Shelves</h3>
+                <p class="text-[11px] text-slate-400 font-mono">Relocate domains &amp; their services to another Main Shelf</p>
+            </div>
+        </div>
+
+        <div class="space-y-3 text-xs">
+            <div class="p-3.5 rounded-xl bg-[#121212] border border-[#282828] space-y-1.5 font-mono">
+                <div class="text-slate-400 text-[11px]">Selected Sub Shelves:</div>
+                <ul id="bulk-move-selected-list" class="text-white text-[11px] space-y-1 mt-1"></ul>
+            </div>
+
+            <div class="space-y-1.5 font-mono pt-1">
+                <label class="block text-slate-300 text-[11px]">Destination Main Shelf</label>
+                <select id="bulk-move-destination" class="w-full rounded-xl bg-[#121212] border border-[#282828] text-white px-3 py-2.5 text-xs font-mono focus:ring-2 focus:ring-purple-500 outline-none">
+                    {{ range .Countries }}
+                    <option value="{{ .Code }}">{{ .Name }} [{{ .Code }}]</option>
+                    {{ end }}
+                </select>
+            </div>
+
+            <div class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-[11px] flex items-start gap-2">
+                <span class="text-base">⚠️</span>
+                <span>Semua microservice yang terdaftar di sub-shelf terpilih akan ikut dipindahkan (kolom <code>country</code> di catalog akan diperbarui).</span>
+            </div>
+
+            <div id="bulk-move-error" class="hidden p-3 rounded-xl bg-rose-500/10 border border-rose-500/25 text-rose-300 text-[11px]"></div>
+        </div>
+
+        <div class="mt-6 pt-4 border-t border-[#242424] flex items-center justify-between">
+            <button type="button" onclick="closeBulkMoveModal()" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-400 hover:text-white bg-white/[0.03] border border-white/[0.06] transition-colors">
+                Cancel
+            </button>
+            <button type="button" id="btn-confirm-bulk-move" onclick="executeBulkMove()" class="px-4 py-2 rounded-xl text-xs font-bold text-white bg-purple-600 hover:bg-purple-500 transition-all flex items-center gap-1.5 shadow-sm shadow-purple-900/40">
+                Move Sub Shelves &rarr;
+            </button>
+        </div>
     </div>
 </div>
 
@@ -729,14 +802,15 @@
     // ==========================================
     // 2-STEP CONFIRMATION DELETE SHELF MODAL LOGIC
     // ==========================================
-    let currentDeleteShelf = { id: '', code: '', name: '', totalServices: 0, type: '' };
+    let currentDeleteShelf = { id: '', code: '', name: '', totalServices: 0, subShelfCount: 0, type: '' };
 
-    function openDeleteShelfModal(shelfType, id, code, name, totalServices) {
+    function openDeleteShelfModal(shelfType, id, code, name, totalServices, subShelfCount) {
         currentDeleteShelf = {
             id: id,
             code: (code || '').trim().toLowerCase(),
             name: name,
             totalServices: parseInt(totalServices, 10) || 0,
+            subShelfCount: parseInt(subShelfCount, 10) || 0,
             type: shelfType === 'main' ? 'Main Shelf (Country)' : 'Sub Shelf (Domain)'
         };
 
@@ -746,10 +820,23 @@
         document.getElementById('step1-shelf-type').textContent = currentDeleteShelf.type;
 
         const warnText = document.getElementById('step1-warning-text');
-        if (currentDeleteShelf.totalServices > 0) {
+        const continueBtn = document.getElementById('btn-continue-delete-step2');
+        const isMain = shelfType === 'main';
+        const notEmpty = isMain && (currentDeleteShelf.subShelfCount > 0 || currentDeleteShelf.totalServices > 0);
+
+        if (notEmpty) {
+            // S3-style empty guard: block progression entirely, point to Bulk Move
+            warnText.innerHTML = `🛑 <strong>Main Shelf tidak kosong (S3-style guard):</strong> masih berisi <strong>${currentDeleteShelf.subShelfCount} sub-shelf</strong> dan <strong>${currentDeleteShelf.totalServices} service</strong>. Kosongkan dengan <button type="button" onclick="closeDeleteShelfModal(); toggleBulkMoveMode();" class="underline font-bold text-amber-200 hover:text-white">Bulk Move Sub-Shelves</button> terlebih dahulu.`;
+            continueBtn.disabled = true;
+            continueBtn.className = "px-4 py-2 rounded-xl text-xs font-bold text-white bg-amber-700/40 cursor-not-allowed opacity-50 transition-all flex items-center gap-1.5";
+        } else if (currentDeleteShelf.totalServices > 0) {
             warnText.innerHTML = `This shelf currently holds <strong>${currentDeleteShelf.totalServices} microservice(s)</strong>. Deleting it will leave these services un-shelved in the catalog.`;
+            continueBtn.disabled = false;
+            continueBtn.className = "px-4 py-2 rounded-xl text-xs font-bold text-white bg-amber-600 hover:bg-amber-500 transition-all flex items-center gap-1.5 shadow-sm shadow-amber-900/40";
         } else {
             warnText.textContent = `This shelf currently has 0 microservices registered.`;
+            continueBtn.disabled = false;
+            continueBtn.className = "px-4 py-2 rounded-xl text-xs font-bold text-white bg-amber-600 hover:bg-amber-500 transition-all flex items-center gap-1.5 shadow-sm shadow-amber-900/40";
         }
 
         // Reset Step 2
@@ -772,6 +859,10 @@
     }
 
     function proceedToDeleteStep2() {
+        const continueBtn = document.getElementById('btn-continue-delete-step2');
+        if (continueBtn && continueBtn.disabled) {
+            return;
+        }
         document.getElementById('delete-shelf-step-1').classList.add('hidden');
         document.getElementById('delete-shelf-step-2').classList.remove('hidden');
         const input = document.getElementById('delete-confirm-input');
@@ -829,6 +920,171 @@
             alert('Failed to delete shelf: ' + err.message);
             deleteBtn.disabled = false;
             deleteBtn.textContent = 'Permanently Delete Shelf';
+        });
+    }
+
+    // ==========================================
+    // BULK MOVE SUB-SHELVES LOGIC (Admin Only, S3-style empty guard companion)
+    // ==========================================
+    let bulkMoveActive = false;
+
+    function toggleBulkMoveMode() {
+        bulkMoveActive = !bulkMoveActive;
+        const bar = document.getElementById('bulk-move-bar');
+        const toggleBtn = document.getElementById('btn-toggle-bulk-move');
+
+        document.querySelectorAll('.sub-shelf-card').forEach(card => {
+            const checkbox = card.querySelector('.bulk-move-checkbox');
+            const icon = card.querySelectorAll('.bulk-move-hide-icon');
+            const link = card.querySelectorAll('.bulk-move-link');
+
+            if (bulkMoveActive) {
+                checkbox.classList.remove('hidden');
+                checkbox.checked = false;
+                icon.forEach(el => el.classList.add('hidden'));
+                link.forEach(el => el.style.pointerEvents = 'none');
+                card.classList.add('cursor-pointer');
+            } else {
+                checkbox.classList.add('hidden');
+                checkbox.checked = false;
+                icon.forEach(el => el.classList.remove('hidden'));
+                link.forEach(el => el.style.pointerEvents = '');
+                card.classList.remove('cursor-pointer');
+            }
+        });
+
+        if (bar) {
+            if (bulkMoveActive) {
+                bar.classList.remove('hidden');
+                bar.classList.add('flex');
+                toggleBtn.classList.add('bg-purple-500/30');
+            } else {
+                bar.classList.add('hidden');
+                bar.classList.remove('flex');
+                toggleBtn.classList.remove('bg-purple-500/30');
+            }
+        }
+
+        onBulkMoveCheckboxChange();
+    }
+
+    function onBulkMoveCheckboxChange() {
+        const selected = document.querySelectorAll('.sub-shelf-card .bulk-move-checkbox:checked');
+        const countEl = document.getElementById('bulk-move-count');
+        const openBtn = document.getElementById('btn-open-bulk-move-modal');
+        if (countEl) countEl.textContent = selected.length;
+        if (openBtn) {
+            if (selected.length > 0) {
+                openBtn.disabled = false;
+                openBtn.className = "px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-purple-600 hover:bg-purple-500 cursor-pointer transition-all";
+            } else {
+                openBtn.disabled = true;
+                openBtn.className = "px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-purple-600/40 cursor-not-allowed opacity-50 transition-all";
+            }
+        }
+    }
+
+    function getSelectedBulkMoveShelves() {
+        const cards = document.querySelectorAll('.sub-shelf-card');
+        const selected = [];
+        cards.forEach(card => {
+            const checkbox = card.querySelector('.bulk-move-checkbox');
+            if (checkbox && checkbox.checked) {
+                selected.push({
+                    id: card.dataset.shelfId,
+                    code: card.dataset.shelfCode,
+                    name: card.dataset.shelfName,
+                    total: parseInt(card.dataset.shelfTotal, 10) || 0
+                });
+            }
+        });
+        return selected;
+    }
+
+    function openBulkMoveModal() {
+        const selected = getSelectedBulkMoveShelves();
+        if (selected.length === 0) return;
+
+        const list = document.getElementById('bulk-move-selected-list');
+        list.innerHTML = selected.map(s =>
+            `<li>📂 <strong>${s.name}</strong> <span class="text-slate-500">(${s.code})</span> — ${s.total} service(s)</li>`
+        ).join('');
+
+        // Remove the current country from the destination dropdown to avoid a no-op move
+        const currentCountry = "{{ if .ActiveCountry }}{{ .ActiveCountry.Code }}{{ end }}";
+        const destSelect = document.getElementById('bulk-move-destination');
+        Array.from(destSelect.options).forEach(opt => {
+            opt.disabled = (opt.value.toLowerCase() === currentCountry.toLowerCase());
+        });
+        // Auto-select first non-disabled option
+        for (const opt of destSelect.options) {
+            if (!opt.disabled) {
+                destSelect.value = opt.value;
+                break;
+            }
+        }
+
+        document.getElementById('bulk-move-error').classList.add('hidden');
+        const confirmBtn = document.getElementById('btn-confirm-bulk-move');
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = 'Move Sub Shelves →';
+
+        document.getElementById('bulk-move-modal').classList.remove('hidden');
+    }
+
+    function closeBulkMoveModal() {
+        document.getElementById('bulk-move-modal').classList.add('hidden');
+    }
+
+    function executeBulkMove() {
+        const selected = getSelectedBulkMoveShelves();
+        const destCountry = document.getElementById('bulk-move-destination').value;
+        const errorBox = document.getElementById('bulk-move-error');
+        const confirmBtn = document.getElementById('btn-confirm-bulk-move');
+
+        if (selected.length === 0 || !destCountry) {
+            return;
+        }
+
+        confirmBtn.disabled = true;
+        confirmBtn.textContent = 'Moving...';
+        errorBox.classList.add('hidden');
+
+        const formData = new URLSearchParams();
+        formData.append('destination_country', destCountry);
+        selected.forEach(s => formData.append('shelf_ids', s.id));
+
+        fetch('/api/v1/admin/shelves/bulk-move', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-Token': getCSRFToken(),
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: formData.toString()
+        })
+        .then(res => {
+            if (!res.ok) {
+                return res.text().then(t => { throw new Error(t); });
+            }
+            return res.json();
+        })
+        .then(data => {
+            const results = data.results || [];
+            const errors = results.filter(r => r.error);
+            if (errors.length > 0) {
+                errorBox.innerHTML = errors.map(e => `⚠️ ${e.shelf_code || 'Shelf'}: ${e.error}`).join('<br>');
+                errorBox.classList.remove('hidden');
+                confirmBtn.disabled = false;
+                confirmBtn.textContent = 'Move Sub Shelves →';
+                return;
+            }
+            window.location.href = '/catalog?country=' + encodeURIComponent(destCountry);
+        })
+        .catch(err => {
+            errorBox.textContent = 'Failed to move shelves: ' + err.message;
+            errorBox.classList.remove('hidden');
+            confirmBtn.disabled = false;
+            confirmBtn.textContent = 'Move Sub Shelves →';
         });
     }
 
