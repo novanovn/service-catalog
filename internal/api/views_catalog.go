@@ -25,6 +25,7 @@ import (
 
 // SubShelfDomain represents a functional domain sub-shelf within a country main-shelf.
 type SubShelfDomain struct {
+	ID          string         // UUID from system_parameters
 	Code        string         // e.g. "ph:neuron", "ph:dtc", "all:devops"
 	Name        string         // e.g. "Neuron Integration Suite"
 	DomainKey   string         // e.g. "neuron", "dtc", "kahoona"
@@ -35,12 +36,13 @@ type SubShelfDomain struct {
 
 // MainShelfCountry represents a country main shelf (e.g. Philippines, Indonesia).
 type MainShelfCountry struct {
-	Code       string           // "ph" | "id"
-	Name       string           // "Philippines" | "Indonesia"
-	Flag       string           // 🇵🇭 | 🇮🇩
-	Total      int
-	IsMine     bool
-	SubShelves []SubShelfDomain
+	ID          string // UUID from system_parameters
+	Code        string // "ph" | "id"
+	Name        string // "Philippines" | "Indonesia"
+	Description string // e.g. "Oona Philippines Entity"
+	Total       int
+	IsMine      bool
+	SubShelves  []SubShelfDomain
 }
 
 type CatalogBreadcrumb struct {
@@ -131,13 +133,24 @@ func RenderCatalogList(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// --- New hierarchy: Main Shelf (Country) -> Sub Shelf (Domain) -> Service ---
-	countryOrder := []string{"ph", "id"}
-	countryLabels := map[string]struct{ Name, Flag string }{
-		"ph": {"Philippines", "🇵🇭"},
-		"id": {"Indonesia", "🇮🇩"},
+	activeCountries := SystemParams.GetActiveCountries()
+	var countryOrder []string
+	countryMetaMap := make(map[string]SystemParam)
+	for _, c := range activeCountries {
+		codeLower := strings.ToLower(c.Code)
+		if codeLower != "all" {
+			countryOrder = append(countryOrder, codeLower)
+			countryMetaMap[codeLower] = c
+		}
+	}
+	if len(countryOrder) == 0 {
+		countryOrder = []string{"ph", "id"}
+		countryMetaMap["ph"] = SystemParam{ID: "cnt-ph", Code: "PH", Name: "Philippines", Description: "Oona Philippines Regional Entity"}
+		countryMetaMap["id"] = SystemParam{ID: "cnt-id", Code: "ID", Name: "Indonesia", Description: "Oona Indonesia Regional Entity"}
 	}
 
 	type shelfDef struct {
+		ID          string
 		Code        string
 		Name        string
 		DomainKey   string
@@ -154,6 +167,7 @@ func RenderCatalogList(w http.ResponseWriter, r *http.Request) {
 				domKey = strings.ToLower(parts[1])
 			}
 			countryShelvesMap[c] = append(countryShelvesMap[c], shelfDef{
+				ID:          s.ID,
 				Code:        s.Code,
 				Name:        s.Name,
 				DomainKey:   domKey,
@@ -228,13 +242,14 @@ func RenderCatalogList(w http.ResponseWriter, r *http.Request) {
 
 	var allMainShelves []MainShelfCountry
 	for _, c := range countryOrder {
-		meta := countryLabels[c]
+		meta := countryMetaMap[c]
 		var subShelves []SubShelfDomain
 		countryTotal := 0
 
 		for _, def := range countryShelvesMap[c] {
 			svcs := serviceBuckets[def.Code]
 			subShelves = append(subShelves, SubShelfDomain{
+				ID:          def.ID,
 				Code:        def.Code,
 				Name:        def.Name,
 				DomainKey:   def.DomainKey,
@@ -249,6 +264,7 @@ func RenderCatalogList(w http.ResponseWriter, r *http.Request) {
 			if strings.HasPrefix(sCode, c+":") {
 				svcs := serviceBuckets[sCode]
 				subShelves = append(subShelves, SubShelfDomain{
+					ID:          def.ID,
 					Code:        def.Code,
 					Name:        def.Name,
 					DomainKey:   def.DomainKey,
@@ -270,12 +286,13 @@ func RenderCatalogList(w http.ResponseWriter, r *http.Request) {
 		})
 
 		allMainShelves = append(allMainShelves, MainShelfCountry{
-			Code:       c,
-			Name:       meta.Name,
-			Flag:       meta.Flag,
-			Total:      countryTotal,
-			IsMine:     myCountrySet[c],
-			SubShelves: subShelves,
+			ID:          meta.ID,
+			Code:        c,
+			Name:        meta.Name,
+			Description: meta.Description,
+			Total:       countryTotal,
+			IsMine:      myCountrySet[c],
+			SubShelves:  subShelves,
 		})
 	}
 
@@ -317,7 +334,7 @@ func RenderCatalogList(w http.ResponseWriter, r *http.Request) {
 		if activeCountry != nil {
 			level = "country"
 			breadcrumbs = append(breadcrumbs, CatalogBreadcrumb{
-				Label:    activeCountry.Flag + " " + activeCountry.Name + " Main Shelf",
+				Label:    activeCountry.Name + " Main Shelf",
 				URL:      fmt.Sprintf("/catalog?country=%s", activeCountry.Code),
 				IsActive: selectedDomainParam == "",
 			})

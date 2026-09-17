@@ -162,7 +162,7 @@ func SetupRouter() *chi.Mux {
 
 		// 5. Infra & Admin Approvals Sub-router (Infra, Admin)
 		r.Group(func(r chi.Router) {
-			r.Use(RequireRole("infra", "admin"))
+			r.Use(RequireRole("infra", "devops", "admin"))
 
 			r.Get("/approvals", RenderApprovalDashboard)
 			r.Get("/approvals/{id}", RenderApprovalDetail)
@@ -172,6 +172,7 @@ func SetupRouter() *chi.Mux {
 			r.Post("/api/v1/tickets/{id}/approve", ApproveTicketHandler)
 			r.Post("/api/v1/tickets/{id}/reject", RejectTicketHandler)
 			r.Get("/api/v1/tickets/{id}/verify-lambda", VerifyTicketLambdaHandler)
+			r.Post("/api/v1/admin/parameters/{id}/edit", EditParameterHandler)
 		})
 
 		// 6. Admin Only Sub-router (Strictly Admin)

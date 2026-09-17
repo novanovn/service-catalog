@@ -491,6 +491,13 @@ func DeleteParameterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	claims, _ := r.Context().Value(userCtxKey).(*auth.Claims)
+	if claims == nil || claims.Role != "admin" {
+		w.Header().Set("HX-Trigger", `{"showToast": {"message": "Forbidden: Only administrators can delete shelves", "type": "error"}}`)
+		http.Error(w, "Forbidden: Only administrators can delete shelves", http.StatusForbidden)
+		return
+	}
+
 	found := false
 
 	// Delete from PostgreSQL if connected
@@ -514,6 +521,16 @@ func DeleteParameterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	SystemParams.Countries = updatedCountries
 
+	var updatedShelves []SystemParam
+	for _, item := range SystemParams.Shelves {
+		if item.ID == id {
+			found = true
+		} else {
+			updatedShelves = append(updatedShelves, item)
+		}
+	}
+	SystemParams.Shelves = updatedShelves
+
 	var updatedDomains []SystemParam
 	for _, item := range SystemParams.Domains {
 		if item.ID == id {
@@ -536,18 +553,26 @@ func DeleteParameterHandler(w http.ResponseWriter, r *http.Request) {
 	SystemParams.mu.Unlock()
 
 	if !found {
-		w.Header().Set("HX-Trigger", `{"showToast": {"message": "Parameter not found", "type": "error"}}`)
+		w.Header().Set("HX-Trigger", `{"showToast": {"message": "Shelf / parameter not found", "type": "error"}}`)
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 
-	w.Header().Set("HX-Trigger", `{"showToast": {"message": "Parameter deleted successfully!", "type": "success"}}`)
+	redirectURL := r.FormValue("redirect_url")
+	if redirectURL == "" {
+		redirectURL = r.Header.Get("Referer")
+	}
+	if redirectURL == "" {
+		redirectURL = "/catalog"
+	}
+
+	w.Header().Set("HX-Trigger", `{"showToast": {"message": "Shelf deleted successfully!", "type": "success"}}`)
 	if r.Header.Get("HX-Request") == "true" {
-		w.Header().Set("HX-Redirect", "/admin/parameters?toast=updated")
+		w.Header().Set("HX-Redirect", redirectURL)
 		w.WriteHeader(http.StatusOK)
 		return
 	}
-	http.Redirect(w, r, "/admin/parameters", http.StatusSeeOther)
+	http.Redirect(w, r, redirectURL, http.StatusSeeOther)
 }
 
 // EditParameterHandler handles POST /api/v1/admin/parameters/{id}/edit
@@ -604,6 +629,17 @@ func EditParameterHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if !found {
+		for i := range SystemParams.Shelves {
+			if SystemParams.Shelves[i].ID == id {
+				SystemParams.Shelves[i].Code = code
+				SystemParams.Shelves[i].Name = name
+				SystemParams.Shelves[i].Description = desc
+				found = true
+				break
+			}
+		}
+	}
+	if !found {
 		for i := range SystemParams.Domains {
 			if SystemParams.Domains[i].ID == id {
 				SystemParams.Domains[i].Code = code
@@ -628,17 +664,25 @@ func EditParameterHandler(w http.ResponseWriter, r *http.Request) {
 	SystemParams.mu.Unlock()
 
 	if !found {
-		w.Header().Set("HX-Trigger", `{"showToast": {"message": "Parameter not found", "type": "error"}}`)
+		w.Header().Set("HX-Trigger", `{"showToast": {"message": "Shelf / parameter not found", "type": "error"}}`)
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 
-	w.Header().Set("HX-Trigger", `{"showToast": {"message": "Parameter updated successfully!", "type": "success"}}`)
+	redirectURL := r.FormValue("redirect_url")
+	if redirectURL == "" {
+		redirectURL = r.Header.Get("Referer")
+	}
+	if redirectURL == "" {
+		redirectURL = "/catalog"
+	}
+
+	w.Header().Set("HX-Trigger", `{"showToast": {"message": "Shelf updated successfully!", "type": "success"}}`)
 	if r.Header.Get("HX-Request") == "true" {
-		w.Header().Set("HX-Redirect", "/admin/parameters?toast=updated")
+		w.Header().Set("HX-Redirect", redirectURL)
 		w.WriteHeader(http.StatusOK)
 		return
 	}
-	http.Redirect(w, r, "/admin/parameters", http.StatusSeeOther)
+	http.Redirect(w, r, redirectURL, http.StatusSeeOther)
 }
 
