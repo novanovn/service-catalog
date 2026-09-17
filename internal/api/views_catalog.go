@@ -23,39 +23,24 @@ import (
 	"service-catalog/internal/worker/infra"
 )
 
-// EnvGroup represents one environment (UAT/PreProd/Prod) bucket within a country,
-// holding only the services whose current ticket status maps to that environment.
-type EnvGroup struct {
-	Code     string // uat | preprod | prod | unassigned
-	Label    string
-	Services []CatalogEntry
+// SubShelfDomain represents a functional domain sub-shelf within a country main-shelf.
+type SubShelfDomain struct {
+	Code        string         // e.g. "ph:neuron", "ph:dtc", "all:devops"
+	Name        string         // e.g. "Neuron Integration Suite"
+	DomainKey   string         // e.g. "neuron", "dtc", "kahoona"
+	Description string         // e.g. "Philippines Neuron Insurance Core & Renewal Services"
+	Services    []CatalogEntry // services belonging to this domain
+	Total       int
 }
 
-// CountryGroup is the top-level grouping in the new Country -> Env -> Service hierarchy.
-type CountryGroup struct {
-	Code      string // ph | id
-	Name      string
-	EnvGroups []EnvGroup
-	Total     int
-	IsMine    bool
-}
-
-// deriveEnvFromStatus maps a catalog entry's ticket-derived status to an environment
-// bucket. This is a heuristic based on pipeline approval progress, NOT a live check
-// of which Terraform env directories/tfvars actually exist for the service — doing
-// that per-service across 300+ services on every /catalog load would be too slow.
-// The UI must present this honestly as "based on approval status", not as a verified
-// infra fact (see catalog_list.html env group subtitle).
-func deriveEnvFromStatus(status string) string {
-	switch strings.ToUpper(status) {
-	case "LIVE":
-		return "prod"
-	case "DEPLOYING", "PENDING_REVIEW":
-		return "uat"
-	default:
-		// DRAFT, SCANNING, PENDING_INFRA, REJECTED, unknown
-		return "unassigned"
-	}
+// MainShelfCountry represents a country main shelf (e.g. Philippines, Indonesia).
+type MainShelfCountry struct {
+	Code       string           // "ph" | "id"
+	Name       string           // "Philippines" | "Indonesia"
+	Flag       string           // 🇵🇭 | 🇮🇩
+	Total      int
+	IsMine     bool
+	SubShelves []SubShelfDomain
 }
 
 // getUserShelfScope returns (assignedShelves, hasGlobalAccess) for the given claims.
@@ -96,6 +81,7 @@ func RenderCatalogList(w http.ResponseWriter, r *http.Request) {
 
 	// Parse query params
 	showAllCountries := r.URL.Query().Get("all") == "true"
+	selectedCountryParam := strings.ToLower(strings.TrimSpace(r.URL.Query().Get("country")))
 
 	myShelves, hasGlobalAccess := getUserShelfScope(r.Context(), claims)
 	// Shelf codes are "<country>:<domain>" (e.g. "id:coreplus"). Per current design,
@@ -137,85 +123,178 @@ func RenderCatalogList(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// --- New hierarchy: Country -> Environment -> Service (Domain shown as a row badge) ---
-	envOrder := []struct{ code, label string }{
-		{"prod", "Production"},
-		{"preprod", "Pre-Production"},
-		{"uat", "UAT"},
-		{"unassigned", "Not Yet Deployed"},
+	// --- New hierarchy: Main Shelf (Country) -> Sub Shelf (Domain) -> Service ---
+	countryOrder := []string{"ph", "id"}
+	countryLabels := map[string]struct{ Name, Flag string }{
+		"ph": {"Philippines", "🇵🇭"},
+		"id": {"Indonesia", "🇮🇩"},
 	}
 
-	countryLabels := map[string]string{"ph": "Philippines", "id": "Indonesia"}
-	countryMap := make(map[string]*CountryGroup)
-	countryOrder := []string{"ph", "id"} // stable, deterministic ordering
-
-	getOrCreateCountry := func(code string) *CountryGroup {
-		if cg, ok := countryMap[code]; ok {
-			return cg
-		}
-		label := countryLabels[code]
-		if label == "" {
-			label = strings.ToUpper(code)
-		}
-		cg := &CountryGroup{Code: code, Name: label}
-		countryMap[code] = cg
-		if code != "ph" && code != "id" {
-			countryOrder = append(countryOrder, code)
-		}
-		return cg
+	type shelfDef struct {
+		Code        string
+		Name        string
+		DomainKey   string
+		Description string
 	}
 
-	// Always show PH and ID as main shelves even if they currently have zero services,
-	// so the top-level hierarchy stays predictable and never nil-panics below.
-	getOrCreateCountry("ph")
-	getOrCreateCountry("id")
+	countryShelvesMap := make(map[string][]shelfDef)
+	for _, c := range countryOrder {
+		activeShelves := SystemParams.GetActiveShelvesByCountry(c)
+		for _, s := range activeShelves {
+			parts := strings.SplitN(s.Code, ":", 2)
+			domKey := ""
+			if len(parts) == 2 {
+				domKey = strings.ToLower(parts[1])
+			}
+			countryShelvesMap[c] = append(countryShelvesMap[c], shelfDef{
+				Code:        s.Code,
+				Name:        s.Name,
+				DomainKey:   domKey,
+				Description: s.Description,
+			})
+		}
+	}
 
-	// Bucket every service into country -> env
-	type bucketKey struct{ country, env string }
-	buckets := make(map[bucketKey][]CatalogEntry)
+	resolveShelfCode := func(countryCode, domainName string) string {
+		c := strings.ToLower(strings.TrimSpace(countryCode))
+		if c == "" {
+			c = "ph"
+		}
+		d := strings.ToLower(strings.TrimSpace(domainName))
+		if c == "ph" {
+			if d == "neuron" || d == "integration" {
+				return "ph:neuron"
+			}
+			if d == "dtc" {
+				return "ph:dtc"
+			}
+			if d == "kahoona" {
+				return "ph:kahoona"
+			}
+		} else if c == "id" {
+			if d == "coreplus" || d == "integration" || d == "core" {
+				return "id:coreplus"
+			}
+			if d == "dtc" {
+				return "id:dtc"
+			}
+		}
+		if d == "devops" {
+			return "all:devops"
+		}
+		return fmt.Sprintf("%s:%s", c, d)
+	}
+
+	serviceBuckets := make(map[string][]CatalogEntry)
+	dynamicShelves := make(map[string]shelfDef)
+
 	for _, svc := range allServices {
-		countryLower := strings.ToLower(svc.Country)
-		if countryLower == "" {
-			countryLower = "ph"
+		c := strings.ToLower(strings.TrimSpace(svc.Country))
+		if c == "" {
+			c = "ph"
 		}
-		envCode := deriveEnvFromStatus(svc.Status)
-		getOrCreateCountry(countryLower) // ensure it exists even if empty later
-		buckets[bucketKey{countryLower, envCode}] = append(buckets[bucketKey{countryLower, envCode}], svc)
+		sCode := resolveShelfCode(c, svc.Domain)
+		serviceBuckets[sCode] = append(serviceBuckets[sCode], svc)
+
+		known := false
+		for _, def := range countryShelvesMap[c] {
+			if def.Code == sCode {
+				known = true
+				break
+			}
+		}
+		if !known {
+			cleanDom := svc.Domain
+			if cleanDom == "" {
+				cleanDom = "Core"
+			} else {
+				cleanDom = strings.ToUpper(cleanDom[:1]) + cleanDom[1:]
+			}
+			dynamicShelves[sCode] = shelfDef{
+				Code:        sCode,
+				Name:        fmt.Sprintf("%s Domain Suite", cleanDom),
+				DomainKey:   strings.ToLower(cleanDom),
+				Description: fmt.Sprintf("%s microservices and APIs", cleanDom),
+			}
+		}
 	}
 
-	// Build ordered EnvGroups per country (only include env buckets that exist for that country,
-	// but always show all 4 buckets so the folder hierarchy stays predictable/scannable)
-	for _, code := range countryOrder {
-		cg := countryMap[code]
-		total := 0
-		for _, e := range envOrder {
-			svcs := buckets[bucketKey{code, e.code}]
-			total += len(svcs)
-			cg.EnvGroups = append(cg.EnvGroups, EnvGroup{Code: e.code, Label: e.label, Services: svcs})
+	var allMainShelves []MainShelfCountry
+	for _, c := range countryOrder {
+		meta := countryLabels[c]
+		var subShelves []SubShelfDomain
+		countryTotal := 0
+
+		for _, def := range countryShelvesMap[c] {
+			svcs := serviceBuckets[def.Code]
+			subShelves = append(subShelves, SubShelfDomain{
+				Code:        def.Code,
+				Name:        def.Name,
+				DomainKey:   def.DomainKey,
+				Description: def.Description,
+				Services:    svcs,
+				Total:       len(svcs),
+			})
+			countryTotal += len(svcs)
 		}
-		cg.Total = total
-		cg.IsMine = myCountrySet[code]
+
+		for sCode, def := range dynamicShelves {
+			if strings.HasPrefix(sCode, c+":") {
+				svcs := serviceBuckets[sCode]
+				subShelves = append(subShelves, SubShelfDomain{
+					Code:        def.Code,
+					Name:        def.Name,
+					DomainKey:   def.DomainKey,
+					Description: def.Description,
+					Services:    svcs,
+					Total:       len(svcs),
+				})
+				countryTotal += len(svcs)
+			}
+		}
+
+		// Prioritize sub-shelves that contain active services at the top,
+		// then sort alphabetically by domain name.
+		sort.SliceStable(subShelves, func(i, j int) bool {
+			if (subShelves[i].Total > 0) != (subShelves[j].Total > 0) {
+				return subShelves[i].Total > subShelves[j].Total
+			}
+			return subShelves[i].Name < subShelves[j].Name
+		})
+
+		allMainShelves = append(allMainShelves, MainShelfCountry{
+			Code:       c,
+			Name:       meta.Name,
+			Flag:       meta.Flag,
+			Total:      countryTotal,
+			IsMine:     myCountrySet[c],
+			SubShelves: subShelves,
+		})
 	}
 
-	var myCountries []CountryGroup
-	var otherCountries []CountryGroup
-	for _, code := range countryOrder {
-		cg := *countryMap[code]
-		if hasCountryScope && cg.IsMine {
-			myCountries = append(myCountries, cg)
+	var visibleCountries []MainShelfCountry
+	var hiddenCountries []MainShelfCountry
+	for _, ms := range allMainShelves {
+		if hasCountryScope && ms.IsMine {
+			visibleCountries = append(visibleCountries, ms)
 		} else if hasCountryScope {
-			otherCountries = append(otherCountries, cg)
+			hiddenCountries = append(hiddenCountries, ms)
 		} else {
-			myCountries = append(myCountries, cg)
+			visibleCountries = append(visibleCountries, ms)
 		}
 	}
 
-	countryGroups := myCountries
-	otherCountriesCount := 0
-	if hasCountryScope {
-		otherCountriesCount = len(otherCountries)
-		if showAllCountries {
-			countryGroups = append(countryGroups, otherCountries...)
+	otherCount := len(hiddenCountries)
+	if hasCountryScope && showAllCountries {
+		visibleCountries = append(visibleCountries, hiddenCountries...)
+	}
+
+	selectedCountry := selectedCountryParam
+	if selectedCountry == "" {
+		if len(visibleCountries) > 0 {
+			selectedCountry = visibleCountries[0].Code
+		} else {
+			selectedCountry = "ph"
 		}
 	}
 
@@ -223,7 +302,8 @@ func RenderCatalogList(w http.ResponseWriter, r *http.Request) {
 		Title               string
 		User                *auth.Claims
 		Services            []CatalogEntry
-		Countries           []CountryGroup
+		Countries           []MainShelfCountry
+		SelectedCountry     string
 		TotalServices       int
 		HasCountryScope     bool
 		ShowAllCountries    bool
@@ -232,11 +312,12 @@ func RenderCatalogList(w http.ResponseWriter, r *http.Request) {
 		Title:               "Service Catalog",
 		User:                claims,
 		Services:            allServices,
-		Countries:           countryGroups,
+		Countries:           visibleCountries,
+		SelectedCountry:     selectedCountry,
 		TotalServices:       len(allServices),
 		HasCountryScope:     hasCountryScope,
 		ShowAllCountries:    showAllCountries,
-		OtherCountriesCount: otherCountriesCount,
+		OtherCountriesCount: otherCount,
 	}
 
 	tmpl.ExecuteTemplate(w, "base", data)

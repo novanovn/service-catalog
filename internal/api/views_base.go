@@ -30,6 +30,15 @@ func parsePage(pageFileName string) (*template.Template, error) {
 		"sub": func(a, b int) int { return a - b },
 		"upper": strings.ToUpper,
 		"lower": strings.ToLower,
+		"hasEnv": func(list []string, target string) bool {
+			target = strings.ToLower(strings.TrimSpace(target))
+			for _, s := range list {
+				if strings.EqualFold(strings.TrimSpace(s), target) {
+					return true
+				}
+			}
+			return false
+		},
 		"contains": func(list []string, item string) bool {
 			for _, s := range list {
 				if s == item {
