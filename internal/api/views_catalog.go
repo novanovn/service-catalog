@@ -352,7 +352,7 @@ func RenderCatalogList(w http.ResponseWriter, r *http.Request) {
 				if activeSubShelf != nil {
 					level = "domain"
 					breadcrumbs = append(breadcrumbs, CatalogBreadcrumb{
-						Label:    "📂 " + activeSubShelf.Name,
+						Label:    activeSubShelf.Name,
 						URL:      fmt.Sprintf("/catalog?country=%s&domain=%s", activeCountry.Code, activeSubShelf.DomainKey),
 						IsActive: true,
 					})
