@@ -203,36 +203,98 @@ func ApproveTicketHandler(w http.ResponseWriter, r *http.Request) {
 	// can be accurately audited (did the operator override a REAL gap, or a false negative?).
 	lambdaCheckPerformed := false
 	lambdaExists := true
-	checkCtx, cancel := context.WithTimeout(r.Context(), 3*time.Second)
+	checkCtx, cancel := context.WithTimeout(r.Context(), 8*time.Second)
 	defer cancel()
 
 	awsClient, awsErr := aws.NewAWSClientForAccount(checkCtx, targetAccountID)
+
+	repoName := JenkinsJobNameFromRepoID(repoURL)
+	if repoName == "" {
+		repoName = pipelineName
+	}
+	fnRefs := FetchLambdaFunctionsForRepo(checkCtx, repoName)
+
+	type fnResult struct {
+		Key     string `json:"key"`
+		Name    string `json:"name"`
+		Handler string `json:"handler"`
+		Exists  bool   `json:"exists"`
+		Error   string `json:"error,omitempty"`
+	}
+
+	var multiResults []fnResult
+	isMulti := len(fnRefs) > 0
+	foundCount := 0
+	var missingFunctions []string
+
 	if awsErr == nil && awsClient != nil {
-		exists, _ := awsClient.CheckLambdaExists(checkCtx, targetFunctionName)
 		lambdaCheckPerformed = true
-		lambdaExists = exists
+		if isMulti {
+			for _, ref := range fnRefs {
+				exists, checkErr := awsClient.CheckLambdaExists(checkCtx, ref.Name)
+				entry := fnResult{
+					Key:     ref.Key,
+					Name:    ref.Name,
+					Handler: ref.Handler,
+					Exists:  exists,
+				}
+				if checkErr != nil {
+					entry.Error = checkErr.Error()
+				}
+				if exists {
+					foundCount++
+				} else {
+					lambdaExists = false
+					missingFunctions = append(missingFunctions, ref.Name)
+				}
+				multiResults = append(multiResults, entry)
+			}
+		} else {
+			exists, _ := awsClient.CheckLambdaExists(checkCtx, targetFunctionName)
+			lambdaExists = exists
+		}
 	}
 
 	if !forceApprove && lambdaCheckPerformed && !lambdaExists {
-		reasonMsg := fmt.Sprintf("Fungsi Lambda '%s' belum ditemukan di AWS Console. Silakan buat resource terlebih dahulu oleh DevOps via 'terraform apply'.", targetFunctionName)
+		var reasonMsg string
+		if isMulti {
+			if len(missingFunctions) == 1 {
+				reasonMsg = fmt.Sprintf("Lambda '%s' belum ditemukan di AWS. Silakan buat resource via 'terraform apply'.", missingFunctions[0])
+			} else {
+				reasonMsg = fmt.Sprintf("%d dari %d function belum ada di AWS: %s", len(missingFunctions), len(fnRefs), strings.Join(missingFunctions, ", "))
+			}
+		} else {
+			reasonMsg = fmt.Sprintf("Fungsi Lambda '%s' belum ditemukan di AWS Console. Silakan buat resource terlebih dahulu oleh DevOps via 'terraform apply'.", targetFunctionName)
+		}
+
+		resDetails := map[string]interface{}{
+			"ticket_id":     ticketID,
+			"function_name": targetFunctionName,
+			"region":        "ap-southeast-3",
+			"account_id":    targetAccountID,
+			"country":       ticketCountry,
+			"domain":        ticketDomain,
+			"service_name":  ticketServiceName,
+			"tf_path":       tfPath,
+			"reason":        reasonMsg,
+		}
+		if isMulti {
+			resDetails["multi_function"] = true
+			resDetails["functions"] = multiResults
+			resDetails["total"] = len(fnRefs)
+			resDetails["found"] = foundCount
+			if len(fnRefs) > 0 {
+				resDetails["function_name"] = fnRefs[0].Name
+			}
+		}
 
 		w.Header().Set("Content-Type", "application/json")
 		triggerPayload, _ := json.Marshal(map[string]interface{}{
-			"resourceNotReady": map[string]interface{}{
-				"ticket_id":     ticketID,
-				"function_name": targetFunctionName,
-				"region":        "ap-southeast-3",
-				"account_id":    targetAccountID,
-				"country":       ticketCountry,
-				"domain":        ticketDomain,
-				"service_name":  ticketServiceName,
-				"tf_path":       tfPath,
-				"reason":        reasonMsg,
-			},
+			"resourceNotReady": resDetails,
 		})
 		w.Header().Set("HX-Trigger", string(triggerPayload))
 		w.WriteHeader(http.StatusOK)
-		_ = json.NewEncoder(w).Encode(map[string]string{
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{
 			"status":        "resource_not_ready",
 			"function_name": targetFunctionName,
 			"message":       reasonMsg,
