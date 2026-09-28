@@ -146,7 +146,11 @@ func fetchLambdaFunctionsUncached(ctx context.Context, repoName string) []Lambda
 	// ── 1. Try local checkout ────────────────────────────────────────
 	localDirs := []string{
 		os.Getenv("SERVICE_REPOS_DIR"),
+		"/repo/demo",
+		"/repo",
 		"/service-repos",
+		"../repo/demo",
+		"../repo",
 		"../",
 	}
 	for _, dir := range localDirs {

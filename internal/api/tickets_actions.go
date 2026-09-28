@@ -446,6 +446,7 @@ func VerifyTicketLambdaHandler(w http.ResponseWriter, r *http.Request) {
 	var ticketServiceName string
 	var ticketDomain string
 	var ticketCountry string
+	var ticketRepoURL string
 
 	if DB != nil {
 		var ticketUUID pgtype.UUID
@@ -455,6 +456,7 @@ func VerifyTicketLambdaHandler(w http.ResponseWriter, r *http.Request) {
 				ticketServiceName = tkt.ServiceName
 				ticketDomain = tkt.Domain
 				ticketCountry = tkt.Country
+				ticketRepoURL = tkt.RepoUrl
 			}
 		}
 	}
@@ -474,7 +476,7 @@ func VerifyTicketLambdaHandler(w http.ResponseWriter, r *http.Request) {
 
 	tfPath, _ := ResolveTerraformPath(r.Context(), ticketDomain, ticketCountry, ticketServiceName, "main")
 
-	checkCtx, cancel := context.WithTimeout(r.Context(), 3*time.Second)
+	checkCtx, cancel := context.WithTimeout(r.Context(), 8*time.Second)
 	defer cancel()
 
 	awsClient, err := aws.NewAWSClientForAccount(checkCtx, targetAccountID)
@@ -490,6 +492,73 @@ func VerifyTicketLambdaHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// ── Resolve function list from the service repo's package.json ──
+	repoName := JenkinsJobNameFromRepoID(ticketRepoURL)
+	if repoName == "" {
+		repoName = pipelineName
+	}
+	fnRefs := FetchLambdaFunctionsForRepo(checkCtx, repoName)
+
+	// ── Multi-function path ─────────────────────────────────────────
+	if len(fnRefs) > 0 {
+		type fnResult struct {
+			Key     string `json:"key"`
+			Name    string `json:"name"`
+			Handler string `json:"handler"`
+			Exists  bool   `json:"exists"`
+			Error   string `json:"error,omitempty"`
+		}
+
+		results := make([]fnResult, 0, len(fnRefs))
+		allExist := true
+		foundCount := 0
+		var missing []string
+
+		for _, ref := range fnRefs {
+			exists, checkErr := awsClient.CheckLambdaExists(checkCtx, ref.Name)
+			entry := fnResult{
+				Key:     ref.Key,
+				Name:    ref.Name,
+				Handler: ref.Handler,
+				Exists:  exists,
+			}
+			if checkErr != nil {
+				entry.Error = checkErr.Error()
+			}
+			if exists {
+				foundCount++
+			} else {
+				allExist = false
+				missing = append(missing, ref.Name)
+			}
+			results = append(results, entry)
+		}
+
+		reasonMsg := ""
+		if !allExist {
+			if len(missing) == 1 {
+				reasonMsg = fmt.Sprintf("Lambda '%s' belum ditemukan di AWS. Silakan buat resource via 'terraform apply'.", missing[0])
+			} else {
+				reasonMsg = fmt.Sprintf("%d dari %d function belum ada di AWS: %s", len(missing), len(fnRefs), strings.Join(missing, ", "))
+			}
+		}
+
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{
+			"exists":         allExist,
+			"function_name":  fnRefs[0].Name, // backward compat: first function
+			"region":         "ap-southeast-3",
+			"account_id":     targetAccountID,
+			"tf_path":        tfPath,
+			"multi_function": true,
+			"total":          len(fnRefs),
+			"found":          foundCount,
+			"functions":      results,
+			"reason":         reasonMsg,
+		})
+		return
+	}
+
+	// ── Legacy single-function path (unchanged) ─────────────────────
 	exists, _ := awsClient.CheckLambdaExists(checkCtx, targetFunctionName)
 	reasonMsg := ""
 	if !exists {
