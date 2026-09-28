@@ -1,9 +1,17 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+	"os"
+	"path/filepath"
 	"sort"
 	"strings"
+	"sync"
+	"time"
 )
 
 // LambdaFunctionRef is one deployed AWS Lambda declared in a service repo's
@@ -77,4 +85,110 @@ func ParseLambdaFunctionsFromPackageJSON(data []byte) []LambdaFunctionRef {
 
 	sort.Slice(refs, func(i, j int) bool { return refs[i].Name < refs[j].Name })
 	return refs
+}
+
+// ── Fetch package.json from a service repo (local mount → GitHub API) ─────
+
+// lambdaFnCacheEntry wraps a result so we can cache nil (repo not found /
+// no manifest) without ambiguity — a nil entry means "not yet looked up",
+// an entry with Refs == nil means "looked up, nothing usable".
+type lambdaFnCacheEntry struct {
+	Refs []LambdaFunctionRef
+}
+
+var (
+	lambdaFnCacheMu sync.RWMutex
+	lambdaFnCache   = make(map[string]*lambdaFnCacheEntry)
+)
+
+// FetchLambdaFunctionsForRepo resolves a service repo's declared Lambda
+// functions by reading its package.json.
+//
+// Resolution order (mirrors FetchExistingRepoIDFromTFVars):
+//  1. Local checkout: SERVICE_REPOS_DIR / /service-repos / ../
+//  2. GitHub Contents API (raw): oona-insurance/{repoName}/contents/package.json
+//
+// The result is cached for the process lifetime — package.json does not
+// change between Pre-Flight recheck clicks within a single approval session.
+//
+// Returns nil when the manifest is absent, unreadable, or unparseable.
+// Callers MUST treat nil as "use legacy single-name behaviour" — a fetch
+// failure must never block an approval.
+func FetchLambdaFunctionsForRepo(ctx context.Context, repoName string) []LambdaFunctionRef {
+	repoName = strings.TrimSpace(repoName)
+	if repoName == "" {
+		return nil
+	}
+
+	// ── Cache check ──────────────────────────────────────────────────
+	lambdaFnCacheMu.RLock()
+	if entry, found := lambdaFnCache[repoName]; found {
+		lambdaFnCacheMu.RUnlock()
+		return entry.Refs // may be nil — that's a cached "not found"
+	}
+	lambdaFnCacheMu.RUnlock()
+
+	refs := fetchLambdaFunctionsUncached(ctx, repoName)
+
+	// ── Cache store (including nil) ──────────────────────────────────
+	lambdaFnCacheMu.Lock()
+	lambdaFnCache[repoName] = &lambdaFnCacheEntry{Refs: refs}
+	lambdaFnCacheMu.Unlock()
+
+	return refs
+}
+
+// fetchLambdaFunctionsUncached does the actual I/O: local filesystem first,
+// then GitHub API. Separated from the cache layer for testability.
+func fetchLambdaFunctionsUncached(ctx context.Context, repoName string) []LambdaFunctionRef {
+	var data []byte
+
+	// ── 1. Try local checkout ────────────────────────────────────────
+	localDirs := []string{
+		os.Getenv("SERVICE_REPOS_DIR"),
+		"/service-repos",
+		"../",
+	}
+	for _, dir := range localDirs {
+		if dir == "" {
+			continue
+		}
+		candidate := filepath.Join(dir, repoName, "package.json")
+		if fileData, err := os.ReadFile(candidate); err == nil && len(fileData) > 0 {
+			data = fileData
+			break
+		}
+	}
+
+	// ── 2. Fall back to GitHub Contents API ──────────────────────────
+	if len(data) == 0 {
+		baseURL := os.Getenv("SERVICE_REPO_GITHUB_BASE_URL")
+		if baseURL == "" {
+			baseURL = "https://api.github.com/repos/oona-insurance"
+		}
+		targetURL := fmt.Sprintf("%s/%s/contents/package.json?ref=main", baseURL, repoName)
+
+		req, err := http.NewRequestWithContext(ctx, http.MethodGet, targetURL, nil)
+		if err != nil {
+			return nil
+		}
+		req.Header.Set("User-Agent", "Oona-Dev-Portal/1.0")
+		req.Header.Set("Accept", "application/vnd.github.v3.raw")
+		if token := os.Getenv("GITHUB_TOKEN"); token != "" {
+			req.Header.Set("Authorization", "Bearer "+token)
+		}
+
+		client := &http.Client{Timeout: 3 * time.Second}
+		resp, doErr := client.Do(req)
+		if doErr != nil {
+			return nil
+		}
+		defer resp.Body.Close()
+		if resp.StatusCode != http.StatusOK {
+			return nil
+		}
+		data, _ = io.ReadAll(resp.Body)
+	}
+
+	return ParseLambdaFunctionsFromPackageJSON(data)
 }
