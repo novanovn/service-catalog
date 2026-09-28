@@ -13,3 +13,6 @@ vendor/
 
 # Operating System files
 .DS_Store
+
+# Local agent working artefacts (plans, scratch notes)
+.hermes/
