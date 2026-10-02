@@ -391,10 +391,15 @@
                 View in GitHub
             </a>
             
-            {{ if or (eq .User.Role "admin") (eq .User.Role "devops") }}
+            {{ if or (eq .User.Role "admin") (eq .User.Role "devops") (eq .User.Role "lead") }}
             <button type="button" onclick="openEditModal('{{ .ServiceID }}', '{{ .ServiceName }}', '{{ .Description }}', '{{ .Domain }}', '{{ .Country }}', 'LIVE', '{{ .RepoURL }}', '{{ .RequestorEmail }}', '{{ .JiraID }}')" class="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 px-3.5 py-2 text-xs font-bold text-white shadow-sm transition-all cursor-pointer">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                 Edit Service
+            </button>
+
+            <button type="button" onclick="openArchiveModal('{{ .ServiceID }}', '{{ .ServiceName }}')" class="inline-flex items-center gap-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 px-3.5 py-2 text-xs font-bold transition-all cursor-pointer" title="Arsipkan service dari katalog">
+                <svg class="w-4 h-4 stroke-current fill-none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                Delete Service
             </button>
             {{ end }}
 
@@ -1387,6 +1392,110 @@
     </div>
 </div>
 
+<!-- MODAL: ARCHIVE SERVICE (2-STEP CONFIRMATION) -->
+<div id="modal-archive-service" class="fixed inset-0 z-[10000] hidden flex items-center justify-center p-4" aria-modal="true" role="dialog">
+    <div onclick="closeArchiveModal()" class="fixed inset-0 bg-black/75 backdrop-blur-sm transition-opacity"></div>
+    <div class="relative w-full max-w-md rounded-2xl bg-[#171717] border border-[#282828] shadow-2xl p-6 text-white z-10 transition-all">
+        <!-- Step 1: Warning & Impact -->
+        <div id="archive-step-1">
+            <div class="flex items-center gap-3 mb-4 pb-3 border-b border-[#242424]">
+                <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-5 h-5 stroke-current fill-none" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-sm font-bold text-white">Arsipkan Service (Langkah 1/2)</h3>
+                    <p class="text-xs text-slate-400">Nonaktifkan service dari katalog aktif</p>
+                </div>
+            </div>
+
+            <div class="space-y-3.5 mb-5 text-xs text-slate-300">
+                <p>
+                    Service <strong id="archive-service-name-disp" class="font-mono text-white"></strong> akan dipindahkan ke <strong>Archived Services</strong>.
+                </p>
+                <div class="p-3 rounded-xl bg-[#121212] border border-[#262626] text-[11.5px] text-slate-400 space-y-1">
+                    <div class="flex items-center gap-1.5 text-slate-300 font-semibold">
+                        <svg class="w-3.5 h-3.5 text-amber-400 stroke-current fill-none" viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        Dampak Pengarsipan:
+                    </div>
+                    <ul class="list-disc list-inside space-y-0.5 text-slate-400 pl-1">
+                        <li>Service tidak lagi muncul di folder explorer katalog.</li>
+                        <li>Tercatat di audit log dan notifikasi terkirim.</li>
+                        <li>Dapat di-restore kapan saja oleh Admin dari menu Archived.</li>
+                    </ul>
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1">Alasan Pengarsipan (Opsional)</label>
+                    <textarea 
+                        id="archive-reason-input" 
+                        rows="2" 
+                        placeholder="Contoh: Decommissioned, refactor, atau digantikan oleh versi baru..."
+                        class="block w-full rounded-xl bg-[#121212] border border-[#282828] py-2 px-3 text-white text-xs focus:ring-2 focus:ring-purple-500"></textarea>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-[#242424]">
+                <button type="button" onclick="closeArchiveModal()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-[#222222] hover:bg-[#2a2a2a] text-slate-300 border border-[#333333] transition-colors cursor-pointer">
+                    Batal
+                </button>
+                <button type="button" onclick="goToArchiveStep2()" class="inline-flex items-center gap-1 px-4 py-2 rounded-xl text-xs font-bold bg-[#7c3aed] hover:bg-[#6d28d9] text-white shadow-sm transition-all cursor-pointer">
+                    Lanjut ke Konfirmasi (Step 2) &rarr;
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 2: Type to Confirm -->
+        <div id="archive-step-2" class="hidden">
+            <div class="flex items-center gap-3 mb-4 pb-3 border-b border-[#242424]">
+                <div class="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-5 h-5 stroke-current fill-none" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-sm font-bold text-white">Konfirmasi Terakhir (Langkah 2/2)</h3>
+                    <p class="text-xs text-rose-400 font-semibold">Ketik nama service untuk verifikasi</p>
+                </div>
+            </div>
+
+            <div class="space-y-3 mb-5 text-xs text-slate-300">
+                <p>
+                    Untuk mengonfirmasi bahwa Anda yakin ingin mengarsipkan service ini, ketik nama service di bawah ini:
+                </p>
+                <div class="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-center font-mono font-bold text-white text-xs select-all" id="archive-target-exact-name"></div>
+                <div>
+                    <input 
+                        type="text" 
+                        id="archive-confirm-input" 
+                        placeholder="Ketik nama service persis..." 
+                        oninput="validateArchiveConfirmInput()"
+                        class="block w-full rounded-xl bg-[#121212] border border-[#282828] py-2 px-3 text-white font-mono text-xs focus:ring-2 focus:ring-rose-500 focus:border-rose-500"/>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between gap-2.5 pt-3 border-t border-[#242424]">
+                <button type="button" onclick="goToArchiveStep1()" class="px-3 py-2 rounded-xl text-xs font-semibold bg-[#222222] hover:bg-[#2a2a2a] text-slate-300 border border-[#333333] transition-colors cursor-pointer">
+                    &larr; Kembali
+                </button>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="closeArchiveModal()" class="px-3 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white transition-colors cursor-pointer">
+                        Batal
+                    </button>
+                    <button 
+                        type="button" 
+                        id="btn-confirm-archive" 
+                        onclick="executeArchiveService()" 
+                        disabled 
+                        class="px-4 py-2 rounded-xl text-xs font-bold bg-rose-600/50 text-white/50 border border-rose-500/20 cursor-not-allowed transition-all">
+                        Ya, Arsipkan Service
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 function openEditModal(id, name, desc, domain, country, status, repoUrl, requestor, jiraId) {
     document.getElementById('edit-name').value = name;
@@ -1407,6 +1516,84 @@ function openEditModal(id, name, desc, domain, country, status, repoUrl, request
 
 function closeEditModal() {
     document.getElementById('edit-modal').classList.add('hidden');
+}
+
+let archiveTargetId = '';
+let archiveTargetName = '';
+
+function openArchiveModal(id, name) {
+    archiveTargetId = id;
+    archiveTargetName = name;
+    document.getElementById('archive-service-name-disp').textContent = name;
+    document.getElementById('archive-target-exact-name').textContent = name;
+    document.getElementById('archive-reason-input').value = '';
+    document.getElementById('archive-confirm-input').value = '';
+    goToArchiveStep1();
+    document.getElementById('modal-archive-service').classList.remove('hidden');
+}
+
+function closeArchiveModal() {
+    document.getElementById('modal-archive-service').classList.add('hidden');
+}
+
+function goToArchiveStep1() {
+    document.getElementById('archive-step-1').classList.remove('hidden');
+    document.getElementById('archive-step-2').classList.add('hidden');
+}
+
+function goToArchiveStep2() {
+    document.getElementById('archive-step-1').classList.add('hidden');
+    document.getElementById('archive-step-2').classList.remove('hidden');
+    const input = document.getElementById('archive-confirm-input');
+    validateArchiveConfirmInput();
+    setTimeout(() => input.focus(), 50);
+}
+
+function validateArchiveConfirmInput() {
+    const input = document.getElementById('archive-confirm-input');
+    const btn = document.getElementById('btn-confirm-archive');
+    if (input.value.trim() === archiveTargetName) {
+        btn.disabled = false;
+        btn.className = "px-4 py-2 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-500 text-white shadow-sm transition-all cursor-pointer";
+    } else {
+        btn.disabled = true;
+        btn.className = "px-4 py-2 rounded-xl text-xs font-bold bg-rose-600/50 text-white/50 border border-rose-500/20 cursor-not-allowed transition-all";
+    }
+}
+
+function executeArchiveService() {
+    const reason = document.getElementById('archive-reason-input').value.trim();
+    const btn = document.getElementById('btn-confirm-archive');
+    btn.disabled = true;
+    btn.textContent = "Mengarsipkan...";
+
+    const params = new URLSearchParams();
+    if (reason) params.append('reason', reason);
+
+    fetch('/api/v1/catalog/' + archiveTargetId + '/archive', {
+        method: 'POST',
+        headers: {
+            'X-CSRF-Token': getCSRFToken(),
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: params
+    })
+    .then(res => {
+        if (res.ok) {
+            window.location.href = '/catalog';
+        } else {
+            return res.text().then(t => {
+                alert('Gagal mengarsipkan service: ' + t);
+                btn.disabled = false;
+                btn.textContent = "Ya, Arsipkan Service";
+            });
+        }
+    })
+    .catch(err => {
+        alert('Error: ' + err.message);
+        btn.disabled = false;
+        btn.textContent = "Ya, Arsipkan Service";
+    });
 }
 
 function openPromoteModal(targetEnv) {

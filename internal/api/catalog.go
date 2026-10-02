@@ -13,6 +13,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"service-catalog/internal/auth"
+	"service-catalog/internal/notify"
 	db "service-catalog/internal/repository/postgres/generated"
 )
 
@@ -302,6 +303,321 @@ func (cs *CatalogStore) Add(entry CatalogEntry) {
 			AwsLastInvoked:  pgtype.Text{String: entry.AWSLastInvoked, Valid: entry.AWSLastInvoked != ""},
 		})
 	}
+}
+
+// Archive marks a catalog entry as ARCHIVED (soft delete) in memory and DB
+func (cs *CatalogStore) Archive(id string) (CatalogEntry, bool) {
+	cs.mu.Lock()
+	defer cs.mu.Unlock()
+
+	var archived CatalogEntry
+	found := false
+
+	// 1. Remove from in-memory active entries
+	for i, e := range cs.Entries {
+		if e.ID == id || strings.EqualFold(e.Name, id) {
+			cs.Entries[i].Status = "ARCHIVED"
+			archived = cs.Entries[i]
+			cs.Entries = append(cs.Entries[:i], cs.Entries[i+1:]...)
+			found = true
+			break
+		}
+	}
+
+	// 2. Mark as archived in PostgreSQL
+	if DB != nil {
+		ctx := context.Background()
+		var uuidVal pgtype.UUID
+		err := uuidVal.Scan(id)
+		if err == nil && uuidVal.Valid {
+			_ = DB.ArchiveCatalogEntry(ctx, uuidVal)
+			found = true
+		} else {
+			entry, err := DB.GetCatalogEntryByName(ctx, id)
+			if err == nil && entry.ID.Valid {
+				_ = DB.ArchiveCatalogEntry(ctx, entry.ID)
+				if archived.Name == "" {
+					archived.Name = entry.Name
+					archived.Domain = entry.Domain.String
+					archived.Country = entry.Country.String
+				}
+				found = true
+			} else if archived.Name != "" {
+				entry2, err2 := DB.GetCatalogEntryByName(ctx, archived.Name)
+				if err2 == nil && entry2.ID.Valid {
+					_ = DB.ArchiveCatalogEntry(ctx, entry2.ID)
+					found = true
+				}
+			}
+		}
+	}
+
+	if found {
+		cs.saveToDisk()
+	}
+
+	return archived, found
+}
+
+// Restore brings an archived catalog entry back to active LIVE status
+func (cs *CatalogStore) Restore(id string) (CatalogEntry, bool) {
+	cs.mu.Lock()
+	defer cs.mu.Unlock()
+
+	var restored CatalogEntry
+	found := false
+
+	if DB != nil {
+		ctx := context.Background()
+		var uuidVal pgtype.UUID
+		err := uuidVal.Scan(id)
+		if err != nil || !uuidVal.Valid {
+			rows, _ := DB.ListArchivedCatalogEntries(ctx)
+			for _, r := range rows {
+				if strings.EqualFold(r.Name, id) {
+					uuidVal = r.ID
+					break
+				}
+			}
+		}
+
+		if uuidVal.Valid {
+			if err := DB.RestoreCatalogEntry(ctx, uuidVal); err == nil {
+				found = true
+				if e, err := DB.GetCatalogEntryByID(ctx, uuidVal); err == nil {
+					restored = CatalogEntry{
+						ID:              fmt.Sprintf("%x-%x-%x-%x-%x", e.ID.Bytes[0:4], e.ID.Bytes[4:6], e.ID.Bytes[6:8], e.ID.Bytes[8:10], e.ID.Bytes[10:16]),
+						Name:            e.Name,
+						Description:     e.Description,
+						Domain:          e.Domain.String,
+						Country:         e.Country.String,
+						Status:          "LIVE",
+						RepoURL:         e.RepoUrl.String,
+						PipelineName:    e.PipelineName.String,
+						RequestorEmail:  e.RequestorEmail.String,
+						JiraID:          e.JiraID.String,
+						AWSLastModified: e.AwsLastModified.String,
+						AWSLastInvoked:  e.AwsLastInvoked.String,
+						CreatedAt:       e.CreatedAt.Time.Format("2006-01-02 15:04"),
+						DeployedEnvs:    e.DeployedEnvs,
+					}
+					cs.Entries = append(cs.Entries, restored)
+				}
+			}
+		}
+	}
+
+	if found {
+		cs.saveToDisk()
+	}
+
+	return restored, found
+}
+
+// PermanentDelete permanently removes a catalog entry from DB and memory
+func (cs *CatalogStore) PermanentDelete(id string) (string, bool) {
+	cs.mu.Lock()
+	defer cs.mu.Unlock()
+
+	deletedName := ""
+	found := false
+
+	for i, e := range cs.Entries {
+		if e.ID == id || strings.EqualFold(e.Name, id) {
+			deletedName = e.Name
+			cs.Entries = append(cs.Entries[:i], cs.Entries[i+1:]...)
+			found = true
+			break
+		}
+	}
+
+	if DB != nil {
+		ctx := context.Background()
+		var uuidVal pgtype.UUID
+		err := uuidVal.Scan(id)
+		if err != nil || !uuidVal.Valid {
+			rows, _ := DB.ListArchivedCatalogEntries(ctx)
+			for _, r := range rows {
+				if strings.EqualFold(r.Name, id) {
+					uuidVal = r.ID
+					deletedName = r.Name
+					break
+				}
+			}
+		} else if deletedName == "" {
+			rows, _ := DB.ListArchivedCatalogEntries(ctx)
+			for _, r := range rows {
+				if r.ID == uuidVal {
+					deletedName = r.Name
+					break
+				}
+			}
+		}
+
+		if uuidVal.Valid {
+			if err := DB.PermanentlyDeleteCatalogEntry(ctx, uuidVal); err == nil {
+				found = true
+			}
+		}
+	}
+
+	if found {
+		cs.saveToDisk()
+	}
+
+	return deletedName, found
+}
+
+// ArchiveCatalogHandler handles POST /api/v1/catalog/{id}/archive (Lead, DevOps, Admin)
+func ArchiveCatalogHandler(w http.ResponseWriter, r *http.Request) {
+	claims, _ := r.Context().Value(userCtxKey).(*auth.Claims)
+	if claims == nil {
+		http.Error(w, `{"error": "Unauthorized"}`, http.StatusUnauthorized)
+		return
+	}
+
+	// RBAC: Lead, DevOps, and Admin can archive
+	if claims.Role != "admin" && claims.Role != "devops" && claims.Role != "lead" {
+		w.Header().Set("HX-Trigger", `{"showToast": {"message": "Hanya Lead, DevOps, atau Admin yang dapat mengarsipkan service", "type": "error"}}`)
+		http.Error(w, `{"error": "Forbidden: Requires Lead, DevOps, or Admin role"}`, http.StatusForbidden)
+		return
+	}
+
+	id := chi.URLParam(r, "id")
+	if id == "" {
+		w.Header().Set("HX-Trigger", `{"showToast": {"message": "Service ID is required", "type": "error"}}`)
+		http.Error(w, `{"error": "Service ID is required"}`, http.StatusBadRequest)
+		return
+	}
+
+	reason := strings.TrimSpace(r.FormValue("reason"))
+	if reason == "" {
+		reason = "Archived via service catalog detail action"
+	}
+
+	archived, found := ServiceCatalog.Archive(id)
+	if !found {
+		w.Header().Set("HX-Trigger", `{"showToast": {"message": "Service tidak ditemukan", "type": "error"}}`)
+		http.Error(w, `{"error": "Service not found"}`, http.StatusNotFound)
+		return
+	}
+
+	serviceName := archived.Name
+	if serviceName == "" {
+		serviceName = id
+	}
+
+	// 1. Audit Logging
+	RecordAudit(r.Context(), r, "ARCHIVE_SERVICE", "catalog", serviceName, map[string]interface{}{
+		"actor_email": claims.Email,
+		"actor_role":  claims.Role,
+		"service_id":  archived.ID,
+		"domain":      archived.Domain,
+		"country":     archived.Country,
+		"reason":      reason,
+	})
+
+	// 2. Notification to MS Teams (Alert if lead or devops archives a service)
+	teamsTitle := fmt.Sprintf("⚠️ Service Archived: %s", serviceName)
+	teamsMsg := fmt.Sprintf("User **%s** (Role: `%s`) telah memindahkan service **%s** (%s/%s) ke Archived Services.\n\n**Alasan:** %s",
+		claims.Email, claims.Role, serviceName, archived.Country, archived.Domain, reason)
+	_ = notify.SendToTeams(teamsTitle, teamsMsg, "D97706") // Amber theme color
+
+	w.Header().Set("HX-Trigger", fmt.Sprintf(`{"showToast": {"message": "Service '%s' berhasil dipindahkan ke Archived Services", "type": "warning"}}`, serviceName))
+	if r.Header.Get("HX-Request") == "true" {
+		w.Header().Set("HX-Redirect", "/catalog")
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+	http.Redirect(w, r, "/catalog", http.StatusSeeOther)
+}
+
+// RestoreCatalogHandler handles POST /api/v1/admin/catalog/{id}/restore (Strictly Admin)
+func RestoreCatalogHandler(w http.ResponseWriter, r *http.Request) {
+	claims, _ := r.Context().Value(userCtxKey).(*auth.Claims)
+	if claims == nil || claims.Role != "admin" {
+		w.Header().Set("HX-Trigger", `{"showToast": {"message": "Akses ditolak: Hanya Admin yang dapat me-restore service", "type": "error"}}`)
+		http.Error(w, `{"error": "Forbidden: Admin role required"}`, http.StatusForbidden)
+		return
+	}
+
+	id := chi.URLParam(r, "id")
+	if id == "" {
+		http.Error(w, `{"error": "Service ID is required"}`, http.StatusBadRequest)
+		return
+	}
+
+	restored, found := ServiceCatalog.Restore(id)
+	if !found {
+		w.Header().Set("HX-Trigger", `{"showToast": {"message": "Service tidak ditemukan di arsip", "type": "error"}}`)
+		http.Error(w, `{"error": "Service not found in archive"}`, http.StatusNotFound)
+		return
+	}
+
+	serviceName := restored.Name
+	if serviceName == "" {
+		serviceName = id
+	}
+
+	// 1. Audit Logging
+	RecordAudit(r.Context(), r, "RESTORE_SERVICE", "catalog", serviceName, map[string]interface{}{
+		"actor_email": claims.Email,
+		"actor_role":  claims.Role,
+		"service_id":  restored.ID,
+		"domain":      restored.Domain,
+		"country":     restored.Country,
+	})
+
+	// 2. Notification to MS Teams
+	teamsTitle := fmt.Sprintf("♻️ Service Restored: %s", serviceName)
+	teamsMsg := fmt.Sprintf("Admin **%s** telah me-restore service **%s** kembali ke katalog aktif.", claims.Email, serviceName)
+	_ = notify.SendToTeams(teamsTitle, teamsMsg, "10B981") // Emerald theme color
+
+	w.Header().Set("HX-Trigger", fmt.Sprintf(`{"showToast": {"message": "Service '%s' berhasil di-restore ke katalog", "type": "success"}}`, serviceName))
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write([]byte(`{"status": "restored"}`))
+}
+
+// PermanentDeleteCatalogHandler handles DELETE /api/v1/admin/catalog/{id}/permanent (Strictly Admin)
+func PermanentDeleteCatalogHandler(w http.ResponseWriter, r *http.Request) {
+	claims, _ := r.Context().Value(userCtxKey).(*auth.Claims)
+	if claims == nil || claims.Role != "admin" {
+		w.Header().Set("HX-Trigger", `{"showToast": {"message": "Akses ditolak: Hanya Admin yang dapat menghapus permanen", "type": "error"}}`)
+		http.Error(w, `{"error": "Forbidden: Admin role required"}`, http.StatusForbidden)
+		return
+	}
+
+	id := chi.URLParam(r, "id")
+	if id == "" {
+		http.Error(w, `{"error": "Service ID is required"}`, http.StatusBadRequest)
+		return
+	}
+
+	deletedName, found := ServiceCatalog.PermanentDelete(id)
+	if !found {
+		w.Header().Set("HX-Trigger", `{"showToast": {"message": "Service tidak ditemukan", "type": "error"}}`)
+		http.Error(w, `{"error": "Service not found"}`, http.StatusNotFound)
+		return
+	}
+
+	if deletedName == "" {
+		deletedName = id
+	}
+
+	// 1. Audit Logging
+	RecordAudit(r.Context(), r, "PERMANENT_DELETE_SERVICE", "catalog", deletedName, map[string]interface{}{
+		"actor_email": claims.Email,
+		"actor_role":  claims.Role,
+	})
+
+	// 2. Notification to MS Teams
+	teamsTitle := fmt.Sprintf("🗑️ Service Permanently Deleted: %s", deletedName)
+	teamsMsg := fmt.Sprintf("Admin **%s** telah menghapus permanen service **%s** dari database.", claims.Email, deletedName)
+	_ = notify.SendToTeams(teamsTitle, teamsMsg, "EF4444") // Rose/Red theme color
+
+	w.Header().Set("HX-Trigger", fmt.Sprintf(`{"showToast": {"message": "Service '%s' berhasil dihapus permanen", "type": "info"}}`, deletedName))
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write([]byte(`{"status": "permanently_deleted"}`))
 }
 
 // DeleteCatalogHandler handles DELETE /api/v1/catalog/{id}

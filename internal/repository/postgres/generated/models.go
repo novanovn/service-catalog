@@ -108,6 +108,7 @@ type UserRole string
 
 const (
 	UserRoleDeveloper UserRole = "developer"
+	UserRoleLead      UserRole = "lead"
 	UserRoleDevops    UserRole = "devops"
 	UserRoleAdmin     UserRole = "admin"
 )

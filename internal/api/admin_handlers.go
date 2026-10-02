@@ -18,6 +18,7 @@ import (
 // validUserRoles are the only role values accepted by CreateUserHandler.
 var validUserRoles = map[string]bool{
 	"developer": true,
+	"lead":      true,
 	"devops":    true,
 	"admin":     true,
 }

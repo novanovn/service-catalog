@@ -32,6 +32,15 @@ func (q *Queries) AddCatalogDeployedEnv(ctx context.Context, arg AddCatalogDeplo
 	return err
 }
 
+const archiveCatalogEntry = `-- name: ArchiveCatalogEntry :exec
+UPDATE catalog SET is_active = false, status = 'ARCHIVED', updated_at = NOW() WHERE id = $1
+`
+
+func (q *Queries) ArchiveCatalogEntry(ctx context.Context, id pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, archiveCatalogEntry, id)
+	return err
+}
+
 const countCatalogEntries = `-- name: CountCatalogEntries :one
 SELECT COUNT(*) FROM catalog WHERE is_active = true
 `
@@ -44,7 +53,7 @@ func (q *Queries) CountCatalogEntries(ctx context.Context) (int64, error) {
 }
 
 const deleteCatalogEntry = `-- name: DeleteCatalogEntry :exec
-UPDATE catalog SET is_active = false, updated_at = NOW() WHERE id = $1
+UPDATE catalog SET is_active = false, status = 'ARCHIVED', updated_at = NOW() WHERE id = $1
 `
 
 func (q *Queries) DeleteCatalogEntry(ctx context.Context, id pgtype.UUID) error {
@@ -144,6 +153,67 @@ func (q *Queries) GetCatalogEntryByName(ctx context.Context, name string) (GetCa
 		&i.DeployedEnvs,
 	)
 	return i, err
+}
+
+const listArchivedCatalogEntries = `-- name: ListArchivedCatalogEntries :many
+SELECT id, name, description, domain, country, status, repo_url, pipeline_name, requestor_email, jira_id, aws_last_modified, aws_last_invoked, created_at, updated_at, deployed_envs
+FROM catalog
+WHERE is_active = false OR status = 'ARCHIVED'
+ORDER BY updated_at DESC
+`
+
+type ListArchivedCatalogEntriesRow struct {
+	ID              pgtype.UUID        `json:"id"`
+	Name            string             `json:"name"`
+	Description     string             `json:"description"`
+	Domain          pgtype.Text        `json:"domain"`
+	Country         pgtype.Text        `json:"country"`
+	Status          string             `json:"status"`
+	RepoUrl         pgtype.Text        `json:"repo_url"`
+	PipelineName    pgtype.Text        `json:"pipeline_name"`
+	RequestorEmail  pgtype.Text        `json:"requestor_email"`
+	JiraID          pgtype.Text        `json:"jira_id"`
+	AwsLastModified pgtype.Text        `json:"aws_last_modified"`
+	AwsLastInvoked  pgtype.Text        `json:"aws_last_invoked"`
+	CreatedAt       pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
+	DeployedEnvs    []string           `json:"deployed_envs"`
+}
+
+func (q *Queries) ListArchivedCatalogEntries(ctx context.Context) ([]ListArchivedCatalogEntriesRow, error) {
+	rows, err := q.db.Query(ctx, listArchivedCatalogEntries)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListArchivedCatalogEntriesRow
+	for rows.Next() {
+		var i ListArchivedCatalogEntriesRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Description,
+			&i.Domain,
+			&i.Country,
+			&i.Status,
+			&i.RepoUrl,
+			&i.PipelineName,
+			&i.RequestorEmail,
+			&i.JiraID,
+			&i.AwsLastModified,
+			&i.AwsLastInvoked,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeployedEnvs,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const listCatalogEntries = `-- name: ListCatalogEntries :many
@@ -272,6 +342,24 @@ func (q *Queries) ListCatalogEntriesPaginated(ctx context.Context, arg ListCatal
 		return nil, err
 	}
 	return items, nil
+}
+
+const permanentlyDeleteCatalogEntry = `-- name: PermanentlyDeleteCatalogEntry :exec
+DELETE FROM catalog WHERE id = $1
+`
+
+func (q *Queries) PermanentlyDeleteCatalogEntry(ctx context.Context, id pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, permanentlyDeleteCatalogEntry, id)
+	return err
+}
+
+const restoreCatalogEntry = `-- name: RestoreCatalogEntry :exec
+UPDATE catalog SET is_active = true, status = 'LIVE', updated_at = NOW() WHERE id = $1
+`
+
+func (q *Queries) RestoreCatalogEntry(ctx context.Context, id pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, restoreCatalogEntry, id)
+	return err
 }
 
 const updateCatalogEntry = `-- name: UpdateCatalogEntry :exec

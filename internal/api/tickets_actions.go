@@ -191,8 +191,13 @@ func ApproveTicketHandler(w http.ResponseWriter, r *http.Request) {
 	targetFunctionName := pipelineName
 	targetAccountID := ""
 	countryLower := strings.ToLower(ticketCountry)
+	domainLower := strings.ToLower(ticketDomain)
 	if countryLower == "ph" {
-		targetAccountID = "471112995648" // PH-DTC-UAT / Account scope
+		if domainLower == "integration" {
+			targetAccountID = "381492025569" // PH-Integration-UAT
+		} else {
+			targetAccountID = "471112995648" // PH-DTC-UAT
+		}
 	} else if countryLower == "id" {
 		targetAccountID = "794038209116" // ID-DTC-UAT / Account scope
 	}
@@ -530,8 +535,13 @@ func VerifyTicketLambdaHandler(w http.ResponseWriter, r *http.Request) {
 	targetFunctionName := pipelineName
 	targetAccountID := ""
 	countryLower := strings.ToLower(ticketCountry)
+	domainLower := strings.ToLower(ticketDomain)
 	if countryLower == "ph" {
-		targetAccountID = "471112995648"
+		if domainLower == "integration" {
+			targetAccountID = "381492025569" // PH-Integration-UAT
+		} else {
+			targetAccountID = "471112995648" // PH-DTC-UAT
+		}
 	} else if countryLower == "id" {
 		targetAccountID = "794038209116"
 	}

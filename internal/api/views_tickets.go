@@ -307,9 +307,11 @@ func JenkinsJobNameFromRepoID(repoID string) string {
 	if repoID == "" {
 		return ""
 	}
+	repoID = strings.TrimSuffix(repoID, ".git")
 	if i := strings.LastIndex(repoID, "/"); i >= 0 {
 		repoID = strings.TrimSpace(repoID[i+1:])
 	}
+	repoID = strings.TrimSuffix(repoID, ".git")
 	if repoID == "" || repoID == "change-me-repo" {
 		return ""
 	}

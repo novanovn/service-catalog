@@ -159,6 +159,7 @@ func SetupRouter() *chi.Mux {
 		r.Delete("/api/v1/tickets/{id}", DeleteTicketHandler)
 		r.Post("/api/v1/catalog/{service}/test", InvokeLambdaHandler)
 		r.Post("/api/v1/catalog/{service}/promote", RequestPromotionHandler)
+		r.Post("/api/v1/catalog/{id}/archive", ArchiveCatalogHandler)
 
 		// 5. Infra & Admin Approvals Sub-router (Infra, Admin)
 		r.Group(func(r chi.Router) {
@@ -182,6 +183,9 @@ func SetupRouter() *chi.Mux {
 			r.Get("/admin/users", RenderAdminUsers)
 			r.Get("/admin/integrations", RenderAdminIntegrations)
 			r.Get("/admin/parameters", RenderAdminParameters)
+			r.Get("/admin/catalog/archived", RenderAdminArchivedCatalog)
+			r.Post("/api/v1/admin/catalog/{id}/restore", RestoreCatalogHandler)
+			r.Delete("/api/v1/admin/catalog/{id}/permanent", PermanentDeleteCatalogHandler)
 			r.Get("/admin/backup", RenderAdminBackup)
 			r.Get("/admin/audit-logs", RenderAdminAuditLogs)
 			r.Get("/api/v1/admin/audit-logs/export", ExportAuditLogsCSVHandler)

@@ -48,7 +48,22 @@ UPDATE catalog SET
 WHERE id = $1;
 
 -- name: DeleteCatalogEntry :exec
-UPDATE catalog SET is_active = false, updated_at = NOW() WHERE id = $1;
+UPDATE catalog SET is_active = false, status = 'ARCHIVED', updated_at = NOW() WHERE id = $1;
+
+-- name: ArchiveCatalogEntry :exec
+UPDATE catalog SET is_active = false, status = 'ARCHIVED', updated_at = NOW() WHERE id = $1;
+
+-- name: RestoreCatalogEntry :exec
+UPDATE catalog SET is_active = true, status = 'LIVE', updated_at = NOW() WHERE id = $1;
+
+-- name: PermanentlyDeleteCatalogEntry :exec
+DELETE FROM catalog WHERE id = $1;
+
+-- name: ListArchivedCatalogEntries :many
+SELECT id, name, description, domain, country, status, repo_url, pipeline_name, requestor_email, jira_id, aws_last_modified, aws_last_invoked, created_at, updated_at, deployed_envs
+FROM catalog
+WHERE is_active = false OR status = 'ARCHIVED'
+ORDER BY updated_at DESC;
 
 -- name: ListCatalogEntriesPaginated :many
 SELECT id, name, description, domain, country, status, repo_url, pipeline_name, requestor_email, jira_id, aws_last_modified, aws_last_invoked, created_at, updated_at, deployed_envs

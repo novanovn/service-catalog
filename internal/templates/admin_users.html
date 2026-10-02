@@ -41,6 +41,7 @@
                     <label class="block text-xs font-semibold text-slate-300 mb-1.5">Role / Access Scope</label>
                     <select name="role" id="new-user-role" onchange="toggleShelfPicker()" class="block w-full rounded-xl bg-[#121212] border border-[#282828] py-2.5 text-white focus:ring-2 focus:ring-purple-500 text-xs px-3.5">
                         <option value="developer">Developer (Submit tickets, View catalog)</option>
+                        <option value="lead">Lead (Manage & Archive Services — Scoped Access)</option>
                         <option value="devops">DevOps (Approve Infra & Jenkins — Global Access)</option>
                         <option value="admin">Admin (Full Access & Integrations — Global Access)</option>
                     </select>
@@ -115,6 +116,8 @@
                             <span class="inline-flex items-center rounded-lg bg-indigo-500/10 px-2.5 py-1 text-[11px] font-bold text-indigo-400 border border-indigo-500/20">ADMIN</span>
                             {{ else if eq .Role "devops" }}
                             <span class="inline-flex items-center rounded-lg bg-teal-500/10 px-2.5 py-1 text-[11px] font-bold text-teal-400 border border-teal-500/20">DEVOPS</span>
+                            {{ else if eq .Role "lead" }}
+                            <span class="inline-flex items-center rounded-lg bg-amber-500/10 px-2.5 py-1 text-[11px] font-bold text-amber-400 border border-amber-500/20">LEAD</span>
                             {{ else }}
                             <span class="inline-flex items-center rounded-lg bg-blue-500/10 px-2.5 py-1 text-[11px] font-bold text-blue-400 border border-blue-500/20">DEVELOPER</span>
                             {{ end }}

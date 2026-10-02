@@ -147,9 +147,13 @@ func fetchLambdaFunctionsUncached(ctx context.Context, repoName string) []Lambda
 	localDirs := []string{
 		os.Getenv("SERVICE_REPOS_DIR"),
 		"/repo/demo",
+		"/repo/PH",
+		"/repo/ID",
 		"/repo",
 		"/service-repos",
 		"../repo/demo",
+		"../repo/PH",
+		"../repo/ID",
 		"../repo",
 		"../",
 	}

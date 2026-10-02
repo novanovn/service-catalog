@@ -810,4 +810,64 @@ func TestIntegrationHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(html))
 }
 
+// ArchivedServiceView represents an archived service item for template rendering
+type ArchivedServiceView struct {
+	ID          string
+	Name        string
+	Description string
+	Domain      string
+	Country     string
+	Status      string
+	UpdatedAt   string
+}
+
+// RenderAdminArchivedCatalog renders the archived catalog services management page (Admin Only)
+func RenderAdminArchivedCatalog(w http.ResponseWriter, r *http.Request) {
+	tmpl, err := parsePage("admin_archived_catalog.html")
+	if err != nil {
+		http.Error(w, "Failed to load template: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	claims, _ := r.Context().Value(userCtxKey).(*auth.Claims)
+	userView := UserView{
+		Email: claims.Email,
+		Role:  claims.Role,
+	}
+
+	var items []ArchivedServiceView
+	if DB != nil {
+		rows, err := DB.ListArchivedCatalogEntries(r.Context())
+		if err == nil {
+			for _, row := range rows {
+				idStr := fmt.Sprintf("%x-%x-%x-%x-%x", row.ID.Bytes[0:4], row.ID.Bytes[4:6], row.ID.Bytes[6:8], row.ID.Bytes[8:10], row.ID.Bytes[10:16])
+				items = append(items, ArchivedServiceView{
+					ID:          idStr,
+					Name:        row.Name,
+					Description: row.Description,
+					Domain:      row.Domain.String,
+					Country:     row.Country.String,
+					Status:      row.Status,
+					UpdatedAt:   row.UpdatedAt.Time.Format("2006-01-02 15:04 WIB"),
+				})
+			}
+		}
+	}
+
+	data := struct {
+		Title            string
+		User             UserView
+		ArchivedServices []ArchivedServiceView
+	}{
+		Title:            "Archived Services",
+		User:             userView,
+		ArchivedServices: items,
+	}
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	if err := tmpl.ExecuteTemplate(w, "base", data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
 // RenderProfile renders the user profile page
