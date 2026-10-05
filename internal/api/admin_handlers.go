@@ -683,7 +683,7 @@ func DeleteParameterHandler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 		if subShelfCount > 0 || serviceCount > 0 {
-			msg := fmt.Sprintf("Main Shelf tidak dapat dihapus: masih berisi %d sub-shelf dan %d service. Kosongkan atau pindahkan (bulk move) sub-shelf terlebih dahulu.", subShelfCount, serviceCount)
+			msg := fmt.Sprintf("Main Shelf cannot be deleted: still contains %d sub-shelves and %d services. Empty or bulk move sub-shelves first.", subShelfCount, serviceCount)
 			w.Header().Set("HX-Trigger", fmt.Sprintf(`{"showToast": {"message": %q, "type": "error"}}`, msg))
 			w.WriteHeader(http.StatusConflict)
 			w.Write([]byte(msg))
@@ -710,7 +710,7 @@ func DeleteParameterHandler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 		if serviceCount > 0 {
-			msg := fmt.Sprintf("Sub Shelf tidak dapat dihapus: masih berisi %d service. Pindahkan service ke domain lain terlebih dahulu.", serviceCount)
+			msg := fmt.Sprintf("Sub Shelf cannot be deleted: still contains %d services. Move services to another domain first.", serviceCount)
 			w.Header().Set("HX-Trigger", fmt.Sprintf(`{"showToast": {"message": %q, "type": "error"}}`, msg))
 			w.WriteHeader(http.StatusConflict)
 			w.Write([]byte(msg))

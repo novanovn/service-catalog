@@ -217,8 +217,8 @@
                     </svg>
                 </div>
                 <div>
-                    <h3 class="text-sm font-bold text-white">Edit User & Password</h3>
-                    <p class="text-xs text-slate-400">Update identitas, role, atau ganti kata sandi</p>
+                    <h3 class="text-sm font-bold text-white">Edit User &amp; Password</h3>
+                    <p class="text-xs text-slate-400">Update identity, role, or reset password</p>
                 </div>
             </div>
             <button type="button" onclick="closeEditUserModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
@@ -244,20 +244,20 @@
                 <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1">Role / Access Scope</label>
                 <select name="role" id="edit-user-role" class="block w-full rounded-xl bg-[#121212] border border-[#282828] py-2 px-3.5 text-white focus:ring-2 focus:ring-purple-500 text-xs">
                     <option value="developer">Developer (Submit tickets, View catalog)</option>
-                    <option value="lead">Lead (Manage & Archive Services — Scoped Access)</option>
-                    <option value="devops">DevOps (Approve Infra & Jenkins — Global Access)</option>
-                    <option value="admin">Admin (Full Access & Integrations — Global Access)</option>
+                    <option value="lead">Lead (Manage &amp; Archive Services — Scoped Access)</option>
+                    <option value="devops">DevOps (Approve Infra &amp; Jenkins — Global Access)</option>
+                    <option value="admin">Admin (Full Access &amp; Integrations — Global Access)</option>
                 </select>
-                <p id="edit-user-role-notice" class="hidden text-[10.5px] text-amber-400/90 mt-1">★ Akun Root Admin tidak dapat diubah rolenya.</p>
+                <p id="edit-user-role-notice" class="hidden text-[10.5px] text-amber-400/90 mt-1">★ Root Admin account role cannot be changed.</p>
             </div>
 
             <div class="p-3.5 rounded-xl bg-[#121212] border border-[#262626] space-y-2">
                 <div class="flex items-center justify-between">
-                    <label class="block text-[11px] font-bold text-amber-300 uppercase tracking-wider">Ganti Password</label>
-                    <span class="text-[10px] text-slate-500 italic">Opsional</span>
+                    <label class="block text-[11px] font-bold text-amber-300 uppercase tracking-wider">Change Password</label>
+                    <span class="text-[10px] text-slate-500 italic">Optional</span>
                 </div>
-                <input type="password" name="password" id="edit-user-password" placeholder="Biarkan kosong jika tidak ingin ganti..." class="block w-full rounded-xl bg-[#181818] border border-[#333333] py-2 px-3 text-white placeholder:text-slate-600 focus:ring-2 focus:ring-amber-500 text-xs"/>
-                <p class="text-[10.5px] text-slate-400">Minimal 6 karakter jika ingin mengganti kata sandi baru.</p>
+                <input type="password" name="password" id="edit-user-password" placeholder="Leave blank to keep current password..." class="block w-full rounded-xl bg-[#181818] border border-[#333333] py-2 px-3 text-white placeholder:text-slate-600 focus:ring-2 focus:ring-amber-500 text-xs"/>
+                <p class="text-[10.5px] text-slate-400">Minimum 6 characters to update password.</p>
             </div>
 
             <div class="flex items-center gap-2 pt-1" id="edit-user-active-container">
@@ -267,10 +267,10 @@
 
             <div class="flex items-center justify-end gap-2.5 pt-4 border-t border-[#242424]">
                 <button type="button" onclick="closeEditUserModal()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-[#222222] hover:bg-[#2a2a2a] text-slate-300 border border-[#333333] transition-colors cursor-pointer">
-                    Batal
+                    Cancel
                 </button>
                 <button type="submit" class="px-4 py-2 rounded-xl text-xs font-bold bg-[#7c3aed] hover:bg-[#6d28d9] text-white shadow-sm transition-all cursor-pointer">
-                    Simpan Perubahan
+                    Save Changes
                 </button>
             </div>
         </form>

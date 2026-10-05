@@ -519,7 +519,7 @@ func ArchiveCatalogHandler(w http.ResponseWriter, r *http.Request) {
 
 	// RBAC: Lead, DevOps, and Admin can archive
 	if claims.Role != "admin" && claims.Role != "devops" && claims.Role != "lead" {
-		w.Header().Set("HX-Trigger", `{"showToast": {"message": "Hanya Lead, DevOps, atau Admin yang dapat mengarsipkan service", "type": "error"}}`)
+		w.Header().Set("HX-Trigger", `{"showToast": {"message": "Only Lead, DevOps, or Admin can archive services", "type": "error"}}`)
 		http.Error(w, `{"error": "Forbidden: Requires Lead, DevOps, or Admin role"}`, http.StatusForbidden)
 		return
 	}
@@ -538,7 +538,7 @@ func ArchiveCatalogHandler(w http.ResponseWriter, r *http.Request) {
 
 	archived, found := ServiceCatalog.Archive(id)
 	if !found {
-		w.Header().Set("HX-Trigger", `{"showToast": {"message": "Service tidak ditemukan", "type": "error"}}`)
+		w.Header().Set("HX-Trigger", `{"showToast": {"message": "Service not found", "type": "error"}}`)
 		http.Error(w, `{"error": "Service not found"}`, http.StatusNotFound)
 		return
 	}
@@ -560,11 +560,11 @@ func ArchiveCatalogHandler(w http.ResponseWriter, r *http.Request) {
 
 	// 2. Notification to MS Teams (Alert if lead or devops archives a service)
 	teamsTitle := fmt.Sprintf("⚠️ Service Archived: %s", serviceName)
-	teamsMsg := fmt.Sprintf("User **%s** (Role: `%s`) telah memindahkan service **%s** (%s/%s) ke Archived Services.\n\n**Alasan:** %s",
+	teamsMsg := fmt.Sprintf("User **%s** (Role: `%s`) has moved service **%s** (%s/%s) to Archived Services.\n\n**Reason:** %s",
 		claims.Email, claims.Role, serviceName, archived.Country, archived.Domain, reason)
 	_ = notify.SendToTeams(teamsTitle, teamsMsg, "D97706") // Amber theme color
 
-	w.Header().Set("HX-Trigger", fmt.Sprintf(`{"showToast": {"message": "Service '%s' berhasil dipindahkan ke Archived Services", "type": "warning"}}`, serviceName))
+	w.Header().Set("HX-Trigger", fmt.Sprintf(`{"showToast": {"message": "Service '%s' successfully moved to Archived Services", "type": "warning"}}`, serviceName))
 	if r.Header.Get("HX-Request") == "true" {
 		w.Header().Set("HX-Redirect", "/catalog")
 		w.WriteHeader(http.StatusOK)
@@ -577,7 +577,7 @@ func ArchiveCatalogHandler(w http.ResponseWriter, r *http.Request) {
 func RestoreCatalogHandler(w http.ResponseWriter, r *http.Request) {
 	claims, _ := r.Context().Value(userCtxKey).(*auth.Claims)
 	if claims == nil || claims.Role != "admin" {
-		w.Header().Set("HX-Trigger", `{"showToast": {"message": "Akses ditolak: Hanya Admin yang dapat me-restore service", "type": "error"}}`)
+		w.Header().Set("HX-Trigger", `{"showToast": {"message": "Access denied: Admin role required to restore services", "type": "error"}}`)
 		http.Error(w, `{"error": "Forbidden: Admin role required"}`, http.StatusForbidden)
 		return
 	}
@@ -590,7 +590,7 @@ func RestoreCatalogHandler(w http.ResponseWriter, r *http.Request) {
 
 	restored, found := ServiceCatalog.Restore(id)
 	if !found {
-		w.Header().Set("HX-Trigger", `{"showToast": {"message": "Service tidak ditemukan di arsip", "type": "error"}}`)
+		w.Header().Set("HX-Trigger", `{"showToast": {"message": "Service not found in archive", "type": "error"}}`)
 		http.Error(w, `{"error": "Service not found in archive"}`, http.StatusNotFound)
 		return
 	}
@@ -611,10 +611,10 @@ func RestoreCatalogHandler(w http.ResponseWriter, r *http.Request) {
 
 	// 2. Notification to MS Teams
 	teamsTitle := fmt.Sprintf("♻️ Service Restored: %s", serviceName)
-	teamsMsg := fmt.Sprintf("Admin **%s** telah me-restore service **%s** kembali ke katalog aktif.", claims.Email, serviceName)
+	teamsMsg := fmt.Sprintf("Admin **%s** has restored service **%s** back to the active catalog.", claims.Email, serviceName)
 	_ = notify.SendToTeams(teamsTitle, teamsMsg, "10B981") // Emerald theme color
 
-	w.Header().Set("HX-Trigger", fmt.Sprintf(`{"showToast": {"message": "Service '%s' berhasil di-restore ke katalog", "type": "success"}}`, serviceName))
+	w.Header().Set("HX-Trigger", fmt.Sprintf(`{"showToast": {"message": "Service '%s' restored to active catalog", "type": "success"}}`, serviceName))
 	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write([]byte(`{"status": "restored"}`))
 }
@@ -623,7 +623,7 @@ func RestoreCatalogHandler(w http.ResponseWriter, r *http.Request) {
 func PermanentDeleteCatalogHandler(w http.ResponseWriter, r *http.Request) {
 	claims, _ := r.Context().Value(userCtxKey).(*auth.Claims)
 	if claims == nil || claims.Role != "admin" {
-		w.Header().Set("HX-Trigger", `{"showToast": {"message": "Akses ditolak: Hanya Admin yang dapat menghapus permanen", "type": "error"}}`)
+		w.Header().Set("HX-Trigger", `{"showToast": {"message": "Access denied: Admin role required to permanently delete services", "type": "error"}}`)
 		http.Error(w, `{"error": "Forbidden: Admin role required"}`, http.StatusForbidden)
 		return
 	}
@@ -636,7 +636,7 @@ func PermanentDeleteCatalogHandler(w http.ResponseWriter, r *http.Request) {
 
 	deletedName, found := ServiceCatalog.PermanentDelete(id)
 	if !found {
-		w.Header().Set("HX-Trigger", `{"showToast": {"message": "Service tidak ditemukan", "type": "error"}}`)
+		w.Header().Set("HX-Trigger", `{"showToast": {"message": "Service not found", "type": "error"}}`)
 		http.Error(w, `{"error": "Service not found"}`, http.StatusNotFound)
 		return
 	}
@@ -653,10 +653,10 @@ func PermanentDeleteCatalogHandler(w http.ResponseWriter, r *http.Request) {
 
 	// 2. Notification to MS Teams
 	teamsTitle := fmt.Sprintf("🗑️ Service Permanently Deleted: %s", deletedName)
-	teamsMsg := fmt.Sprintf("Admin **%s** telah menghapus permanen service **%s** dari database.", claims.Email, deletedName)
+	teamsMsg := fmt.Sprintf("Admin **%s** permanently deleted service **%s** from the database.", claims.Email, deletedName)
 	_ = notify.SendToTeams(teamsTitle, teamsMsg, "EF4444") // Rose/Red theme color
 
-	w.Header().Set("HX-Trigger", fmt.Sprintf(`{"showToast": {"message": "Service '%s' berhasil dihapus permanen", "type": "info"}}`, deletedName))
+	w.Header().Set("HX-Trigger", fmt.Sprintf(`{"showToast": {"message": "Service '%s' permanently deleted", "type": "info"}}`, deletedName))
 	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write([]byte(`{"status": "permanently_deleted"}`))
 }
