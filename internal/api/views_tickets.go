@@ -941,11 +941,13 @@ func (v VulnInfo) OfficialURL() string {
 }
 
 type VulnSummary struct {
-	Critical int
-	High     int
-	Medium   int
-	Low      int
-	Total    int
+	Critical  int
+	High      int
+	Medium    int
+	Low       int
+	Total     int
+	ScannedAt string
+	IsCached  bool
 }
 
 // RenderApprovalDetail renders the dedicated full-page DevOps review workspace for a specific ticket/service
@@ -1205,14 +1207,25 @@ func RenderApprovalDetail(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	wibLoc := time.FixedZone("WIB", 7*3600)
+	if cachedJSON != "" {
+		summary.IsCached = true
+	}
+
 	if len(outputData) > 0 {
 		var report struct {
-			Results []struct {
+			CreatedAt string `json:"CreatedAt"`
+			Results   []struct {
 				Target          string     `json:"Target"`
 				Vulnerabilities []VulnInfo `json:"Vulnerabilities"`
 			} `json:"Results"`
 		}
 		if errJSON := json.Unmarshal(outputData, &report); errJSON == nil {
+			if report.CreatedAt != "" {
+				if t, errT := time.Parse(time.RFC3339, report.CreatedAt); errT == nil {
+					summary.ScannedAt = t.In(wibLoc).Format("2006-01-02 15:04 WIB")
+				}
+			}
 			for _, res := range report.Results {
 				for _, v := range res.Vulnerabilities {
 					v.TargetFile = res.Target
@@ -1233,21 +1246,11 @@ func RenderApprovalDetail(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// If scan produced 0 vulns due to network or empty cache, ensure known local finding is represented
-	if len(vulnList) == 0 {
-		v := VulnInfo{
-			TargetFile:       "package-lock.json",
-			VulnerabilityID:  "CVE-2026-41907",
-			PkgName:          "uuid",
-			InstalledVersion: "8.3.2",
-			FixedVersion:     "11.1.1, 12.0.1, 13.0.1",
-			Severity:         "MEDIUM",
-			Title:            "uuid: Out-of-bounds write vulnerability impacts data integrity and confidentiality",
-			PrimaryURL:       "https://avd.aquasec.com/nvd/cve-2026-41907",
-		}
-		vulnList = append(vulnList, v)
-		summary.Medium++
-		summary.Total++
+	if summary.ScannedAt == "" && len(outputData) > 0 {
+		summary.ScannedAt = time.Now().In(wibLoc).Format("2006-01-02 15:04 WIB")
+	}
+	if summary.ScannedAt == "" {
+		summary.ScannedAt = "Not scanned yet"
 	}
 
 	availableBranches := []string{"main", "ci/portal", "dev", "staging"}

@@ -77,6 +77,29 @@ func CatalogTrivyScanHandler(w http.ResponseWriter, r *http.Request) {
 	forceRefresh := r.URL.Query().Get("refresh") == "true"
 	cacheKey := "trivy:report:" + serviceName + ":" + branch
 
+	// If refresh requested, purge cached JSON and HTML reports from Valkey and memory
+	if forceRefresh {
+		rdb := getTrivyRedisClient()
+		if rdb != nil {
+			ctx := r.Context()
+			pattern1 := fmt.Sprintf("trivy:*:%s:*", serviceName)
+			pattern2 := fmt.Sprintf("trivy:*:%s:*", strings.TrimSuffix(serviceName, "-clone"))
+			keys1, _ := rdb.Keys(ctx, pattern1).Result()
+			keys2, _ := rdb.Keys(ctx, pattern2).Result()
+			allKeys := append(keys1, keys2...)
+			if len(allKeys) > 0 {
+				_ = rdb.Del(ctx, allKeys...).Err()
+			}
+		}
+		trivyScanHtmlCacheMu.Lock()
+		for k := range trivyScanHtmlCache {
+			if strings.Contains(k, serviceName) {
+				delete(trivyScanHtmlCache, k)
+			}
+		}
+		trivyScanHtmlCacheMu.Unlock()
+	}
+
 	// 1. Check Valkey / Redis 15-minute TTL cache first unless refresh is requested
 	if !forceRefresh {
 		rdb := getTrivyRedisClient()
