@@ -190,6 +190,8 @@ func SetupRouter() *chi.Mux {
 			r.Get("/admin/audit-logs", RenderAdminAuditLogs)
 			r.Get("/api/v1/admin/audit-logs/export", ExportAuditLogsCSVHandler)
 			r.Post("/api/v1/admin/users", CreateUserHandler)
+			r.Post("/api/v1/admin/users/{id}/edit", EditUserHandler)
+			r.Post("/api/v1/admin/users/{id}", EditUserHandler)
 			r.Post("/api/v1/admin/users/{id}/shelves", UpdateUserShelvesHandler)
 			r.Delete("/api/v1/admin/users/{id}", DeleteUserHandler)
 			r.Post("/api/v1/admin/integrations", CreateIntegrationHandler)

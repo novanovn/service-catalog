@@ -201,6 +201,123 @@ func UpdateUserShelvesHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/admin/users", http.StatusSeeOther)
 }
 
+// EditUserHandler handles POST /api/v1/admin/users/{id}/edit (Admin only)
+// Updates full name, role, active status, and optionally password.
+func EditUserHandler(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	if id == "" {
+		http.Error(w, "User ID is required", http.StatusBadRequest)
+		return
+	}
+
+	if err := r.ParseForm(); err != nil {
+		w.Header().Set("HX-Trigger", `{"showToast": {"message": "Invalid form data provided", "type": "error"}}`)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if DB == nil {
+		w.Header().Set("HX-Trigger", `{"showToast": {"message": "Database unavailable", "type": "error"}}`)
+		w.WriteHeader(http.StatusServiceUnavailable)
+		return
+	}
+
+	var uid pgtype.UUID
+	if err := uid.Scan(id); err != nil {
+		w.Header().Set("HX-Trigger", `{"showToast": {"message": "Invalid user ID format", "type": "error"}}`)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	existingUser, err := DB.GetUserByID(r.Context(), uid)
+	if err != nil {
+		w.Header().Set("HX-Trigger", `{"showToast": {"message": "User not found in database", "type": "error"}}`)
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	fullName := strings.TrimSpace(r.FormValue("full_name"))
+	if fullName == "" {
+		fullName = existingUser.FullName
+	}
+
+	role := strings.ToLower(strings.TrimSpace(r.FormValue("role")))
+	if role == "" || !validUserRoles[role] {
+		role = string(existingUser.Role)
+	}
+
+	// Protection: root admin cannot be demoted away from admin role
+	if existingUser.Email == "admin@oona-insurance.com" && role != "admin" {
+		w.Header().Set("HX-Trigger", `{"showToast": {"message": "Root admin cannot be demoted from admin role", "type": "error"}}`)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	isActive := existingUser.IsActive
+	if activeVal := r.FormValue("is_active"); activeVal != "" {
+		isActive = (activeVal == "true" || activeVal == "on" || activeVal == "1")
+	}
+
+	// Protection: root admin cannot be deactivated
+	if existingUser.Email == "admin@oona-insurance.com" && !isActive {
+		w.Header().Set("HX-Trigger", `{"showToast": {"message": "Root admin cannot be deactivated", "type": "error"}}`)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	password := strings.TrimSpace(r.FormValue("password"))
+	var passwordHash string
+	passwordChanged := false
+	if password != "" {
+		if len(password) < 6 {
+			w.Header().Set("HX-Trigger", `{"showToast": {"message": "Password minimum 6 characters", "type": "error"}}`)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		hashed, hashErr := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+		if hashErr != nil {
+			w.Header().Set("HX-Trigger", `{"showToast": {"message": "Failed to encrypt password", "type": "error"}}`)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		passwordHash = string(hashed)
+		passwordChanged = true
+	}
+
+	updated, err := DB.UpdateUser(r.Context(), db.UpdateUserParams{
+		ID:           uid,
+		FullName:     fullName,
+		Role:         db.UserRole(role),
+		IsActive:     isActive,
+		PasswordHash: passwordHash,
+	})
+	if err != nil {
+		w.Header().Set("HX-Trigger", fmt.Sprintf(`{"showToast": {"message": "Update failed: %v", "type": "error"}}`, err))
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	RecordAudit(r.Context(), r, "UPDATE_USER", "user", updated.Email, map[string]interface{}{
+		"full_name":        fullName,
+		"role":             role,
+		"is_active":        isActive,
+		"password_changed": passwordChanged,
+	})
+
+	toastMsg := fmt.Sprintf("User '%s' updated successfully!", updated.Email)
+	if passwordChanged {
+		toastMsg = fmt.Sprintf("User '%s' updated & password reset successfully!", updated.Email)
+	}
+
+	w.Header().Set("HX-Trigger", fmt.Sprintf(`{"showToast": {"message": "%s", "type": "success"}}`, toastMsg))
+	if r.Header.Get("HX-Request") == "true" {
+		w.Header().Set("HX-Redirect", "/admin/users")
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+	http.Redirect(w, r, "/admin/users", http.StatusSeeOther)
+}
+
 // DeleteUserHandler handles DELETE /api/v1/admin/users/{id}
 func DeleteUserHandler(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")

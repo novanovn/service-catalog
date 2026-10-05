@@ -149,17 +149,16 @@
                             {{ end }}
                         </td>
                         <td class="px-3 py-4 text-right pr-4 sm:pr-4">
-                            <div class="flex items-center justify-end gap-3">
+                            <div class="flex items-center justify-end gap-3 text-xs font-semibold">
+                                <button type="button" onclick="openEditUserModal('{{ .ID }}', '{{ .FullName }}', '{{ .Email }}', '{{ .Role }}', {{ .IsActive }})" class="text-indigo-400 hover:text-indigo-300 cursor-pointer">Edit User</button>
                                 {{ if not (eq .Role "admin") }}
-                                <button type="button" onclick="toggleShelfEditor('{{ .ID }}')" class="text-indigo-400 hover:text-indigo-300 font-semibold">Edit Folders</button>
-                                {{ end }}
-                                {{ if not (eq .Role "admin") }}
+                                <button type="button" onclick="toggleShelfEditor('{{ .ID }}')" class="text-slate-400 hover:text-slate-300 cursor-pointer">Edit Folders</button>
                                 <button type="button"
                                     hx-delete="/api/v1/admin/users/{{ .ID }}"
                                     hx-confirm="Delete user {{ .Email }}? This cannot be undone."
                                     hx-target="closest tr"
                                     hx-swap="outerHTML swap:0.2s"
-                                    class="text-red-400 hover:text-red-300 font-semibold">Delete</button>
+                                    class="text-red-400 hover:text-red-300 cursor-pointer">Delete</button>
                                 {{ else }}
                                 <span class="text-slate-600 text-[11px] font-mono">System Root</span>
                                 {{ end }}
@@ -205,6 +204,79 @@
     </div>
 </div>
 
+<!-- MODAL: EDIT USER & GANTI PASSWORD -->
+<div id="modal-edit-user" class="fixed inset-0 z-[10000] hidden flex items-center justify-center p-4" aria-modal="true" role="dialog">
+    <div onclick="closeEditUserModal()" class="fixed inset-0 bg-black/75 backdrop-blur-sm transition-opacity"></div>
+    <div class="relative w-full max-w-md rounded-2xl bg-[#171717] border border-[#282828] shadow-2xl p-6 text-white z-10 transition-all">
+        <!-- Header -->
+        <div class="flex items-center justify-between pb-3 mb-5 border-b border-[#242424]">
+            <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-lg bg-purple-500/10 border border-purple-500/20 text-[#a78bfa] flex items-center justify-center flex-shrink-0">
+                    <svg class="w-4 h-4 stroke-current fill-none" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-sm font-bold text-white">Edit User & Password</h3>
+                    <p class="text-xs text-slate-400">Update identitas, role, atau ganti kata sandi</p>
+                </div>
+            </div>
+            <button type="button" onclick="closeEditUserModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+                <svg class="w-4 h-4 stroke-current fill-none" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Form -->
+        <form id="edit-user-form" method="POST" class="space-y-4 text-xs font-mono">
+            <div>
+                <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1">Email Address</label>
+                <input type="email" id="edit-user-email" disabled class="block w-full rounded-xl bg-[#121212] border border-[#282828] py-2 px-3.5 text-slate-400 text-xs cursor-not-allowed"/>
+            </div>
+
+            <div>
+                <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1">Full Name</label>
+                <input type="text" name="full_name" id="edit-user-fullname" required class="block w-full rounded-xl bg-[#121212] border border-[#282828] py-2 px-3.5 text-white focus:ring-2 focus:ring-purple-500 text-xs"/>
+            </div>
+
+            <div>
+                <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1">Role / Access Scope</label>
+                <select name="role" id="edit-user-role" class="block w-full rounded-xl bg-[#121212] border border-[#282828] py-2 px-3.5 text-white focus:ring-2 focus:ring-purple-500 text-xs">
+                    <option value="developer">Developer (Submit tickets, View catalog)</option>
+                    <option value="lead">Lead (Manage & Archive Services — Scoped Access)</option>
+                    <option value="devops">DevOps (Approve Infra & Jenkins — Global Access)</option>
+                    <option value="admin">Admin (Full Access & Integrations — Global Access)</option>
+                </select>
+                <p id="edit-user-role-notice" class="hidden text-[10.5px] text-amber-400/90 mt-1">★ Akun Root Admin tidak dapat diubah rolenya.</p>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-[#121212] border border-[#262626] space-y-2">
+                <div class="flex items-center justify-between">
+                    <label class="block text-[11px] font-bold text-amber-300 uppercase tracking-wider">Ganti Password</label>
+                    <span class="text-[10px] text-slate-500 italic">Opsional</span>
+                </div>
+                <input type="password" name="password" id="edit-user-password" placeholder="Biarkan kosong jika tidak ingin ganti..." class="block w-full rounded-xl bg-[#181818] border border-[#333333] py-2 px-3 text-white placeholder:text-slate-600 focus:ring-2 focus:ring-amber-500 text-xs"/>
+                <p class="text-[10.5px] text-slate-400">Minimal 6 karakter jika ingin mengganti kata sandi baru.</p>
+            </div>
+
+            <div class="flex items-center gap-2 pt-1" id="edit-user-active-container">
+                <input type="checkbox" name="is_active" id="edit-user-active" value="true" class="rounded border-[#333333] bg-[#121212] text-[#7c3aed] focus:ring-purple-500"/>
+                <label for="edit-user-active" class="text-xs text-slate-300 cursor-pointer">Account Status: Active</label>
+            </div>
+
+            <div class="flex items-center justify-end gap-2.5 pt-4 border-t border-[#242424]">
+                <button type="button" onclick="closeEditUserModal()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-[#222222] hover:bg-[#2a2a2a] text-slate-300 border border-[#333333] transition-colors cursor-pointer">
+                    Batal
+                </button>
+                <button type="submit" class="px-4 py-2 rounded-xl text-xs font-bold bg-[#7c3aed] hover:bg-[#6d28d9] text-white shadow-sm transition-all cursor-pointer">
+                    Simpan Perubahan
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
     function toggleShelfPicker() {
         const role = document.getElementById('new-user-role').value;
@@ -217,6 +289,44 @@
     function toggleShelfEditor(userId) {
         const row = document.getElementById('shelf-editor-' + userId);
         if (row) row.classList.toggle('hidden');
+    }
+
+    let currentEditingUserId = '';
+
+    function openEditUserModal(id, fullName, email, role, isActive) {
+        currentEditingUserId = id;
+        document.getElementById('edit-user-fullname').value = fullName;
+        document.getElementById('edit-user-email').value = email;
+        document.getElementById('edit-user-role').value = role;
+        document.getElementById('edit-user-password').value = '';
+        document.getElementById('edit-user-active').checked = isActive;
+
+        const isRootAdmin = (email === 'admin@oona-insurance.com');
+        const roleSelect = document.getElementById('edit-user-role');
+        const roleNotice = document.getElementById('edit-user-role-notice');
+        const activeContainer = document.getElementById('edit-user-active-container');
+
+        if (isRootAdmin) {
+            roleSelect.disabled = true;
+            roleNotice.classList.remove('hidden');
+            activeContainer.classList.add('hidden');
+        } else {
+            roleSelect.disabled = false;
+            roleNotice.classList.add('hidden');
+            activeContainer.classList.remove('hidden');
+        }
+
+        const form = document.getElementById('edit-user-form');
+        form.setAttribute('hx-post', '/api/v1/admin/users/' + id + '/edit');
+        if (window.htmx) {
+            htmx.process(form);
+        }
+
+        document.getElementById('modal-edit-user').classList.remove('hidden');
+    }
+
+    function closeEditUserModal() {
+        document.getElementById('modal-edit-user').classList.add('hidden');
     }
 </script>
 {{ end }}

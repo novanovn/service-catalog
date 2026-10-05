@@ -71,7 +71,8 @@ func (q *Queries) DeleteUser(ctx context.Context, id pgtype.UUID) error {
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, email, full_name, password_hash, role, is_active, created_at, updated_at, assigned_shelves FROM users
+SELECT id, email, full_name, password_hash, role, is_active, created_at, updated_at, assigned_shelves
+FROM users
 WHERE email = $1 LIMIT 1
 `
 
@@ -92,8 +93,32 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 	return i, err
 }
 
+const getUserByID = `-- name: GetUserByID :one
+SELECT id, email, full_name, password_hash, role, is_active, created_at, updated_at, assigned_shelves
+FROM users
+WHERE id = $1 LIMIT 1
+`
+
+func (q *Queries) GetUserByID(ctx context.Context, id pgtype.UUID) (User, error) {
+	row := q.db.QueryRow(ctx, getUserByID, id)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.FullName,
+		&i.PasswordHash,
+		&i.Role,
+		&i.IsActive,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.AssignedShelves,
+	)
+	return i, err
+}
+
 const listUsers = `-- name: ListUsers :many
-SELECT id, email, full_name, password_hash, role, is_active, created_at, updated_at, assigned_shelves FROM users
+SELECT id, email, full_name, password_hash, role, is_active, created_at, updated_at, assigned_shelves
+FROM users
 ORDER BY created_at DESC
 `
 
@@ -125,6 +150,62 @@ func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateUser = `-- name: UpdateUser :one
+UPDATE users
+SET 
+    full_name = $2,
+    role = $3,
+    is_active = $4,
+    password_hash = CASE 
+        WHEN $5::text != '' THEN $5::text 
+        ELSE password_hash 
+    END,
+    updated_at = NOW()
+WHERE id = $1
+RETURNING id, email, full_name, role, is_active, assigned_shelves, created_at, updated_at
+`
+
+type UpdateUserParams struct {
+	ID           pgtype.UUID `json:"id"`
+	FullName     string      `json:"full_name"`
+	Role         UserRole    `json:"role"`
+	IsActive     bool        `json:"is_active"`
+	PasswordHash string      `json:"password_hash"`
+}
+
+type UpdateUserRow struct {
+	ID              pgtype.UUID        `json:"id"`
+	Email           string             `json:"email"`
+	FullName        string             `json:"full_name"`
+	Role            UserRole           `json:"role"`
+	IsActive        bool               `json:"is_active"`
+	AssignedShelves []string           `json:"assigned_shelves"`
+	CreatedAt       pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
+}
+
+func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (UpdateUserRow, error) {
+	row := q.db.QueryRow(ctx, updateUser,
+		arg.ID,
+		arg.FullName,
+		arg.Role,
+		arg.IsActive,
+		arg.PasswordHash,
+	)
+	var i UpdateUserRow
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.FullName,
+		&i.Role,
+		&i.IsActive,
+		&i.AssignedShelves,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }
 
 const updateUserShelves = `-- name: UpdateUserShelves :one
