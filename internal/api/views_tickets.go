@@ -223,7 +223,7 @@ func fetchLiveTerraformBranchesInternal(ctx context.Context, forceRefresh bool) 
 
 	var names []string
 	for _, b := range branchList {
-		if b.Name != "" {
+		if b.Name != "" && !strings.HasPrefix(b.Name, "agent/") && !strings.HasPrefix(b.Name, "ci/") {
 			names = append(names, b.Name)
 		}
 	}
@@ -282,8 +282,8 @@ func listLocalGitBranches(ctx context.Context) []string {
 			if line == "" || line == "HEAD" || line == "origin" || seen[line] {
 				continue
 			}
-			// Skip ephemeral agent/bot branches — never relevant to a DevOps approval review
-			if strings.HasPrefix(line, "agent/") {
+			// Skip ephemeral agent/bot branches and experimental ci/* branches per workflow standard
+			if strings.HasPrefix(line, "agent/") || strings.HasPrefix(line, "ci/") {
 				continue
 			}
 			seen[line] = true
@@ -923,7 +923,7 @@ func RenderApprovalDashboard(w http.ResponseWriter, r *http.Request) {
 			pipelineName := fmt.Sprintf("lmd-oona-%s-%s-%s", countryLower, domainLower, cleanName)
 			tfPath := fmt.Sprintf("02-app-setup/%s/%s/%s/services/%s", domainLower, countryLower, tEnv, cleanName)
 
-			candidateBranches := []string{"main", "ci/portal"}
+			candidateBranches := []string{"main", "dev", "staging", "uat"}
 			detectedBranch := "main"
 			tfExists := false
 
@@ -1153,7 +1153,7 @@ func RenderApprovalDetail(w http.ResponseWriter, r *http.Request) {
 	pipelineName := fmt.Sprintf("lmd-oona-%s-%s-%s", countryLower, domainLower, cleanName)
 	tfPath := fmt.Sprintf("02-app-setup/%s/%s/%s/services/%s", domainLower, countryLower, targetEnv, cleanName)
 
-	candidateBranches := []string{"main", "ci/portal", "dev", "staging"}
+	candidateBranches := []string{"main", "dev", "staging", "uat"}
 	detectedBranch := "main"
 	tfExists := false
 
