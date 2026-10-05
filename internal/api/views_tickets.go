@@ -282,11 +282,30 @@ func listLocalGitBranches(ctx context.Context) []string {
 			if line == "" || line == "HEAD" || line == "origin" || seen[line] {
 				continue
 			}
+			// Skip ephemeral agent/bot branches — never relevant to a DevOps approval review
+			if strings.HasPrefix(line, "agent/") {
+				continue
+			}
 			seen[line] = true
 			names = append(names, line)
 		}
 		if len(names) > 0 {
-			return names
+			// main is the single source of truth for CI/CD; always pin it first
+			// regardless of its position in the commit-date-sorted local list.
+			filtered := make([]string, 0, len(names))
+			filtered = append(filtered, "main")
+			for _, n := range names {
+				if n != "main" {
+					filtered = append(filtered, n)
+				}
+			}
+			// Cap the list so the dropdown stays usable — main plus the dozen
+			// most recently touched branches is enough for a review workflow.
+			const maxBranches = 12
+			if len(filtered) > maxBranches {
+				filtered = filtered[:maxBranches]
+			}
+			return filtered
 		}
 	}
 	return nil
@@ -904,7 +923,7 @@ func RenderApprovalDashboard(w http.ResponseWriter, r *http.Request) {
 			pipelineName := fmt.Sprintf("lmd-oona-%s-%s-%s", countryLower, domainLower, cleanName)
 			tfPath := fmt.Sprintf("02-app-setup/%s/%s/%s/services/%s", domainLower, countryLower, tEnv, cleanName)
 
-			candidateBranches := []string{"ci/portal", "main"}
+			candidateBranches := []string{"main", "ci/portal"}
 			detectedBranch := "main"
 			tfExists := false
 
@@ -1134,7 +1153,7 @@ func RenderApprovalDetail(w http.ResponseWriter, r *http.Request) {
 	pipelineName := fmt.Sprintf("lmd-oona-%s-%s-%s", countryLower, domainLower, cleanName)
 	tfPath := fmt.Sprintf("02-app-setup/%s/%s/%s/services/%s", domainLower, countryLower, targetEnv, cleanName)
 
-	candidateBranches := []string{"ci/portal", "main", "dev", "staging"}
+	candidateBranches := []string{"main", "ci/portal", "dev", "staging"}
 	detectedBranch := "main"
 	tfExists := false
 
