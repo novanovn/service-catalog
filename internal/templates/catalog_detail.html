@@ -425,7 +425,7 @@
                 hx-target="#logs-container"
                 type="button" 
                 class="inline-flex items-center gap-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white px-3.5 py-2 text-xs font-bold shadow-sm transition-all cursor-pointer border border-slate-700/80">
-                <img src="/static/img/brands/jenkins.svg" alt="" class="brand-icon" width="16" height="16">
+                <svg class="w-4 h-4 stroke-current fill-none" viewBox="0 0 24 24" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
                 View CI Logs
             </button>
         </div>
@@ -816,42 +816,46 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             
             <!-- Card 1: CI/CD Pipeline & Repo -->
-            <div class="bg-slate-900/90 border border-slate-800/80 rounded-2xl p-4 shadow-xl shadow-black/20 backdrop-blur-xl relative overflow-hidden group hover:border-indigo-500/50 transition-all">
+            <div class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-4 shadow-xl shadow-slate-900/5 dark:shadow-black/20 backdrop-blur-xl relative overflow-hidden group hover:border-indigo-500/50 transition-all">
                 <div class="flex items-center justify-between mb-2">
-                    <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400 inline-flex items-center gap-1.5">
-                        <img src="/static/img/brands/jenkins.svg" alt="" class="brand-icon" width="16" height="16">
+                    <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                         CI/CD Pipeline
                     </span>
                     {{ if not .JenkinsKnown }}
-                    <span class="inline-flex items-center gap-1 rounded-md bg-slate-800 px-1.5 py-0.5 text-[10px] font-semibold text-slate-300 ring-1 ring-slate-700">Unknown</span>
+                    <span class="inline-flex items-center gap-1 rounded-md bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 text-[10px] font-semibold text-slate-600 dark:text-slate-300 ring-1 ring-slate-200 dark:ring-slate-700">Unknown</span>
                     {{ else if .JenkinsExists }}
-                    <span class="inline-flex items-center gap-1 rounded-md bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-400 ring-1 ring-emerald-500/30">In Jenkins</span>
+                    <span class="inline-flex items-center gap-1 rounded-md bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 ring-1 ring-emerald-500/30">Active</span>
                     {{ else }}
-                    <span class="inline-flex items-center gap-1 rounded-md bg-rose-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-rose-400 ring-1 ring-rose-500/30">Missing</span>
+                    <span class="inline-flex items-center gap-1 rounded-md bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700 dark:text-amber-300 ring-1 ring-amber-500/30">Not Created</span>
                     {{ end }}
                 </div>
                 <div class="mt-1">
                     {{ if and .JenkinsKnown .JenkinsExists }}
-                    <a href="{{ .JenkinsURL }}" target="_blank" rel="noopener" class="font-mono text-xs font-bold text-indigo-400 break-all leading-snug hover:underline" title="{{ .PipelineName }}">{{ .PipelineName }}</a>
+                    <a href="{{ .JenkinsURL }}" target="_blank" rel="noopener" class="font-mono text-xs font-bold text-indigo-600 dark:text-indigo-400 break-all leading-snug hover:underline" title="{{ .PipelineName }}">{{ .PipelineName }}</a>
                     {{ else }}
-                    <p class="font-mono text-xs font-bold text-indigo-400 break-all leading-snug" title="{{ .PipelineName }}">{{ .PipelineName }}</p>
+                    <p class="font-mono text-xs font-bold text-slate-700 dark:text-indigo-400 break-all leading-snug" title="{{ .PipelineName }}">{{ .PipelineName }}</p>
                     {{ end }}
                 </div>
-                <div class="mt-3 pt-2.5 border-t border-slate-800/80 flex items-center justify-between gap-2 text-[11px]">
+                <div class="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-2 text-[11px]">
                     <span class="text-slate-400">Domain / Country</span>
-                    <span class="font-semibold text-slate-200">{{ .Domain }} &middot; {{ .Country }}</span>
+                    <span class="font-semibold text-slate-700 dark:text-slate-200">{{ .Domain }} &middot; {{ .Country }}</span>
                 </div>
                 {{ if and (eq .User.Role "admin") .JenkinsKnown (not .JenkinsExists) }}
+                {{ if or (eq .Status "DRAFT") (eq .Status "PENDING_INFRA") }}
+                <div class="mt-3 w-full py-1.5 px-2 rounded-lg bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 text-[10.5px] text-center text-slate-500 dark:text-slate-400 font-mono">
+                    Provisioned upon DevOps approval
+                </div>
+                {{ else }}
                 <button
                     type="button"
                     hx-post="/api/v1/catalog/{{ .ServiceName }}/recreate-pipeline"
-                    hx-confirm="Recreate Jenkins job {{ .PipelineName }} from terraform.tfvars existing_github_repo_id? This does not provision the Lambda."
-                    class="mt-3 w-full inline-flex items-center justify-center gap-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 px-3 py-1.5 text-[11px] font-bold text-white shadow-sm cursor-pointer">
-                    <img src="/static/img/brands/jenkins.svg" alt="" class="brand-icon" width="16" height="16">
-                    Recreate pipeline
+                    hx-confirm="Provision pipeline job {{ .PipelineName }} from IaC config? This does not provision the Lambda."
+                    class="mt-3 w-full inline-flex items-center justify-center gap-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 px-3 py-1.5 text-[11px] font-bold text-white shadow-sm cursor-pointer transition-all">
+                    Provision pipeline
                 </button>
+                {{ end }}
                 {{ else if and (eq .User.Role "admin") (not .JenkinsKnown) }}
-                <p class="mt-3 text-[10px] text-slate-500">Jenkins unreachable — Recreate disabled until probe succeeds.</p>
+                <p class="mt-3 text-[10px] text-slate-400">CI server probe pending.</p>
                 {{ end }}
             </div>
 
