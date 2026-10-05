@@ -45,6 +45,10 @@ WHERE status = $1;
 DELETE FROM tickets
 WHERE id = $1;
 
+-- name: DeleteTicketsByServiceName :exec
+DELETE FROM tickets
+WHERE LOWER(service_name) = LOWER($1);
+
 -- name: UpdateTicketAIAnalysis :one
 UPDATE tickets
 SET ai_analysis = $2, ai_analyzed_at = NOW(), updated_at = NOW()

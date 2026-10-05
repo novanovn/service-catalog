@@ -86,6 +86,16 @@ func (q *Queries) DeleteTicket(ctx context.Context, id pgtype.UUID) error {
 	return err
 }
 
+const deleteTicketsByServiceName = `-- name: DeleteTicketsByServiceName :exec
+DELETE FROM tickets
+WHERE LOWER(service_name) = LOWER($1)
+`
+
+func (q *Queries) DeleteTicketsByServiceName(ctx context.Context, lower string) error {
+	_, err := q.db.Exec(ctx, deleteTicketsByServiceName, lower)
+	return err
+}
+
 const getTicketAIAnalysis = `-- name: GetTicketAIAnalysis :one
 SELECT id, service_name, ai_analysis, ai_analyzed_at
 FROM tickets

@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 
@@ -459,6 +460,46 @@ func (cs *CatalogStore) PermanentDelete(id string) (string, bool) {
 				found = true
 			}
 		}
+
+		if deletedName != "" {
+			_ = DB.DeleteTicketsByServiceName(ctx, deletedName)
+		}
+	}
+
+	if deletedName != "" {
+		// Purge Valkey / Redis cache for Trivy reports and scan schedules
+		rdb := getTrivyRedisClient()
+		if rdb != nil {
+			ctx := context.Background()
+			pattern := fmt.Sprintf("trivy:report:%s:*", deletedName)
+			keys, _ := rdb.Keys(ctx, pattern).Result()
+			if len(keys) > 0 {
+				_ = rdb.Del(ctx, keys...).Err()
+			}
+			_ = rdb.Del(ctx, fmt.Sprintf("scan_schedule:%s", deletedName)).Err()
+		}
+
+		// Clear in-memory caches
+		trivyScanHtmlCacheMu.Lock()
+		for k := range trivyScanHtmlCache {
+			if strings.Contains(k, deletedName) {
+				delete(trivyScanHtmlCache, k)
+			}
+		}
+		trivyScanHtmlCacheMu.Unlock()
+
+		tfvarsCacheMu.Lock()
+		for k := range tfvarsCache {
+			if strings.Contains(k, deletedName) {
+				delete(tfvarsCache, k)
+			}
+		}
+		tfvarsCacheMu.Unlock()
+
+		// Purge disk cache for TechDocs & JSON
+		_ = os.RemoveAll(filepath.Join("internal/docs/cache", deletedName))
+		_ = os.RemoveAll(filepath.Join("internal/docs/cache", "lmd-oona-ph-integration-"+deletedName))
+		_ = os.RemoveAll(filepath.Join("internal/docs/cache", "lmd-oona-id-integration-"+deletedName))
 	}
 
 	if found {
