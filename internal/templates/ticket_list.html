@@ -57,13 +57,12 @@
                         <tr class="ticket-row hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors" data-name="{{ .ServiceName }}" data-ticket="{{ .TicketCode }}" data-jira="{{ .JiraID }}" data-domain="{{ .Domain }}" data-country="{{ .Country }}" data-status="{{ .Status }}">
                             <!-- 1. Ticket / Jira -->
                             <td class="py-3 pl-4 pr-3 whitespace-nowrap">
-                                <div class="font-mono font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-1.5">
-                                    <svg class="h-3.5 w-3.5 text-indigo-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 002 2h14a2 2 0 002-2V7a2 2 0 00-2-2H5z"></path></svg>
+                                <div class="font-mono font-bold text-indigo-600 dark:text-indigo-400">
                                     {{ .TicketCode }}
                                 </div>
                                 {{ if .JiraID }}
                                 <div class="mt-1">
-                                    <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10.5px] font-mono font-semibold bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20">
+                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10.5px] font-mono font-semibold bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20">
                                         {{ .JiraID }}
                                     </span>
                                 </div>
@@ -154,8 +153,7 @@
                     {{ if or (eq .Status "WAITING_INFRA") (eq .Status "PENDING_INFRA") (eq .Status "DRAFT") (eq .Status "PENDING_REVIEW") }}
                     <div class="ticket-card bg-white p-4 rounded-lg shadow-sm ring-1 ring-slate-900/5 hover:shadow-md hover:ring-amber-400 transition-all cursor-pointer group" data-name="{{ .ServiceName }}" data-ticket="{{ .TicketCode }}" data-jira="{{ .JiraID }}" data-domain="{{ .Domain }}" data-country="{{ .Country }}">
                         <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
-                            <span class="font-mono font-bold text-indigo-600 flex items-center gap-1">
-                                <svg class="h-3 w-3 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 002 2h14a2 2 0 002-2V7a2 2 0 00-2-2H5z"></path></svg>
+                            <span class="font-mono font-bold text-indigo-600">
                                 {{ .TicketCode }}
                             </span>
                             <span class="text-[10px] text-slate-400">{{ .CreatedAt }}</span>
@@ -193,8 +191,7 @@
                     {{ if or (eq .Status "SCANNING") (eq .Status "INFRA_DETECTED") }}
                     <div class="ticket-card bg-white p-4 rounded-lg shadow-sm ring-1 ring-slate-900/5 hover:shadow-md hover:ring-cyan-400 transition-all cursor-pointer group" data-name="{{ .ServiceName }}" data-ticket="{{ .TicketCode }}" data-jira="{{ .JiraID }}" data-domain="{{ .Domain }}" data-country="{{ .Country }}">
                         <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
-                            <span class="font-mono font-bold text-indigo-600 flex items-center gap-1">
-                                <svg class="h-3 w-3 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 002 2h14a2 2 0 002-2V7a2 2 0 00-2-2H5z"></path></svg>
+                            <span class="font-mono font-bold text-indigo-600">
                                 {{ .TicketCode }}
                             </span>
                             <span class="text-[10px] text-slate-400">{{ .CreatedAt }}</span>
@@ -232,8 +229,7 @@
                     {{ if or (eq .Status "JENKINS_READY") (eq .Status "BUILDING") (eq .Status "DEPLOYING") }}
                     <div class="ticket-card bg-white p-4 rounded-lg shadow-sm ring-1 ring-slate-900/5 hover:shadow-md hover:ring-purple-400 transition-all cursor-pointer group" data-name="{{ .ServiceName }}" data-ticket="{{ .TicketCode }}" data-jira="{{ .JiraID }}" data-domain="{{ .Domain }}" data-country="{{ .Country }}">
                         <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
-                            <span class="font-mono font-bold text-indigo-600 flex items-center gap-1">
-                                <svg class="h-3 w-3 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 002 2h14a2 2 0 002-2V7a2 2 0 00-2-2H5z"></path></svg>
+                            <span class="font-mono font-bold text-indigo-600">
                                 {{ .TicketCode }}
                             </span>
                             <span class="text-[10px] text-slate-400">{{ .CreatedAt }}</span>
@@ -271,8 +267,7 @@
                     {{ if or (eq .Status "LIVE") (eq .Status "APPROVED") }}
                     <div class="ticket-card bg-white p-4 rounded-lg shadow-sm ring-1 ring-slate-900/5 hover:shadow-md hover:ring-emerald-400 transition-all cursor-pointer group" data-name="{{ .ServiceName }}" data-ticket="{{ .TicketCode }}" data-jira="{{ .JiraID }}" data-domain="{{ .Domain }}" data-country="{{ .Country }}">
                         <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
-                            <span class="font-mono font-bold text-indigo-600 flex items-center gap-1">
-                                <svg class="h-3 w-3 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 002 2h14a2 2 0 002-2V7a2 2 0 00-2-2H5z"></path></svg>
+                            <span class="font-mono font-bold text-indigo-600">
                                 {{ .TicketCode }}
                             </span>
                             <span class="text-[10px] text-slate-400">{{ .CreatedAt }}</span>
