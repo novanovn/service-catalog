@@ -162,14 +162,25 @@ var (
 
 // FetchLiveTerraformBranches connects to GitHub REST API and fetches active repository branches in oona-dtc-country-terraform-iac
 func FetchLiveTerraformBranches(ctx context.Context) []string {
-	branchesCacheMu.RLock()
-	if len(branchesCache) > 0 && time.Since(branchesFetchedAt) < 10*time.Minute {
-		res := make([]string, len(branchesCache))
-		copy(res, branchesCache)
+	return fetchLiveTerraformBranchesInternal(ctx, false)
+}
+
+// RefreshLiveTerraformBranches forces a cache bypass and re-fetches branches from GitHub
+func RefreshLiveTerraformBranches(ctx context.Context) []string {
+	return fetchLiveTerraformBranchesInternal(ctx, true)
+}
+
+func fetchLiveTerraformBranchesInternal(ctx context.Context, forceRefresh bool) []string {
+	if !forceRefresh {
+		branchesCacheMu.RLock()
+		if len(branchesCache) > 0 && time.Since(branchesFetchedAt) < 10*time.Minute {
+			res := make([]string, len(branchesCache))
+			copy(res, branchesCache)
+			branchesCacheMu.RUnlock()
+			return res
+		}
 		branchesCacheMu.RUnlock()
-		return res
 	}
-	branchesCacheMu.RUnlock()
 
 	targetURL := "https://api.github.com/repos/oona-insurance/oona-dtc-country-terraform-iac/branches"
 
@@ -950,6 +961,17 @@ type VulnSummary struct {
 	IsCached  bool
 }
 
+// RefreshBranchesHandler forces a re-fetch of live branches from GitHub, bypassing the 10-minute cache.
+// Used by the manual refresh button next to the Branch selector in the approval detail page.
+func RefreshBranchesHandler(w http.ResponseWriter, r *http.Request) {
+	branches := RefreshLiveTerraformBranches(r.Context())
+	w.Header().Set("Content-Type", "application/json")
+	_ = json.NewEncoder(w).Encode(map[string]interface{}{
+		"branches": branches,
+		"count":    len(branches),
+	})
+}
+
 // RenderApprovalDetail renders the dedicated full-page DevOps review workspace for a specific ticket/service
 func RenderApprovalDetail(w http.ResponseWriter, r *http.Request) {
 	tmpl, err := parsePage("approval_detail.html")
@@ -1253,7 +1275,18 @@ func RenderApprovalDetail(w http.ResponseWriter, r *http.Request) {
 		summary.ScannedAt = "Not scanned yet"
 	}
 
-	availableBranches := []string{"main", "ci/portal", "dev", "staging"}
+	availableBranches := FetchLiveTerraformBranches(r.Context())
+	// Always ensure the currently detected/target branch appears in the list
+	hasTargetBranch := false
+	for _, b := range availableBranches {
+		if b == detectedBranch {
+			hasTargetBranch = true
+			break
+		}
+	}
+	if !hasTargetBranch {
+		availableBranches = append([]string{detectedBranch}, availableBranches...)
+	}
 
 	data := struct {
 		Title             string

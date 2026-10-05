@@ -149,6 +149,9 @@
                             <option value="{{ . }}" {{ if eq . $.Item.TargetBranch }}selected{{ end }}>{{ . }}</option>
                             {{ end }}
                         </select>
+                        <button type="button" onclick="refreshBranchList()" id="btn-refresh-branches" class="p-1.5 rounded-lg text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors cursor-pointer border border-slate-300 dark:border-slate-700" title="Refresh branch list from GitHub">
+                            <svg id="branch-refresh-spinner" class="w-3.5 h-3.5 stroke-current fill-none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                        </button>
                     </div>
                 </div>
 
@@ -554,6 +557,45 @@
         if (match) return match[2];
         const tokenMeta = document.querySelector('meta[name="csrf-token"]');
         return tokenMeta ? tokenMeta.getAttribute('content') : '';
+    }
+
+    function refreshBranchList() {
+        const spinner = document.getElementById('branch-refresh-spinner');
+        const btn = document.getElementById('btn-refresh-branches');
+        const select = document.getElementById('detail-branch-select');
+        if (spinner) spinner.classList.add('animate-spin');
+        if (btn) btn.disabled = true;
+
+        fetch('/api/v1/terraform/branches/refresh', {
+            headers: { 'X-CSRF-Token': getCSRFToken() }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (select && Array.isArray(data.branches)) {
+                const currentValue = select.value;
+                select.innerHTML = '';
+                data.branches.forEach(b => {
+                    const opt = document.createElement('option');
+                    opt.value = b;
+                    opt.textContent = b;
+                    if (b === currentValue) opt.selected = true;
+                    select.appendChild(opt);
+                });
+                if (!data.branches.includes(currentValue)) {
+                    // Keep showing the previously selected branch at top so it's not silently dropped
+                    const keepOpt = document.createElement('option');
+                    keepOpt.value = currentValue;
+                    keepOpt.textContent = currentValue;
+                    keepOpt.selected = true;
+                    select.insertBefore(keepOpt, select.firstChild);
+                }
+            }
+        })
+        .catch(() => {})
+        .finally(() => {
+            if (spinner) spinner.classList.remove('animate-spin');
+            if (btn) btn.disabled = false;
+        });
     }
 
     function onDetailBranchChange(branch) {

@@ -173,6 +173,7 @@ func SetupRouter() *chi.Mux {
 			r.Post("/api/v1/tickets/{id}/approve", ApproveTicketHandler)
 			r.Post("/api/v1/tickets/{id}/reject", RejectTicketHandler)
 			r.Get("/api/v1/tickets/{id}/verify-lambda", VerifyTicketLambdaHandler)
+			r.Get("/api/v1/terraform/branches/refresh", RefreshBranchesHandler)
 			r.Post("/api/v1/admin/parameters/{id}/edit", EditParameterHandler)
 		})
 
