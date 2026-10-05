@@ -182,7 +182,21 @@ func fetchLiveTerraformBranchesInternal(ctx context.Context, forceRefresh bool) 
 		branchesCacheMu.RUnlock()
 	}
 
-	targetURL := "https://api.github.com/repos/oona-insurance/oona-dtc-country-terraform-iac/branches"
+	// 1. Prefer the locally mounted IaC repo — the GitHub repo is private and the
+	// container has no GITHUB_TOKEN, so the REST API call below always 404s.
+	// The local mount, however, is a full clone with every remote branch ref,
+	// so this is both faster and actually reflects what was just pushed.
+	if names := listLocalGitBranches(ctx); len(names) > 0 {
+		branchesCacheMu.Lock()
+		branchesCache = names
+		branchesFetchedAt = time.Now()
+		branchesCacheMu.Unlock()
+		return names
+	}
+
+	// 2. Fall back to the GitHub REST API (works if GITHUB_TOKEN is configured
+	// and the repo is reachable, e.g. in environments without a local mount).
+	targetURL := "https://api.github.com/repos/oona-insurance/oona-dtc-country-terraform-iac/branches?per_page=100"
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, targetURL, nil)
 	if err != nil {
@@ -224,6 +238,58 @@ func fetchLiveTerraformBranchesInternal(ctx context.Context, forceRefresh bool) 
 	branchesCacheMu.Unlock()
 
 	return names
+}
+
+// listLocalGitBranches reads remote branch refs directly from the locally mounted
+// Terraform IaC repo (git for-each-ref — no network, no GitHub token required).
+// This reflects branches immediately after `git push`, unlike the GitHub API path
+// which 404s against this private repo without a configured token.
+func listLocalGitBranches(ctx context.Context) []string {
+	localDirs := []string{
+		os.Getenv("TERRAFORM_IAC_DIR"),
+		"/terraform-iac",
+		"../oona-dtc-country-terraform-iac",
+		"/Users/novanhariman/Documents/Ngulik/oona-dtc-country-terraform-iac",
+	}
+
+	for _, dir := range localDirs {
+		if dir == "" {
+			continue
+		}
+		if fi, err := os.Stat(filepath.Join(dir, ".git")); err != nil || !fi.IsDir() {
+			continue
+		}
+
+		// Refresh remote refs if the mount is writable; ignore failures on read-only mounts.
+		fetchCtx, cancelFetch := context.WithTimeout(ctx, 4*time.Second)
+		_ = exec.CommandContext(fetchCtx, "git", "-C", dir, "fetch", "origin", "--prune", "--quiet").Run()
+		cancelFetch()
+
+		listCtx, cancel := context.WithTimeout(ctx, 2*time.Second)
+		cmd := exec.CommandContext(listCtx, "git", "-C", dir, "for-each-ref",
+			"--sort=-committerdate", "--format=%(refname:short)", "refs/remotes/origin/")
+		out, err := cmd.Output()
+		cancel()
+		if err != nil {
+			continue
+		}
+
+		var names []string
+		seen := make(map[string]bool)
+		for _, line := range strings.Split(strings.TrimSpace(string(out)), "\n") {
+			line = strings.TrimSpace(line)
+			line = strings.TrimPrefix(line, "origin/")
+			if line == "" || line == "HEAD" || line == "origin" || seen[line] {
+				continue
+			}
+			seen[line] = true
+			names = append(names, line)
+		}
+		if len(names) > 0 {
+			return names
+		}
+	}
+	return nil
 }
 
 var (
