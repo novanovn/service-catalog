@@ -39,80 +39,92 @@
 
     <!-- VIEW 1: TABULAR LIST VIEW -->
     <div id="view-list" class="block">
-        <div class="overflow-hidden bg-slate-900/90 border border-slate-800/80 rounded-2xl shadow-xl shadow-black/30 backdrop-blur-xl">
+        <div class="overflow-hidden bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/80 rounded-2xl shadow-xl shadow-slate-900/5 dark:shadow-black/30 backdrop-blur-xl">
             <div class="overflow-x-auto p-1 sm:p-2">
-                <table class="min-w-full divide-y divide-slate-800 text-left">
+                <table class="w-full divide-y divide-slate-200 dark:divide-slate-800 text-left table-auto">
                     <thead>
-                        <tr class="text-slate-400 text-xs font-semibold uppercase tracking-wider bg-slate-950/60">
-                            <th scope="col" class="py-3.5 pl-4 pr-3 sm:pl-4">Ticket ID</th>
-                            <th scope="col" class="px-3 py-3.5">Jira Issue</th>
-                            <th scope="col" class="px-3 py-3.5">Service Name</th>
-                            <th scope="col" class="px-3 py-3.5">Requestor</th>
-                            <th scope="col" class="px-3 py-3.5">Domain</th>
-                            <th scope="col" class="px-3 py-3.5">Country</th>
-                            <th scope="col" class="px-3 py-3.5">Status</th>
-                            <th scope="col" class="px-3 py-3.5">Created At</th>
-                            <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-4"><span class="sr-only">Actions</span></th>
+                        <tr class="text-slate-500 dark:text-slate-400 text-[11px] font-mono uppercase tracking-wider bg-slate-50 dark:bg-slate-950/60 border-b border-slate-200 dark:border-slate-800">
+                            <th scope="col" class="py-3 pl-4 pr-3">Ticket / Jira</th>
+                            <th scope="col" class="px-3 py-3">Service &amp; Shelf</th>
+                            <th scope="col" class="px-3 py-3">Requestor</th>
+                            <th scope="col" class="px-3 py-3">Status</th>
+                            <th scope="col" class="px-3 py-3">Created</th>
+                            <th scope="col" class="sticky right-0 bg-slate-50 dark:bg-slate-950 px-4 py-3 text-right z-10 border-l border-slate-200 dark:border-slate-800/80 shadow-[-6px_0_10px_-4px_rgba(0,0,0,0.08)]">Actions</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-800/60 text-xs">
+                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60 text-xs">
                         {{ range .Tickets }}
-                        <tr class="ticket-row hover:bg-slate-800/40 transition-colors" data-name="{{ .ServiceName }}" data-ticket="{{ .TicketCode }}" data-jira="{{ .JiraID }}" data-domain="{{ .Domain }}" data-country="{{ .Country }}" data-status="{{ .Status }}">
-                            <td class="whitespace-nowrap py-4 pl-4 pr-3 font-mono font-bold text-indigo-400 sm:pl-4">
-                                <span class="inline-flex items-center gap-1.5 bg-indigo-500/10 px-2.5 py-1 rounded-lg border border-indigo-500/20 text-indigo-400">
-                                    <svg class="h-3.5 w-3.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 002 2h14a2 2 0 002-2V7a2 2 0 00-2-2H5z"></path></svg>
+                        <tr class="ticket-row hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors" data-name="{{ .ServiceName }}" data-ticket="{{ .TicketCode }}" data-jira="{{ .JiraID }}" data-domain="{{ .Domain }}" data-country="{{ .Country }}" data-status="{{ .Status }}">
+                            <!-- 1. Ticket / Jira -->
+                            <td class="py-3 pl-4 pr-3 whitespace-nowrap">
+                                <div class="font-mono font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-1.5">
+                                    <svg class="h-3.5 w-3.5 text-indigo-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 002 2h14a2 2 0 002-2V7a2 2 0 00-2-2H5z"></path></svg>
                                     {{ .TicketCode }}
-                                </span>
-                            </td>
-                            <td class="whitespace-nowrap px-3 py-4 font-mono font-medium">
+                                </div>
                                 {{ if .JiraID }}
-                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[11px]">
-                                    <svg class="h-3 w-3 text-blue-400" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a8 8 0 100 16 8 8 0 000-16zm1 11H9v-2h2v2zm0-4H9V5h2v4z"/></svg>
-                                    {{ .JiraID }}
-                                </span>
-                                {{ else }}
-                                <span class="text-slate-600 font-mono text-[11px]">-</span>
+                                <div class="mt-1">
+                                    <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10.5px] font-mono font-semibold bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20">
+                                        {{ .JiraID }}
+                                    </span>
+                                </div>
                                 {{ end }}
                             </td>
-                            <td class="whitespace-nowrap px-3 py-4 font-bold text-white">
-                                {{ .ServiceName }}
+
+                            <!-- 2. Service & Shelf -->
+                            <td class="px-3 py-3">
+                                <div class="font-bold text-slate-900 dark:text-white truncate max-w-[220px]" title="{{ .ServiceName }}">
+                                    {{ .ServiceName }}
+                                </div>
+                                <div class="flex items-center gap-1.5 mt-1 font-mono text-[10.5px]">
+                                    <span class="inline-flex items-center rounded px-1.5 py-0.2 font-bold uppercase bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">{{ .Country }}</span>
+                                    <span class="text-slate-400 dark:text-slate-500">/</span>
+                                    <span class="text-indigo-600 dark:text-indigo-300 capitalize">{{ .Domain }}</span>
+                                </div>
                             </td>
-                            <td class="whitespace-nowrap px-3 py-4 text-slate-400">
-                                {{ if .RequestorEmail }}{{ .RequestorEmail }}{{ else }}admin@oona-insurance.com{{ end }}
+
+                            <!-- 3. Requestor -->
+                            <td class="px-3 py-3 text-slate-500 dark:text-slate-400">
+                                <div class="truncate max-w-[130px]" title="{{ if .RequestorEmail }}{{ .RequestorEmail }}{{ else }}admin@oona-insurance.com{{ end }}">
+                                    {{ if .RequestorEmail }}{{ .RequestorEmail }}{{ else }}admin@oona-insurance.com{{ end }}
+                                </div>
                             </td>
-                            <td class="whitespace-nowrap px-3 py-4 font-medium capitalize">
-                                <span class="inline-flex items-center rounded-md bg-indigo-500/10 px-2 py-0.5 text-[11px] font-semibold text-indigo-300 border border-indigo-500/20">{{ .Domain }}</span>
-                            </td>
-                            <td class="whitespace-nowrap px-3 py-4 font-medium uppercase">
-                                <span class="inline-flex items-center rounded-md bg-slate-800 px-2 py-0.5 text-[11px] font-semibold text-slate-300 border border-slate-700">{{ .Country }}</span>
-                            </td>
-                            <td class="whitespace-nowrap px-3 py-4">
+
+                            <!-- 4. Status -->
+                            <td class="px-3 py-3 whitespace-nowrap">
                                 {{ if or (eq .Status "LIVE") (eq .Status "APPROVED") }}
-                                    <span class="inline-flex items-center rounded-lg bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-400 border border-emerald-500/20">LIVE</span>
+                                    <span class="inline-flex items-center rounded-lg bg-emerald-500/10 px-2 py-0.5 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">LIVE</span>
                                 {{ else if eq .Status "JENKINS_READY" }}
-                                    <span class="inline-flex items-center rounded-lg bg-purple-500/10 px-2.5 py-1 text-[11px] font-semibold text-purple-400 border border-purple-500/20">JENKINS_READY</span>
+                                    <span class="inline-flex items-center rounded-lg bg-purple-500/10 px-2 py-0.5 text-[11px] font-semibold text-purple-600 dark:text-purple-400 border border-purple-500/20">JENKINS_READY</span>
                                 {{ else if eq .Status "INFRA_DETECTED" }}
-                                    <span class="inline-flex items-center rounded-lg bg-indigo-500/10 px-2.5 py-1 text-[11px] font-semibold text-indigo-400 border border-indigo-500/20">INFRA_DETECTED</span>
+                                    <span class="inline-flex items-center rounded-lg bg-indigo-500/10 px-2 py-0.5 text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">INFRA_DETECTED</span>
                                 {{ else if or (eq .Status "WAITING_INFRA") (eq .Status "PENDING_INFRA") }}
-                                    <span class="inline-flex items-center rounded-lg bg-amber-500/10 px-2.5 py-1 text-[11px] font-semibold text-amber-400 border border-amber-500/20">PENDING_INFRA</span>
+                                    <span class="inline-flex items-center rounded-lg bg-amber-500/10 px-2 py-0.5 text-[11px] font-semibold text-amber-600 dark:text-amber-400 border border-amber-500/20">PENDING_INFRA</span>
                                 {{ else if eq .Status "SCANNING" }}
-                                    <span class="inline-flex items-center rounded-lg bg-cyan-500/10 px-2.5 py-1 text-[11px] font-semibold text-cyan-400 border border-cyan-500/20">SCANNING</span>
+                                    <span class="inline-flex items-center rounded-lg bg-cyan-500/10 px-2 py-0.5 text-[11px] font-semibold text-cyan-600 dark:text-cyan-400 border border-cyan-500/20">SCANNING</span>
                                 {{ else if or (eq .Status "REJECTED_SECURITY") (eq .Status "REJECTED") }}
-                                    <span class="inline-flex items-center rounded-lg bg-rose-500/10 px-2.5 py-1 text-[11px] font-semibold text-rose-400 border border-rose-500/20">REJECTED</span>
+                                    <span class="inline-flex items-center rounded-lg bg-rose-500/10 px-2 py-0.5 text-[11px] font-semibold text-rose-600 dark:text-rose-400 border border-rose-500/20">REJECTED</span>
                                 {{ else }}
-                                    <span class="inline-flex items-center rounded-lg bg-slate-800 px-2.5 py-1 text-[11px] font-semibold text-slate-400 border border-slate-700">{{ .Status }}</span>
+                                    <span class="inline-flex items-center rounded-lg bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-[11px] font-semibold text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">{{ .Status }}</span>
                                 {{ end }}
                             </td>
-                            <td class="whitespace-nowrap px-3 py-4 text-slate-400">
+
+                            <!-- 5. Created At -->
+                            <td class="px-3 py-3 text-slate-500 dark:text-slate-400 whitespace-nowrap font-mono text-[11px]">
                                 {{ .CreatedAt }}
                             </td>
-                            <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right font-semibold sm:pr-4 space-x-2">
-                                <a href="/catalog/{{ .ServiceName }}" class="text-[#a78bfa] hover:text-purple-300 transition-colors">Catalog &rarr;</a>
-                                {{ if or (eq $.User.Role "admin") (eq $.User.Role "devops") (eq $.User.Role "infra") }}
-                                <button type="button" onclick="openDeleteTicketModal('{{ .ID }}', '{{ .TicketCode }}', '{{ .ServiceName }}')" class="text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 px-2 py-1 rounded transition-colors text-xs font-semibold ml-2">
-                                    Delete
-                                </button>
-                                {{ end }}
+
+                            <!-- 6. Actions (Sticky Right) -->
+                            <td class="sticky right-0 bg-white dark:bg-[#151518] px-4 py-3 text-right whitespace-nowrap z-10 border-l border-slate-200 dark:border-slate-800/80 shadow-[-6px_0_10px_-4px_rgba(0,0,0,0.08)]">
+                                <div class="flex items-center justify-end gap-2">
+                                    <a href="/catalog/{{ .ServiceName }}" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold text-purple-600 dark:text-[#a78bfa] hover:text-purple-700 dark:hover:text-purple-300 bg-purple-50 dark:bg-purple-500/10 hover:bg-purple-100 dark:hover:bg-purple-500/20 border border-purple-200 dark:border-purple-500/20 transition-all">
+                                        Catalog &rarr;
+                                    </a>
+                                    {{ if or (eq $.User.Role "admin") (eq $.User.Role "devops") (eq $.User.Role "infra") }}
+                                    <button type="button" onclick="openDeleteTicketModal('{{ .ID }}', '{{ .TicketCode }}', '{{ .ServiceName }}')" class="inline-flex items-center px-2.5 py-1.5 rounded-lg text-xs font-bold text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 bg-rose-50 dark:bg-rose-500/10 hover:bg-rose-100 dark:hover:bg-rose-500/20 border border-rose-200 dark:border-rose-500/20 transition-all cursor-pointer">
+                                        Delete
+                                    </button>
+                                    {{ end }}
+                                </div>
                             </td>
                         </tr>
                         {{ end }}
