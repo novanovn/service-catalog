@@ -177,6 +177,88 @@
                     <pre id="detail-tfvars-content" class="text-xs font-mono text-emerald-400 whitespace-pre-wrap overflow-x-auto max-h-[380px] overflow-y-auto leading-relaxed p-1 bg-transparent">{{ .TFVarsContent }}</pre>
                 </div>
             </div>
+
+            <!-- Card 2: Declared AWS Lambda Compute Functions -->
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden">
+                <div class="px-5 py-4 border-b border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-slate-50 dark:bg-slate-950/70">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-xl bg-purple-50 text-purple-700 border border-purple-200 dark:bg-purple-500/10 dark:text-purple-400 dark:border-purple-500/20 flex items-center justify-center">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <h3 class="text-sm font-bold text-slate-900 dark:text-white">Declared AWS Lambda Functions</h3>
+                                {{ if .IsMultiFunction }}
+                                <span class="px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-purple-100 text-purple-800 border border-purple-300 dark:bg-purple-900/40 dark:text-purple-300 dark:border-purple-800">
+                                    {{ len .Functions }} Functions &middot; Multi-Function
+                                </span>
+                                {{ else if .Functions }}
+                                <span class="px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-slate-100 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700">
+                                    1 Function
+                                </span>
+                                {{ else }}
+                                <span class="px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-slate-100 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700">
+                                    Single Function (Default)
+                                </span>
+                                {{ end }}
+                            </div>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Declared in <code class="font-mono text-slate-600 dark:text-slate-300">package.json</code> manifest for automated deployment</p>
+                        </div>
+                    </div>
+                    <span class="text-xs font-mono text-slate-600 dark:text-slate-400 font-semibold">
+                        Account {{ .TargetAccountID }} &middot; ap-southeast-3
+                    </span>
+                </div>
+
+                <div class="p-4 space-y-3">
+                    {{ if .Functions }}
+                    <div class="grid grid-cols-1 gap-2.5">
+                        {{ range .Functions }}
+                        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                            <div class="min-w-0 flex-1 space-y-1">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <span class="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 dark:bg-indigo-950/50 dark:text-indigo-300 dark:border-indigo-800">{{ .Key }}</span>
+                                    <code class="text-xs font-mono font-bold text-slate-900 dark:text-slate-100 break-all">{{ .Name }}</code>
+                                </div>
+                                <div class="text-[11px] text-slate-500 dark:text-slate-400 font-mono flex items-center gap-1.5">
+                                    <span>Handler:</span>
+                                    <span class="text-slate-700 dark:text-slate-300 font-semibold">{{ .Handler }}</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1.5 flex-shrink-0">
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700">
+                                    AWS Lambda
+                                </span>
+                            </div>
+                        </div>
+                        {{ end }}
+                    </div>
+                    {{ else }}
+                    <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                        <div class="min-w-0 flex-1 space-y-1">
+                            <div class="flex items-center gap-2">
+                                <span class="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300">default</span>
+                                <code class="text-xs font-mono font-bold text-slate-900 dark:text-slate-100 break-all">{{ .Item.PipelineName }}</code>
+                            </div>
+                            <div class="text-[11px] text-slate-500 dark:text-slate-400 font-mono">Standard single Lambda function deployment</div>
+                        </div>
+                        <div class="flex items-center gap-1.5 flex-shrink-0">
+                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700">
+                                AWS Lambda
+                            </span>
+                        </div>
+                    </div>
+                    {{ end }}
+
+                    <div class="pt-2 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
+                        <span class="flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            Verified during Pre-Flight Gate check before promotion
+                        </span>
+                        <span class="font-mono">Runtime: Node.js 24.x (ARM64)</span>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- RIGHT COLUMN: Security Scan & Jenkins Pipeline Spec (5 Cols) -->

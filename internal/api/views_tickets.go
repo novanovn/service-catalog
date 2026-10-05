@@ -395,6 +395,17 @@ func FetchExistingRepoIDFromTFVars(ctx context.Context, terraformPath string, br
 	return extracted
 }
 
+// ResolveAWSAccountID maps country and domain to the target AWS Account ID
+func ResolveAWSAccountID(country, domain string) string {
+	if strings.ToUpper(country) == "PH" {
+		if strings.EqualFold(domain, "integration") {
+			return "381492025569" // PH-Integration-UAT
+		}
+		return "471112995648" // PH-DTC-UAT
+	}
+	return "794038209116" // ID-DTC-UAT / Account scope
+}
+
 // JenkinsJobNameFromRepoID turns terraform.tfvars existing_github_repo_id into a Jenkins job name.
 // Values are stored as either a bare repo ("lmd-oona-ph-integration-health-renewal-svc")
 // or an org-qualified id ("oona-insurance/lmd-..."). Placeholder template ids are ignored.
@@ -1373,6 +1384,17 @@ func RenderApprovalDetail(w http.ResponseWriter, r *http.Request) {
 		availableBranches = append([]string{detectedBranch}, availableBranches...)
 	}
 
+	repoLookupName := JenkinsJobNameFromRepoID(repoURL)
+	if repoLookupName == "" {
+		repoLookupName = pipelineName
+	}
+	declaredFunctions := FetchLambdaFunctionsForRepo(r.Context(), repoLookupName)
+	if len(declaredFunctions) == 0 && serviceName != "" {
+		declaredFunctions = FetchLambdaFunctionsForRepo(r.Context(), serviceName)
+	}
+	targetAccountID := ResolveAWSAccountID(country, domain)
+	isMultiFunction := len(declaredFunctions) > 1
+
 	data := struct {
 		Title             string
 		User              *auth.Claims
@@ -1381,6 +1403,9 @@ func RenderApprovalDetail(w http.ResponseWriter, r *http.Request) {
 		TFVarsContent     string
 		VulnList          []VulnInfo
 		VulnSummary       VulnSummary
+		Functions         []LambdaFunctionRef
+		IsMultiFunction   bool
+		TargetAccountID   string
 	}{
 		Title:             serviceName + " - DevOps Approval Review",
 		User:              claims,
@@ -1389,6 +1414,9 @@ func RenderApprovalDetail(w http.ResponseWriter, r *http.Request) {
 		TFVarsContent:     tfvarsContent,
 		VulnList:          vulnList,
 		VulnSummary:       summary,
+		Functions:         declaredFunctions,
+		IsMultiFunction:   isMultiFunction,
+		TargetAccountID:   targetAccountID,
 	}
 
 	tmpl.ExecuteTemplate(w, "base", data)
