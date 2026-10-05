@@ -178,7 +178,7 @@
                 </div>
             </div>
 
-            <!-- Card 2: Declared AWS Lambda Compute Functions -->
+            <!-- Card 2: Declared AWS Lambda Compute Functions & IaC Audit -->
             <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden">
                 <div class="px-5 py-4 border-b border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-slate-50 dark:bg-slate-950/70">
                     <div class="flex items-center gap-2.5">
@@ -187,22 +187,18 @@
                         </div>
                         <div>
                             <div class="flex items-center gap-2 flex-wrap">
-                                <h3 class="text-sm font-bold text-slate-900 dark:text-white">Declared AWS Lambda Functions</h3>
-                                {{ if .IsMultiFunction }}
-                                <span class="px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-purple-100 text-purple-800 border border-purple-300 dark:bg-purple-900/40 dark:text-purple-300 dark:border-purple-800">
-                                    {{ len .Functions }} Functions &middot; Multi-Function
-                                </span>
-                                {{ else if .Functions }}
-                                <span class="px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-slate-100 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700">
-                                    1 Function
+                                <h3 class="text-sm font-bold text-slate-900 dark:text-white">Declared AWS Lambda Functions &amp; IaC Audit</h3>
+                                {{ if .Audit.HasDrift }}
+                                <span class="px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-amber-100 text-amber-800 border border-amber-300 dark:bg-amber-900/40 dark:text-amber-300 dark:border-amber-800">
+                                    ⚠️ {{ len .Audit.DriftWarnings }} Drift Detected
                                 </span>
                                 {{ else }}
-                                <span class="px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-slate-100 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700">
-                                    Single Function (Default)
+                                <span class="px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 dark:bg-emerald-900/40 dark:text-emerald-300 dark:border-emerald-800">
+                                    ✓ {{ .Audit.InSyncCount }}/{{ .Audit.TotalFunctions }} in Sync (package.json &harr; terraform.tfvars)
                                 </span>
                                 {{ end }}
                             </div>
-                            <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Declared in <code class="font-mono text-slate-600 dark:text-slate-300">package.json</code> manifest for automated deployment</p>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Cross-checking application <code class="font-mono text-slate-600 dark:text-slate-300">package.json</code> manifest against <code class="font-mono text-slate-600 dark:text-slate-300">terraform.tfvars</code></p>
                         </div>
                     </div>
                     <span class="text-xs font-mono text-slate-600 dark:text-slate-400 font-semibold">
@@ -211,49 +207,88 @@
                 </div>
 
                 <div class="p-4 space-y-3">
-                    {{ if .Functions }}
+                    {{ if .Audit.HasDrift }}
+                    <div class="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-xs text-amber-900 dark:text-amber-300 space-y-1">
+                        <div class="font-bold flex items-center gap-1.5">
+                            <svg class="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                            <span>Naming or Handler Discrepancy Detected:</span>
+                        </div>
+                        <ul class="list-disc list-inside space-y-0.5 text-[11px] pl-1 font-mono">
+                            {{ range .Audit.DriftWarnings }}
+                            <li>{{ . }}</li>
+                            {{ end }}
+                        </ul>
+                    </div>
+                    {{ end }}
+
                     <div class="grid grid-cols-1 gap-2.5">
-                        {{ range .Functions }}
-                        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-                            <div class="min-w-0 flex-1 space-y-1">
-                                <div class="flex items-center gap-2 flex-wrap">
-                                    <span class="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 dark:bg-indigo-950/50 dark:text-indigo-300 dark:border-indigo-800">{{ .Key }}</span>
-                                    <code class="text-xs font-mono font-bold text-slate-900 dark:text-slate-100 break-all">{{ .Name }}</code>
+                        {{ range .Audit.Items }}
+                        <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800/80 space-y-2.5">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                <div class="space-y-0.5">
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        {{ if .PkgKey }}
+                                        <span class="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 dark:bg-indigo-950/50 dark:text-indigo-300 dark:border-indigo-800" title="Key in package.json">pkg: {{ .PkgKey }}</span>
+                                        {{ end }}
+                                        {{ if .TFKey }}
+                                        <span class="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-purple-50 text-purple-700 border border-purple-200 dark:bg-purple-950/50 dark:text-purple-300 dark:border-purple-800" title="Key in terraform.tfvars">tf: {{ .TFKey }}</span>
+                                        {{ end }}
+                                        <code class="text-xs font-mono font-bold text-slate-900 dark:text-slate-100 break-all">{{ .AWSName }}</code>
+                                    </div>
                                 </div>
-                                <div class="text-[11px] text-slate-500 dark:text-slate-400 font-mono flex items-center gap-1.5">
-                                    <span>Handler:</span>
-                                    <span class="text-slate-700 dark:text-slate-300 font-semibold">{{ .Handler }}</span>
+                                
+                                <div class="flex items-center gap-1.5 flex-shrink-0">
+                                    {{ if eq .StatusBadge "IN_SYNC" }}
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10.5px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-300 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800">
+                                        ✓ In Sync
+                                    </span>
+                                    {{ else if eq .StatusBadge "HANDLER_DRIFT" }}
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10.5px] font-bold bg-amber-50 text-amber-700 border border-amber-300 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800">
+                                        ⚠️ Handler Drift
+                                    </span>
+                                    {{ else if eq .StatusBadge "MISSING_IN_TF" }}
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10.5px] font-bold bg-rose-50 text-rose-700 border border-rose-300 dark:bg-rose-950/50 dark:text-rose-300 dark:border-rose-800">
+                                        ⚠️ Missing in Terraform
+                                    </span>
+                                    {{ else }}
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10.5px] font-bold bg-amber-50 text-amber-700 border border-amber-300 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800">
+                                        ⚠️ Missing in package.json
+                                    </span>
+                                    {{ end }}
                                 </div>
                             </div>
-                            <div class="flex items-center gap-1.5 flex-shrink-0">
-                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700">
-                                    AWS Lambda
-                                </span>
+
+                            <!-- Detailed Specs Grid -->
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-slate-200/70 dark:border-slate-800/60 text-[11px] font-mono">
+                                <div>
+                                    <span class="text-slate-400 block text-[10px]">HANDLER</span>
+                                    <span class="text-slate-700 dark:text-slate-300 font-semibold break-all">{{ if .TFHandler }}{{ .TFHandler }}{{ else }}{{ .PkgHandler }}{{ end }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 block text-[10px]">MEMORY / TIMEOUT</span>
+                                    <span class="text-slate-700 dark:text-slate-300 font-semibold">{{ .MemorySize }} MB &middot; {{ .Timeout }}s</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 block text-[10px]">NETWORK &amp; VPC</span>
+                                    <span class="font-semibold {{ if .VPCAttach }}text-emerald-600 dark:text-emerald-400{{ else }}text-slate-500{{ end }}">
+                                        {{ if .VPCAttach }}Attached (VPC){{ else }}Standard (No VPC){{ end }}
+                                    </span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 block text-[10px]">API GATEWAY TRIGGER</span>
+                                    <span class="text-slate-700 dark:text-slate-300 font-semibold break-all">
+                                        {{ if .APIGatewayRoute }}{{ .APIGatewayRoute }}{{ else }}None{{ end }}
+                                    </span>
+                                </div>
                             </div>
                         </div>
                         {{ end }}
                     </div>
-                    {{ else }}
-                    <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-                        <div class="min-w-0 flex-1 space-y-1">
-                            <div class="flex items-center gap-2">
-                                <span class="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300">default</span>
-                                <code class="text-xs font-mono font-bold text-slate-900 dark:text-slate-100 break-all">{{ .Item.PipelineName }}</code>
-                            </div>
-                            <div class="text-[11px] text-slate-500 dark:text-slate-400 font-mono">Standard single Lambda function deployment</div>
-                        </div>
-                        <div class="flex items-center gap-1.5 flex-shrink-0">
-                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700">
-                                AWS Lambda
-                            </span>
-                        </div>
-                    </div>
-                    {{ end }}
 
                     <div class="pt-2 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
                         <span class="flex items-center gap-1.5">
                             <svg class="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                            Verified during Pre-Flight Gate check before promotion
+                            Pre-Flight check matches Terraform specifications before approval
                         </span>
                         <span class="font-mono">Runtime: Node.js 24.x (ARM64)</span>
                     </div>

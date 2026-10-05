@@ -264,6 +264,94 @@ func ParseFunctionConfigFromHCL(src []byte) *FunctionConfig {
 	return cfg
 }
 
+// ParseAllFunctionConfigsFromHCL parses every function block defined under functions = { ... } in terraform.tfvars
+func ParseAllFunctionConfigsFromHCL(src []byte) map[string]FunctionConfig {
+	file, diags := hclsyntax.ParseConfig(src, "terraform.tfvars", hcl.Pos{Line: 1, Column: 1})
+	if diags.HasErrors() || file == nil {
+		return nil
+	}
+
+	body, ok := file.Body.(*hclsyntax.Body)
+	if !ok || body == nil {
+		return nil
+	}
+
+	res := make(map[string]FunctionConfig)
+	for attrName, attr := range body.Attributes {
+		if attrName == "functions" {
+			objCons, ok := attr.Expr.(*hclsyntax.ObjectConsExpr)
+			if !ok {
+				continue
+			}
+			for _, funcItem := range objCons.Items {
+				funcKey := getKeyName(funcItem.KeyExpr)
+				if funcKey == "" {
+					continue
+				}
+				cfg := FunctionConfig{
+					Name:       funcKey,
+					Runtime:    "nodejs24.x",
+					MemorySize: 256,
+					Timeout:    30,
+					EnvVars:    make(map[string]string),
+				}
+				subObj, ok := funcItem.ValueExpr.(*hclsyntax.ObjectConsExpr)
+				if ok {
+					for _, item := range subObj.Items {
+						k := getKeyName(item.KeyExpr)
+						switch k {
+						case "handler":
+							cfg.Handler = getStringVal(item.ValueExpr)
+						case "runtime":
+							cfg.Runtime = getStringVal(item.ValueExpr)
+						case "memory_size":
+							cfg.MemorySize = getIntVal(item.ValueExpr, 256)
+						case "timeout":
+							cfg.Timeout = getIntVal(item.ValueExpr, 30)
+						case "vpc_attach":
+							cfg.VPCAttach = getBoolVal(item.ValueExpr)
+						case "cron_schedule":
+							cfg.CronSchedule = getStringVal(item.ValueExpr)
+						case "sqs_arn":
+							cfg.SQSARN = getStringVal(item.ValueExpr)
+						case "api_gateway_trigger_arns":
+							cfg.APIGatewayARNs = getTupleStrings(item.ValueExpr)
+						case "env_vars":
+							if envObj, ok := item.ValueExpr.(*hclsyntax.ObjectConsExpr); ok {
+								for _, envItem := range envObj.Items {
+									ek := getKeyName(envItem.KeyExpr)
+									ev := getStringVal(envItem.ValueExpr)
+									if ek != "" {
+										cfg.EnvVars[ek] = ev
+									}
+								}
+							}
+						}
+					}
+				}
+				if len(cfg.APIGatewayARNs) > 0 {
+					for _, arn := range cfg.APIGatewayARNs {
+						parts := strings.Split(arn, "/*/")
+						if len(parts) > 1 {
+							sub := parts[1]
+							routeParts := strings.SplitN(sub, "/", 2)
+							if len(routeParts) == 2 {
+								cfg.TriggerMethod = routeParts[0]
+								cfg.TriggerPath = "/" + routeParts[1]
+							} else if len(routeParts) == 1 {
+								cfg.TriggerMethod = routeParts[0]
+							}
+							break
+						}
+					}
+				}
+				res[funcKey] = cfg
+			}
+		}
+	}
+	return res
+}
+
 func parseFunctionsObject(expr hclsyntax.Expression, cfg *FunctionConfig) {
 	objCons, ok := expr.(*hclsyntax.ObjectConsExpr)
 	if !ok {

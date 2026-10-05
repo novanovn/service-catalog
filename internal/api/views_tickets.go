@@ -1068,6 +1068,177 @@ func RefreshBranchesHandler(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// FunctionAuditItem holds reconciled function specifications comparing package.json vs terraform.tfvars
+type FunctionAuditItem struct {
+	AWSName         string `json:"aws_name"`
+	PkgKey          string `json:"pkg_key"`
+	TFKey           string `json:"tf_key"`
+	PkgHandler      string `json:"pkg_handler"`
+	TFHandler       string `json:"tf_handler"`
+	Runtime         string `json:"runtime"`
+	MemorySize      int    `json:"memory_size"`
+	Timeout         int    `json:"timeout"`
+	VPCAttach       bool   `json:"vpc_attach"`
+	APIGatewayRoute string `json:"api_gateway_route"`
+	InSync          bool   `json:"in_sync"`
+	StatusBadge     string `json:"status_badge"` // "IN_SYNC", "HANDLER_DRIFT", "MISSING_IN_TF", "MISSING_IN_PKG"
+	StatusMessage   string `json:"status_message"`
+}
+
+// ManifestAuditSummary summarizes the cross-verification between application package.json and IaC terraform.tfvars
+type ManifestAuditSummary struct {
+	TotalFunctions int                 `json:"total_functions"`
+	InSyncCount    int                 `json:"in_sync_count"`
+	HasDrift       bool                `json:"has_drift"`
+	DriftWarnings  []string            `json:"drift_warnings"`
+	Items          []FunctionAuditItem `json:"items"`
+}
+
+// AuditManifestVsTerraform cross-checks declared functions in package.json against functions in terraform.tfvars
+func AuditManifestVsTerraform(
+	pkgFuncs []LambdaFunctionRef,
+	tfvarsContent string,
+	country, domain, targetEnv, cleanName string,
+) ManifestAuditSummary {
+	countryLower := strings.ToLower(country)
+	domainLower := strings.ToLower(domain)
+	envLower := strings.ToLower(targetEnv)
+
+	tfServiceName := infra.ExtractTFVarValueFromHCL([]byte(tfvarsContent), "service_name")
+	if tfServiceName == "" {
+		tfServiceName = cleanName
+	}
+
+	tfFuncMap := infra.ParseAllFunctionConfigsFromHCL([]byte(tfvarsContent))
+	if tfFuncMap == nil {
+		tfFuncMap = make(map[string]infra.FunctionConfig)
+	}
+
+	matchedTFKeys := make(map[string]bool)
+	var items []FunctionAuditItem
+	var warnings []string
+
+	// 1. Process all functions declared in package.json
+	for _, pf := range pkgFuncs {
+		item := FunctionAuditItem{
+			AWSName:    pf.Name,
+			PkgKey:     pf.Key,
+			PkgHandler: pf.Handler,
+			Runtime:    "nodejs24.x",
+			MemorySize: 256,
+			Timeout:    30,
+		}
+
+		var foundTFKey string
+		var tfCfg infra.FunctionConfig
+
+		for tfKey, cfg := range tfFuncMap {
+			expectedName := fmt.Sprintf("%s-%s-%s-%s-%s", countryLower, domainLower, envLower, tfServiceName, tfKey)
+			if pf.Name == expectedName || pf.Key == tfKey || strings.HasSuffix(pf.Name, tfKey) {
+				foundTFKey = tfKey
+				tfCfg = cfg
+				break
+			}
+		}
+
+		if foundTFKey != "" {
+			matchedTFKeys[foundTFKey] = true
+			item.TFKey = foundTFKey
+			item.TFHandler = tfCfg.Handler
+			if tfCfg.Runtime != "" {
+				item.Runtime = tfCfg.Runtime
+			}
+			if tfCfg.MemorySize > 0 {
+				item.MemorySize = tfCfg.MemorySize
+			}
+			if tfCfg.Timeout > 0 {
+				item.Timeout = tfCfg.Timeout
+			}
+			item.VPCAttach = tfCfg.VPCAttach
+			if tfCfg.TriggerMethod != "" {
+				item.APIGatewayRoute = fmt.Sprintf("%s %s", tfCfg.TriggerMethod, tfCfg.TriggerPath)
+			} else if len(tfCfg.APIGatewayARNs) > 0 {
+				item.APIGatewayRoute = "API Gateway Triggered"
+			}
+
+			// Check handler drift
+			if item.PkgHandler != "" && item.TFHandler != "" && item.PkgHandler != item.TFHandler {
+				item.InSync = false
+				item.StatusBadge = "HANDLER_DRIFT"
+				item.StatusMessage = fmt.Sprintf("Handler mismatch: package.json (%s) vs terraform (%s)", item.PkgHandler, item.TFHandler)
+				warnings = append(warnings, fmt.Sprintf("%s: handler mismatch (%s vs %s)", pf.Key, item.PkgHandler, item.TFHandler))
+			} else {
+				item.InSync = true
+				item.StatusBadge = "IN_SYNC"
+				item.StatusMessage = "Naming & handler in sync with terraform.tfvars"
+			}
+		} else {
+			item.InSync = false
+			item.StatusBadge = "MISSING_IN_TF"
+			item.StatusMessage = "Declared in package.json but not provisioned in terraform.tfvars functions map"
+			warnings = append(warnings, fmt.Sprintf("%s: missing in terraform.tfvars", pf.Key))
+		}
+
+		items = append(items, item)
+	}
+
+	// 2. Check any remaining functions defined in terraform.tfvars that were not in package.json
+	for tfKey, cfg := range tfFuncMap {
+		if matchedTFKeys[tfKey] {
+			continue
+		}
+		expectedName := fmt.Sprintf("%s-%s-%s-%s-%s", countryLower, domainLower, envLower, tfServiceName, tfKey)
+		item := FunctionAuditItem{
+			AWSName:       expectedName,
+			TFKey:         tfKey,
+			TFHandler:     cfg.Handler,
+			Runtime:       cfg.Runtime,
+			MemorySize:    cfg.MemorySize,
+			Timeout:       cfg.Timeout,
+			VPCAttach:     cfg.VPCAttach,
+			InSync:        false,
+			StatusBadge:   "MISSING_IN_PKG",
+			StatusMessage: "Defined in terraform.tfvars but not declared in package.json manifest",
+		}
+		if cfg.TriggerMethod != "" {
+			item.APIGatewayRoute = fmt.Sprintf("%s %s", cfg.TriggerMethod, cfg.TriggerPath)
+		}
+		warnings = append(warnings, fmt.Sprintf("%s: defined in terraform.tfvars but missing in package.json", tfKey))
+		items = append(items, item)
+	}
+
+	// 3. Fallback for single-function (legacy without functions map in either)
+	if len(items) == 0 {
+		defaultName := fmt.Sprintf("lmd-oona-%s-%s-%s", countryLower, domainLower, cleanName)
+		items = append(items, FunctionAuditItem{
+			AWSName:       defaultName,
+			PkgKey:        "default",
+			TFKey:         "default",
+			Runtime:       "nodejs24.x",
+			MemorySize:    256,
+			Timeout:       30,
+			InSync:        true,
+			StatusBadge:   "IN_SYNC",
+			StatusMessage: "Single standard Lambda function",
+		})
+	}
+
+	inSyncCount := 0
+	for _, it := range items {
+		if it.InSync {
+			inSyncCount++
+		}
+	}
+
+	return ManifestAuditSummary{
+		TotalFunctions: len(items),
+		InSyncCount:    inSyncCount,
+		HasDrift:       len(warnings) > 0,
+		DriftWarnings:  warnings,
+		Items:          items,
+	}
+}
+
 // RenderApprovalDetail renders the dedicated full-page DevOps review workspace for a specific ticket/service
 func RenderApprovalDetail(w http.ResponseWriter, r *http.Request) {
 	tmpl, err := parsePage("approval_detail.html")
@@ -1395,6 +1566,8 @@ func RenderApprovalDetail(w http.ResponseWriter, r *http.Request) {
 	targetAccountID := ResolveAWSAccountID(country, domain)
 	isMultiFunction := len(declaredFunctions) > 1
 
+	auditReport := AuditManifestVsTerraform(declaredFunctions, tfvarsContent, country, domain, targetEnv, cleanName)
+
 	data := struct {
 		Title             string
 		User              *auth.Claims
@@ -1406,6 +1579,7 @@ func RenderApprovalDetail(w http.ResponseWriter, r *http.Request) {
 		Functions         []LambdaFunctionRef
 		IsMultiFunction   bool
 		TargetAccountID   string
+		Audit             ManifestAuditSummary
 	}{
 		Title:             serviceName + " - DevOps Approval Review",
 		User:              claims,
@@ -1417,6 +1591,7 @@ func RenderApprovalDetail(w http.ResponseWriter, r *http.Request) {
 		Functions:         declaredFunctions,
 		IsMultiFunction:   isMultiFunction,
 		TargetAccountID:   targetAccountID,
+		Audit:             auditReport,
 	}
 
 	tmpl.ExecuteTemplate(w, "base", data)
