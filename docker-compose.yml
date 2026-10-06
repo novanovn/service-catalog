@@ -53,6 +53,7 @@ services:
       - ./static:/app/static:ro
       - ../oona-dtc-country-terraform-iac:/terraform-iac:ro
       - ../repo:/repo:ro
+      - ~/.aws:/home/appuser/.aws:ro
     ports:
       - "8080:8080"
     deploy:
@@ -84,8 +85,8 @@ services:
           cpus: '1.5'
           memory: 1024M
     volumes:
-      # Optional: Mount your local AWS SSO credentials so the worker can invoke Lambda in UAT
-      - ~/.aws:/appuser/.aws:ro
+      # Mount local AWS SSO credentials so the worker can invoke Lambda in UAT
+      - ~/.aws:/home/appuser/.aws:ro
     depends_on:
       postgres:
         condition: service_healthy

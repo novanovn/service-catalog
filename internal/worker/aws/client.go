@@ -26,6 +26,13 @@ func NewAWSClient(ctx context.Context) (*AWSClient, error) {
 	return NewAWSClientForAccount(ctx, "")
 }
 
+// AccountProfileMap maps target AWS account IDs to local AWS SSO profiles in ~/.aws/config
+var AccountProfileMap = map[string]string{
+	"381492025569": "ph-integration-uat",
+	"471112995648": "ph-dtc-uat",
+	"794038209116": "id-dtc-uat",
+}
+
 // NewAWSClientForAccount initializes an AWS client, optionally assuming a role in the target AWS account.
 func NewAWSClientForAccount(ctx context.Context, targetAccountID string) (*AWSClient, error) {
 	region := os.Getenv("AWS_REGION")
@@ -33,7 +40,20 @@ func NewAWSClientForAccount(ctx context.Context, targetAccountID string) (*AWSCl
 		region = "ap-southeast-3" // Oona default region
 	}
 
-	cfg, err := config.LoadDefaultConfig(ctx, config.WithRegion(region))
+	var configOpts []func(*config.LoadOptions) error
+	configOpts = append(configOpts, config.WithRegion(region))
+
+	profile := os.Getenv("AWS_PROFILE")
+	if profile == "" && targetAccountID != "" {
+		if mapped, ok := AccountProfileMap[targetAccountID]; ok {
+			profile = mapped
+		}
+	}
+	if profile != "" {
+		configOpts = append(configOpts, config.WithSharedConfigProfile(profile))
+	}
+
+	cfg, err := config.LoadDefaultConfig(ctx, configOpts...)
 	if err != nil {
 		return nil, fmt.Errorf("unable to load AWS SDK config: %v", err)
 	}

@@ -231,6 +231,7 @@ func ApproveTicketHandler(w http.ResponseWriter, r *http.Request) {
 	isMulti := len(fnRefs) > 0
 	foundCount := 0
 	var missingFunctions []string
+	var apiErrors []string
 
 	if awsErr == nil && awsClient != nil {
 		lambdaCheckPerformed = true
@@ -245,6 +246,7 @@ func ApproveTicketHandler(w http.ResponseWriter, r *http.Request) {
 				}
 				if checkErr != nil {
 					entry.Error = checkErr.Error()
+					apiErrors = append(apiErrors, ref.Name+": "+checkErr.Error())
 				}
 				if exists {
 					foundCount++
@@ -255,14 +257,21 @@ func ApproveTicketHandler(w http.ResponseWriter, r *http.Request) {
 				multiResults = append(multiResults, entry)
 			}
 		} else {
-			exists, _ := awsClient.CheckLambdaExists(checkCtx, targetFunctionName)
+			exists, checkErr := awsClient.CheckLambdaExists(checkCtx, targetFunctionName)
+			if checkErr != nil {
+				apiErrors = append(apiErrors, targetFunctionName+": "+checkErr.Error())
+			}
 			lambdaExists = exists
 		}
+	} else if awsErr != nil {
+		apiErrors = append(apiErrors, "AWS Client error: "+awsErr.Error())
 	}
 
 	if !forceApprove && lambdaCheckPerformed && !lambdaExists {
 		var reasonMsg string
-		if isMulti {
+		if len(apiErrors) > 0 {
+			reasonMsg = fmt.Sprintf("Gagal terhubung ke AWS: %s. Pastikan kredensial AWS aktif.", strings.Join(apiErrors, "; "))
+		} else if isMulti {
 			if len(missingFunctions) == 1 {
 				reasonMsg = fmt.Sprintf("Lambda '%s' belum ditemukan di AWS. Silakan buat resource via 'terraform apply'.", missingFunctions[0])
 			} else {
@@ -585,6 +594,7 @@ func VerifyTicketLambdaHandler(w http.ResponseWriter, r *http.Request) {
 		allExist := true
 		foundCount := 0
 		var missing []string
+		var apiErrors []string
 
 		for _, ref := range fnRefs {
 			exists, checkErr := awsClient.CheckLambdaExists(checkCtx, ref.Name)
@@ -596,6 +606,7 @@ func VerifyTicketLambdaHandler(w http.ResponseWriter, r *http.Request) {
 			}
 			if checkErr != nil {
 				entry.Error = checkErr.Error()
+				apiErrors = append(apiErrors, ref.Name+": "+checkErr.Error())
 			}
 			if exists {
 				foundCount++
@@ -608,7 +619,9 @@ func VerifyTicketLambdaHandler(w http.ResponseWriter, r *http.Request) {
 
 		reasonMsg := ""
 		if !allExist {
-			if len(missing) == 1 {
+			if len(apiErrors) > 0 {
+				reasonMsg = fmt.Sprintf("Gagal terhubung ke AWS: %s. Pastikan sesi AWS SSO/kredensial aktif.", strings.Join(apiErrors, "; "))
+			} else if len(missing) == 1 {
 				reasonMsg = fmt.Sprintf("Lambda '%s' belum ditemukan di AWS. Silakan buat resource via 'terraform apply'.", missing[0])
 			} else {
 				reasonMsg = fmt.Sprintf("%d dari %d function belum ada di AWS: %s", len(missing), len(fnRefs), strings.Join(missing, ", "))
