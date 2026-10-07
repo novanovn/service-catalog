@@ -502,6 +502,13 @@ var (
 	tfPathCacheMu sync.RWMutex
 )
 
+// FlushTerraformPathCache clears the in-memory Terraform path resolution cache
+func FlushTerraformPathCache() {
+	tfPathCacheMu.Lock()
+	tfPathCache = make(map[string]tfCacheItem)
+	tfPathCacheMu.Unlock()
+}
+
 // CheckTerraformPathExists checks if a folder path exists locally on disk or in the GitHub Terraform IaC repository
 func CheckTerraformPathExists(ctx context.Context, path string, branch string) bool {
 	if branch == "" {
@@ -512,7 +519,13 @@ func CheckTerraformPathExists(ctx context.Context, path string, branch string) b
 
 	tfPathCacheMu.RLock()
 	if cached, found := tfPathCache[cacheKey]; found {
-		if time.Since(cached.timestamp) < 15*time.Minute {
+		// Positive hits cache for 10 minutes.
+		// Negative misses (exists == false) only cache for 5 seconds so newly pushed / merged commits are detected promptly.
+		ttl := 10 * time.Minute
+		if !cached.exists {
+			ttl = 5 * time.Second
+		}
+		if time.Since(cached.timestamp) < ttl {
 			tfPathCacheMu.RUnlock()
 			return cached.exists
 		}
@@ -1057,9 +1070,11 @@ type VulnSummary struct {
 	IsCached  bool
 }
 
-// RefreshBranchesHandler forces a re-fetch of live branches from GitHub, bypassing the 10-minute cache.
+// RefreshBranchesHandler forces a re-fetch of live branches and flushes all terraform caches.
 // Used by the manual refresh button next to the Branch selector in the approval detail page.
 func RefreshBranchesHandler(w http.ResponseWriter, r *http.Request) {
+	FlushTerraformPathCache()
+	FlushTFVarsContentCache()
 	branches := RefreshLiveTerraformBranches(r.Context())
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(map[string]interface{}{

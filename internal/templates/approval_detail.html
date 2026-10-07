@@ -706,6 +706,9 @@
                     keepOpt.selected = true;
                     select.insertBefore(keepOpt, select.firstChild);
                 }
+                if (select.value) {
+                    onDetailBranchChange(select.value);
+                }
             }
         })
         .catch(() => {})

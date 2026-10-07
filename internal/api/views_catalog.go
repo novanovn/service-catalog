@@ -1008,6 +1008,13 @@ var (
 	tfvarsRawContentCacheMu sync.RWMutex
 )
 
+// FlushTFVarsContentCache clears the raw terraform.tfvars string cache
+func FlushTFVarsContentCache() {
+	tfvarsRawContentCacheMu.Lock()
+	tfvarsRawContentCache = make(map[string]tfvarsContentCacheEntry)
+	tfvarsRawContentCacheMu.Unlock()
+}
+
 func FetchTFVarsContent(ctx context.Context, path string, branch string) string {
 	if branch == "" {
 		branch = "main"
@@ -1020,7 +1027,11 @@ func FetchTFVarsContent(ctx context.Context, path string, branch string) string 
 
 	tfvarsRawContentCacheMu.RLock()
 	if cached, ok := tfvarsRawContentCache[cacheKey]; ok {
-		if time.Since(cached.fetchedAt) < 15*time.Minute {
+		ttl := 10 * time.Minute
+		if cached.content == "" {
+			ttl = 5 * time.Second
+		}
+		if time.Since(cached.fetchedAt) < ttl {
 			tfvarsRawContentCacheMu.RUnlock()
 			return cached.content
 		}
