@@ -1083,6 +1083,60 @@ func RefreshBranchesHandler(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// ResolveLocalServiceRepoPath finds the local filesystem directory for a service repo across standard mount paths
+func ResolveLocalServiceRepoPath(serviceName, repoURL string) string {
+	cleanServiceName := strings.TrimSuffix(serviceName, "-clone")
+	repoNameFromURL := JenkinsJobNameFromRepoID(repoURL)
+
+	baseDirs := []string{
+		os.Getenv("SERVICE_REPOS_DIR"),
+		"/repo/PH",
+		"/repo/ID",
+		"/repo/demo",
+		"/repo/Partner",
+		"/repo",
+		"/service-repos",
+		"../repo/PH",
+		"../repo/ID",
+		"../repo/demo",
+		"../repo",
+		"/Users/novanhariman/Documents/Ngulik/repo/PH",
+		"/Users/novanhariman/Documents/Ngulik/repo/ID",
+		"/Users/novanhariman/Documents/Ngulik/repo",
+		"/Users/novanhariman/Documents/oona/repo/PH",
+		"/Users/novanhariman/Documents/oona/repo/ID",
+		"/Users/novanhariman/Documents/oona/repo",
+	}
+
+	nameCandidates := []string{
+		repoNameFromURL,
+		serviceName,
+		cleanServiceName,
+		"lmd-oona-ph-integration-" + serviceName,
+		"lmd-oona-ph-integration-" + cleanServiceName,
+		"lmd-oona-id-integration-" + serviceName,
+		"lmd-oona-id-integration-" + cleanServiceName,
+		"lmd-oona-" + serviceName,
+		"lmd-oona-" + cleanServiceName,
+	}
+
+	for _, base := range baseDirs {
+		if base == "" {
+			continue
+		}
+		for _, name := range nameCandidates {
+			if name == "" {
+				continue
+			}
+			p := filepath.Join(base, name)
+			if fi, err := os.Stat(p); err == nil && fi.IsDir() {
+				return p
+			}
+		}
+	}
+	return ""
+}
+
 // FunctionAuditItem holds reconciled function specifications comparing package.json vs terraform.tfvars
 type FunctionAuditItem struct {
 	AWSName         string `json:"aws_name"`
@@ -1463,32 +1517,11 @@ func RenderApprovalDetail(w http.ResponseWriter, r *http.Request) {
 	if cachedJSON != "" {
 		outputData = []byte(cachedJSON)
 	} else {
-		// Scan with optimized timeout and flags to ensure fast page load (< 2s)
-		scanCtx, cancel := context.WithTimeout(context.Background(), 4*time.Second)
+		// Scan with generous timeout to ensure local Trivy finishes reliably
+		scanCtx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 		defer cancel()
 
-		localRepoCandidates := []string{
-			filepath.Join("/repo", "lmd-oona-ph-integration-"+cleanServiceName),
-			filepath.Join("/repo", "lmd-oona-ph-integration-"+serviceName),
-			filepath.Join("/repo", "lmd-oona-id-integration-"+cleanServiceName),
-			filepath.Join("/repo", "lmd-oona-id-integration-"+serviceName),
-			filepath.Join("/repo", serviceName),
-			filepath.Join("/repo", cleanServiceName),
-			filepath.Join("../repo", "lmd-oona-ph-integration-"+cleanServiceName),
-			filepath.Join("../repo", serviceName),
-			filepath.Join("../repo", cleanServiceName),
-			filepath.Join("/Users/novanhariman/Documents/oona/repo", "lmd-oona-ph-integration-"+cleanServiceName),
-			filepath.Join("/Users/novanhariman/Documents/oona/repo", serviceName),
-			filepath.Join("/Users/novanhariman/Documents/oona/repo", cleanServiceName),
-		}
-
-		var localPath string
-		for _, lp := range localRepoCandidates {
-			if fi, err := os.Stat(lp); err == nil && fi.IsDir() {
-				localPath = lp
-				break
-			}
-		}
+		localPath := ResolveLocalServiceRepoPath(serviceName, repoURL)
 
 		var cmd *exec.Cmd
 		if localPath != "" {

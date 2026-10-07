@@ -134,24 +134,7 @@ func CatalogTrivyScanHandler(w http.ResponseWriter, r *http.Request) {
 		defer cancel()
 
 		// Execute Trivy scan with 120s timeout on specific branch
-		cleanServiceName := strings.TrimSuffix(serviceName, "-clone")
-		localRepoCandidates := []string{
-			filepath.Join("/repo", serviceName),
-			filepath.Join("/repo", cleanServiceName),
-			filepath.Join("/repo", "lmd-oona-ph-integration-"+cleanServiceName),
-			filepath.Join("../repo", serviceName),
-			filepath.Join("../repo", cleanServiceName),
-			filepath.Join("/Users/novanhariman/Documents/oona/repo", serviceName),
-			filepath.Join("/Users/novanhariman/Documents/oona/repo", cleanServiceName),
-		}
-
-		var localPath string
-		for _, lp := range localRepoCandidates {
-			if fi, err := os.Stat(lp); err == nil && fi.IsDir() {
-				localPath = lp
-				break
-			}
-		}
+		localPath := ResolveLocalServiceRepoPath(serviceName, repoURL)
 
 		githubToken := os.Getenv("GITHUB_TOKEN")
 		var cmd *exec.Cmd
