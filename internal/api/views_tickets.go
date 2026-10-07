@@ -204,7 +204,7 @@ func fetchLiveTerraformBranchesInternal(ctx context.Context, forceRefresh bool) 
 	}
 
 	req.Header.Set("User-Agent", "Oona-Dev-Portal/1.0")
-	token := os.Getenv("GITHUB_TOKEN")
+	token := GetActiveGitHubToken(ctx)
 	if token != "" {
 		req.Header.Set("Authorization", "Bearer "+token)
 	}
@@ -361,7 +361,7 @@ func FetchExistingRepoIDFromTFVars(ctx context.Context, terraformPath string, br
 		if err == nil {
 			req.Header.Set("User-Agent", "Oona-Dev-Portal/1.0")
 			req.Header.Set("Accept", "application/vnd.github.v3.raw")
-			token := os.Getenv("GITHUB_TOKEN")
+			token := GetActiveGitHubToken(ctx)
 			if token != "" {
 				req.Header.Set("Authorization", "Bearer "+token)
 			}
@@ -605,7 +605,7 @@ func CheckTerraformPathExists(ctx context.Context, path string, branch string) b
 	}
 
 	req.Header.Set("User-Agent", "Oona-Dev-Portal/1.0")
-	token := os.Getenv("GITHUB_TOKEN")
+	token := GetActiveGitHubToken(ctx)
 	if token != "" {
 		req.Header.Set("Authorization", "Bearer "+token)
 	}
@@ -1528,7 +1528,7 @@ func RenderApprovalDetail(w http.ResponseWriter, r *http.Request) {
 			cmd = exec.CommandContext(scanCtx, "trivy", "fs", "--scanners", "vuln", "--skip-db-update", "--quiet", "--format", "json", localPath)
 		} else {
 			cmd = exec.CommandContext(scanCtx, "trivy", "repo", "--scanners", "vuln", "--skip-db-update", "--quiet", "--branch", detectedBranch, "--format", "json", "--", repoURL)
-			githubToken := os.Getenv("GITHUB_TOKEN")
+			githubToken := GetActiveGitHubToken(r.Context())
 			if githubToken != "" {
 				cmd.Env = append(os.Environ(), "GITHUB_TOKEN="+githubToken)
 			}

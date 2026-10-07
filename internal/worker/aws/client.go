@@ -2,13 +2,17 @@ package aws
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/credentials/stscreds"
 	"github.com/aws/aws-sdk-go-v2/service/lambda"
 	"github.com/aws/aws-sdk-go-v2/service/lambda/types"
@@ -33,6 +37,69 @@ var AccountProfileMap = map[string]string{
 	"794038209116": "id-dtc-uat",
 }
 
+// loadCLICachedCredentials inspects ~/.aws/cli/cache/*.json for valid, unexpired temporary credentials
+func loadCLICachedCredentials(targetAccountID string) *aws.Credentials {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return nil
+	}
+	cacheDirs := []string{
+		filepath.Join(homeDir, ".aws", "cli", "cache"),
+		"/home/appuser/.aws/cli/cache",
+		"/root/.aws/cli/cache",
+	}
+
+	type cachePayload struct {
+		Credentials struct {
+			AccessKeyId     string `json:"AccessKeyId"`
+			SecretAccessKey string `json:"SecretAccessKey"`
+			SessionToken    string `json:"SessionToken"`
+			Expiration      string `json:"Expiration"`
+			AccountId       string `json:"AccountId"`
+		} `json:"Credentials"`
+	}
+
+	now := time.Now()
+	for _, cacheDir := range cacheDirs {
+		files, err := os.ReadDir(cacheDir)
+		if err != nil {
+			continue
+		}
+		for _, f := range files {
+			if !strings.HasSuffix(f.Name(), ".json") {
+				continue
+			}
+			data, err := os.ReadFile(filepath.Join(cacheDir, f.Name()))
+			if err != nil {
+				continue
+			}
+			var p cachePayload
+			if err := json.Unmarshal(data, &p); err != nil {
+				continue
+			}
+			if p.Credentials.AccessKeyId == "" || p.Credentials.SecretAccessKey == "" {
+				continue
+			}
+			if targetAccountID != "" && p.Credentials.AccountId != "" && p.Credentials.AccountId != targetAccountID {
+				continue
+			}
+			if p.Credentials.Expiration != "" {
+				t, errT := time.Parse(time.RFC3339, p.Credentials.Expiration)
+				if errT == nil && now.After(t) {
+					continue
+				}
+			}
+			return &aws.Credentials{
+				AccessKeyID:     p.Credentials.AccessKeyId,
+				SecretAccessKey: p.Credentials.SecretAccessKey,
+				SessionToken:    p.Credentials.SessionToken,
+				Source:          "CLICacheCredentials",
+			}
+		}
+	}
+	return nil
+}
+
 // NewAWSClientForAccount initializes an AWS client, optionally assuming a role in the target AWS account.
 func NewAWSClientForAccount(ctx context.Context, targetAccountID string) (*AWSClient, error) {
 	region := os.Getenv("AWS_REGION")
@@ -43,14 +110,23 @@ func NewAWSClientForAccount(ctx context.Context, targetAccountID string) (*AWSCl
 	var configOpts []func(*config.LoadOptions) error
 	configOpts = append(configOpts, config.WithRegion(region))
 
-	profile := os.Getenv("AWS_PROFILE")
-	if profile == "" && targetAccountID != "" {
-		if mapped, ok := AccountProfileMap[targetAccountID]; ok {
-			profile = mapped
+	// 1. Prefer unexpired AWS CLI cached STS credentials if present
+	if cliCreds := loadCLICachedCredentials(targetAccountID); cliCreds != nil {
+		configOpts = append(configOpts, config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(
+			cliCreds.AccessKeyID,
+			cliCreds.SecretAccessKey,
+			cliCreds.SessionToken,
+		)))
+	} else {
+		profile := os.Getenv("AWS_PROFILE")
+		if profile == "" && targetAccountID != "" {
+			if mapped, ok := AccountProfileMap[targetAccountID]; ok {
+				profile = mapped
+			}
 		}
-	}
-	if profile != "" {
-		configOpts = append(configOpts, config.WithSharedConfigProfile(profile))
+		if profile != "" {
+			configOpts = append(configOpts, config.WithSharedConfigProfile(profile))
+		}
 	}
 
 	cfg, err := config.LoadDefaultConfig(ctx, configOpts...)

@@ -236,11 +236,30 @@ func ApproveTicketHandler(w http.ResponseWriter, r *http.Request) {
 	if awsErr == nil && awsClient != nil {
 		lambdaCheckPerformed = true
 		if isMulti {
+			prefix := fmt.Sprintf("%s-%s-%s-", countryLower, domainLower, targetEnv)
 			for _, ref := range fnRefs {
-				exists, checkErr := awsClient.CheckLambdaExists(checkCtx, ref.Name)
+				checkNames := []string{ref.Name}
+				if !strings.HasPrefix(ref.Name, prefix) {
+					checkNames = append(checkNames, prefix+ref.Name)
+				}
+				var exists bool
+				var checkErr error
+				var matchedName = ref.Name
+				for _, cn := range checkNames {
+					e, err := awsClient.CheckLambdaExists(checkCtx, cn)
+					if err != nil {
+						checkErr = err
+					}
+					if e {
+						exists = true
+						checkErr = nil
+						matchedName = cn
+						break
+					}
+				}
 				entry := fnResult{
 					Key:     ref.Key,
-					Name:    ref.Name,
+					Name:    matchedName,
 					Handler: ref.Handler,
 					Exists:  exists,
 				}
@@ -257,7 +276,24 @@ func ApproveTicketHandler(w http.ResponseWriter, r *http.Request) {
 				multiResults = append(multiResults, entry)
 			}
 		} else {
-			exists, checkErr := awsClient.CheckLambdaExists(checkCtx, targetFunctionName)
+			checkNames := []string{targetFunctionName}
+			prefix := fmt.Sprintf("%s-%s-%s-", countryLower, domainLower, targetEnv)
+			if !strings.HasPrefix(targetFunctionName, prefix) {
+				checkNames = append(checkNames, prefix+targetFunctionName)
+			}
+			var exists bool
+			var checkErr error
+			for _, cn := range checkNames {
+				e, err := awsClient.CheckLambdaExists(checkCtx, cn)
+				if err != nil {
+					checkErr = err
+				}
+				if e {
+					exists = true
+					checkErr = nil
+					break
+				}
+			}
 			if checkErr != nil {
 				apiErrors = append(apiErrors, targetFunctionName+": "+checkErr.Error())
 			}
@@ -596,11 +632,30 @@ func VerifyTicketLambdaHandler(w http.ResponseWriter, r *http.Request) {
 		var missing []string
 		var apiErrors []string
 
+		prefix := fmt.Sprintf("%s-%s-%s-", countryLower, domainLower, "uat")
 		for _, ref := range fnRefs {
-			exists, checkErr := awsClient.CheckLambdaExists(checkCtx, ref.Name)
+			checkNames := []string{ref.Name}
+			if !strings.HasPrefix(ref.Name, prefix) {
+				checkNames = append(checkNames, prefix+ref.Name)
+			}
+			var exists bool
+			var checkErr error
+			var matchedName = ref.Name
+			for _, cn := range checkNames {
+				e, err := awsClient.CheckLambdaExists(checkCtx, cn)
+				if err != nil {
+					checkErr = err
+				}
+				if e {
+					exists = true
+					checkErr = nil
+					matchedName = cn
+					break
+				}
+			}
 			entry := fnResult{
 				Key:     ref.Key,
-				Name:    ref.Name,
+				Name:    matchedName,
 				Handler: ref.Handler,
 				Exists:  exists,
 			}

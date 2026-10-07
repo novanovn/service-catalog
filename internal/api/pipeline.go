@@ -150,6 +150,53 @@ func enqueueCreatePipeline(pipelineName, folder, repoURL, triggeredBy string) {
 	_, _ = client.Enqueue(task)
 }
 
+// EnqueueTicketBackgroundTasks dispatches initial asynchronous background checks (Trivy Security Scan & Git Infra Verification)
+func EnqueueTicketBackgroundTasks(ticketID, repoURL, domain, country, env, serviceName string) {
+	redisAddr := os.Getenv("VALKEY_URL")
+	if redisAddr == "" {
+		redisAddr = "localhost:6379"
+	}
+	client := asynq.NewClient(asynq.RedisClientOpt{
+		Addr:     redisAddr,
+		Password: os.Getenv("VALKEY_PASSWORD"),
+	})
+	defer client.Close()
+
+	// 1. Enqueue Trivy Security Scan
+	if repoURL != "" {
+		scanPayload, _ := json.Marshal(struct {
+			TicketID string
+			RepoURL  string
+		}{
+			TicketID: ticketID,
+			RepoURL:  repoURL,
+		})
+		trivyTask := asynq.NewTask("security:trivy_scan", scanPayload, asynq.Queue("trivy_scan"), asynq.MaxRetry(3))
+		_, _ = client.Enqueue(trivyTask)
+	}
+
+	// 2. Enqueue Git Infra Verification
+	if env == "" {
+		env = "uat"
+	}
+	infraPayload, _ := json.Marshal(struct {
+		TicketID      string
+		Domain        string
+		Country       string
+		Env           string
+		ServiceName   string
+		IntegrationID string
+	}{
+		TicketID:    ticketID,
+		Domain:      domain,
+		Country:     country,
+		Env:         env,
+		ServiceName: serviceName,
+	})
+	infraTask := asynq.NewTask("infra:verify_git", infraPayload, asynq.Queue("git_verify"), asynq.MaxRetry(5))
+	_, _ = client.Enqueue(infraTask)
+}
+
 // RecreatePipelineHandler re-creates a deleted Jenkins multibranch job from an existing catalog entry.
 // Admin only. Job name is taken from terraform.tfvars existing_github_repo_id, not tickets.pipeline_name.
 func RecreatePipelineHandler(w http.ResponseWriter, r *http.Request) {

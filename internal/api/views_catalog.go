@@ -1099,7 +1099,7 @@ func FetchTFVarsContent(ctx context.Context, path string, branch string) string 
 
 	req.Header.Set("User-Agent", "Oona-Dev-Portal/1.0")
 	req.Header.Set("Accept", "application/vnd.github.v3.raw")
-	token := os.Getenv("GITHUB_TOKEN")
+	token := GetActiveGitHubToken(ctx)
 	if token != "" {
 		req.Header.Set("Authorization", "Bearer "+token)
 	}

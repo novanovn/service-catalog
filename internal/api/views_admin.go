@@ -561,6 +561,7 @@ func EditIntegrationHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	InvalidateGitHubTokenCache()
 	w.Header().Set("HX-Trigger", `{"showToast": {"message": "Integration updated successfully!", "type": "success"}}`)
 	w.Header().Set("HX-Redirect", "/admin/integrations")
 	w.Write([]byte{})

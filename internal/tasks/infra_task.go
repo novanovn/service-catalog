@@ -76,7 +76,7 @@ func HandleVerifyInfraGitTask(ctx context.Context, t *asynq.Task) error {
 		if err == nil {
 			req.Header.Set("User-Agent", "Oona-Dev-Portal-Worker/1.0")
 			req.Header.Set("Accept", "application/vnd.github.v3.raw")
-			token := os.Getenv("GITHUB_TOKEN")
+			token := api.GetActiveGitHubToken(ctx)
 			if token != "" {
 				req.Header.Set("Authorization", "Bearer "+token)
 			}
@@ -101,7 +101,7 @@ func HandleVerifyInfraGitTask(ctx context.Context, t *asynq.Task) error {
 	// 4. Fallback if GitHub API was blocked or not configured: Shallow Clone (depth=1)
 	if !fetchedSuccessfully {
 		repoURL := "https://github.com/oona-insurance/oona-dtc-country-terraform-iac.git"
-		gitHubToken := os.Getenv("GITHUB_TOKEN")
+		gitHubToken := api.GetActiveGitHubToken(ctx)
 		cloneURL := repoURL
 		if gitHubToken != "" {
 			cloneURL = fmt.Sprintf("https://%s@%s", gitHubToken, repoURL[8:])

@@ -182,7 +182,7 @@ func fetchLambdaFunctionsUncached(ctx context.Context, repoName string) []Lambda
 		}
 		req.Header.Set("User-Agent", "Oona-Dev-Portal/1.0")
 		req.Header.Set("Accept", "application/vnd.github.v3.raw")
-		if token := os.Getenv("GITHUB_TOKEN"); token != "" {
+		if token := GetActiveGitHubToken(ctx); token != "" {
 			req.Header.Set("Authorization", "Bearer "+token)
 		}
 

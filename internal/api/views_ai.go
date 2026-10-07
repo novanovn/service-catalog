@@ -136,7 +136,7 @@ func CatalogTrivyScanHandler(w http.ResponseWriter, r *http.Request) {
 		// Execute Trivy scan with 120s timeout on specific branch
 		localPath := ResolveLocalServiceRepoPath(serviceName, repoURL)
 
-		githubToken := os.Getenv("GITHUB_TOKEN")
+		githubToken := GetActiveGitHubToken(scanCtx)
 		var cmd *exec.Cmd
 		if localPath != "" {
 			cmd = exec.CommandContext(scanCtx, "trivy", "fs", "--scanners", "vuln,secret", "--quiet", "--format", "json", localPath)

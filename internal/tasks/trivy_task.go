@@ -60,8 +60,8 @@ func HandleTrivyScanTask(ctx context.Context, t *asynq.Task) error {
 		return fmt.Errorf("json unmarshal failed: %v: %w", err, asynq.SkipRetry)
 	}
 
-	// Read GitHub Token from environment (needed by Trivy to scan private repos)
-	githubToken := os.Getenv("GITHUB_TOKEN")
+	// Read GitHub Token from database integration (or environment fallback)
+	githubToken := api.GetActiveGitHubToken(ctx)
 	if githubToken == "" {
 		log.Println("WARNING: GITHUB_TOKEN is not set. Trivy might fail on private repositories.")
 	}

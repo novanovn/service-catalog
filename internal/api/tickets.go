@@ -143,8 +143,8 @@ func CreateTicketHandler(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
-	// Let's pretend we also enqueued the Trivy Asynq worker here
-	// asynqClient.Enqueue(tasks.NewTrivyScanTask(createdID, req.RepoURL))
+	// Enqueue background worker tasks for Trivy scanning & Terraform infra verification
+	EnqueueTicketBackgroundTasks(createdID, req.RepoURL, req.Domain, req.Country, "uat", req.ServiceName)
 
 	if r.Header.Get("HX-Request") != "" {
 		w.Header().Set("HX-Redirect", "/tickets?toast=created")
