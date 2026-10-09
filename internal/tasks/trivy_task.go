@@ -7,9 +7,12 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"strings"
+	"time"
 
 	"github.com/hibiken/asynq"
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/redis/go-redis/v9"
 	"service-catalog/internal/api"
 	"service-catalog/internal/notify"
 	db "service-catalog/internal/repository/postgres/generated"
@@ -23,8 +26,9 @@ const (
 
 // TrivyScanPayload holds the data for the background scan
 type TrivyScanPayload struct {
-	TicketID string
-	RepoURL  string // e.g. "https://github.com/oona-insurance/lmd-health-renewal-svc"
+	TicketID    string `json:"ticket_id"`
+	RepoURL     string `json:"repo_url"`
+	ServiceName string `json:"service_name,omitempty"`
 }
 
 // TrivyJSONReport models the expected output structure from the trivy CLI tool
@@ -66,18 +70,43 @@ func HandleTrivyScanTask(ctx context.Context, t *asynq.Task) error {
 		log.Println("WARNING: GITHUB_TOKEN is not set. Trivy might fail on private repositories.")
 	}
 
-	log.Printf("Starting Trivy scan for ticket %s on repo %s", p.TicketID, p.RepoURL)
+	// Resolve service name if not provided directly
+	if p.ServiceName == "" && p.TicketID != "" && api.DB != nil {
+		var ticketUUID pgtype.UUID
+		if errScan := ticketUUID.Scan(p.TicketID); errScan == nil {
+			if tkt, errGet := api.DB.GetTicketByID(ctx, ticketUUID); errGet == nil {
+				p.ServiceName = tkt.ServiceName
+			}
+		}
+	}
 
-	// Execute Trivy CLI
-	cmd := exec.CommandContext(ctx, "trivy", "repo",
-		"--format", "json",
-		"--scanners", "vuln,secret", // Scan for Vulnerabilities and Hardcoded Secrets
-		"--quiet", // Supress progress bars in logs
-		p.RepoURL,
-	)
+	log.Printf("Starting Trivy scan for ticket %s (service: %s) on repo %s", p.TicketID, p.ServiceName, p.RepoURL)
 
-	// Inject GitHub Token directly into the process environment
-	cmd.Env = append(os.Environ(), fmt.Sprintf("GITHUB_TOKEN=%s", githubToken))
+	localPath := api.ResolveLocalServiceRepoPath(p.ServiceName, p.RepoURL)
+
+	var cmd *exec.Cmd
+	if localPath != "" {
+		log.Printf("Trivy fast local scan target found at %s", localPath)
+		cmd = exec.CommandContext(ctx, "trivy", "fs",
+			"--format", "json",
+			"--scanners", "vuln,secret",
+			"--skip-db-update",
+			"--quiet",
+			localPath,
+		)
+	} else {
+		log.Printf("Trivy remote scan targeting %s", p.RepoURL)
+		cmd = exec.CommandContext(ctx, "trivy", "repo",
+			"--format", "json",
+			"--scanners", "vuln,secret",
+			"--skip-db-update",
+			"--quiet",
+			p.RepoURL,
+		)
+		if githubToken != "" {
+			cmd.Env = append(os.Environ(), fmt.Sprintf("GITHUB_TOKEN=%s", githubToken))
+		}
+	}
 
 	// Trivy will return a non-zero exit code if it finds issues, but we only care about the JSON output
 	outputData, err := cmd.Output()
@@ -85,6 +114,31 @@ func HandleTrivyScanTask(ctx context.Context, t *asynq.Task) error {
 	// Check if the command failed because the binary is missing or auth failed
 	if err != nil && len(outputData) == 0 {
 		return fmt.Errorf("trivy execution failed: %v", err)
+	}
+
+	// Cache scan results in Valkey so approval page loads immediately with ready scan data
+	if len(outputData) > 0 && p.ServiceName != "" {
+		redisAddr := os.Getenv("VALKEY_URL")
+		if redisAddr == "" {
+			redisAddr = "localhost:6379"
+		}
+		rdb := redis.NewClient(&redis.Options{
+			Addr:     redisAddr,
+			Password: os.Getenv("VALKEY_PASSWORD"),
+		})
+		defer rdb.Close()
+
+		cleanName := strings.TrimSuffix(p.ServiceName, "-clone")
+		cacheKeys := []string{
+			"trivy:json:" + p.ServiceName + ":main",
+			"trivy:json:" + cleanName + ":main",
+			"trivy:json:lmd-oona-ph-integration-" + cleanName + ":main",
+			"trivy:json:lmd-oona-ph-integration-" + p.ServiceName + ":main",
+			"trivy:json:lmd-oona-id-integration-" + cleanName + ":main",
+		}
+		for _, ck := range cacheKeys {
+			_ = rdb.Set(ctx, ck, string(outputData), 2*time.Hour).Err()
+		}
 	}
 
 	// Parse JSON

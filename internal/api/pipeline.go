@@ -165,11 +165,13 @@ func EnqueueTicketBackgroundTasks(ticketID, repoURL, domain, country, env, servi
 	// 1. Enqueue Trivy Security Scan
 	if repoURL != "" {
 		scanPayload, _ := json.Marshal(struct {
-			TicketID string
-			RepoURL  string
+			TicketID    string `json:"ticket_id"`
+			RepoURL     string `json:"repo_url"`
+			ServiceName string `json:"service_name"`
 		}{
-			TicketID: ticketID,
-			RepoURL:  repoURL,
+			TicketID:    ticketID,
+			RepoURL:     repoURL,
+			ServiceName: serviceName,
 		})
 		trivyTask := asynq.NewTask("security:trivy_scan", scanPayload, asynq.Queue("trivy_scan"), asynq.MaxRetry(3))
 		_, _ = client.Enqueue(trivyTask)
