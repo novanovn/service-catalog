@@ -126,8 +126,19 @@ func RenderCatalogList(w http.ResponseWriter, r *http.Request) {
 					if t.PipelineName != "" && (t.Status == db.TicketStatusJENKINSREADY || t.Status == db.TicketStatusLIVE) {
 						savedPipeline = t.PipelineName
 					}
+					if t.RepoUrl != "" && (allServices[i].RepoURL == "" || allServices[i].RepoURL == fmt.Sprintf("https://github.com/oona-insurance/%s", svc.Name)) {
+						allServices[i].RepoURL = strings.TrimSuffix(t.RepoUrl, ".git")
+					}
 				}
 				allServices[i].PipelineName = ResolveCanonicalPipelineName(r.Context(), svc.Domain, svc.Country, svc.Name, "main", savedPipeline)
+				if allServices[i].RepoURL == "" {
+					if allServices[i].PipelineName != "" {
+						allServices[i].RepoURL = fmt.Sprintf("https://github.com/oona-insurance/%s", allServices[i].PipelineName)
+					} else {
+						allServices[i].RepoURL = fmt.Sprintf("https://github.com/oona-insurance/%s", svc.Name)
+					}
+				}
+				allServices[i].RepoURL = strings.TrimSuffix(allServices[i].RepoURL, ".git")
 			}
 		}
 	}
@@ -392,6 +403,32 @@ func RenderCatalogList(w http.ResponseWriter, r *http.Request) {
 	tmpl.ExecuteTemplate(w, "base", data)
 }
 
+// ResolveServiceRepoURL looks up the true repository URL for a service from catalog or onboarding tickets
+func ResolveServiceRepoURL(ctx context.Context, serviceName string) string {
+	if DB != nil {
+		if catEntry, err := DB.GetCatalogEntryByName(ctx, serviceName); err == nil {
+			if catEntry.RepoUrl.Valid && catEntry.RepoUrl.String != "" {
+				return strings.TrimSuffix(catEntry.RepoUrl.String, ".git")
+			}
+		}
+		if tickets, err := DB.ListTickets(ctx); err == nil {
+			for _, t := range tickets {
+				if strings.EqualFold(t.ServiceName, serviceName) && t.RepoUrl != "" {
+					return strings.TrimSuffix(t.RepoUrl, ".git")
+				}
+			}
+		}
+	}
+	if entry, found := ServiceCatalog.FindByNameOrID(serviceName); found && entry.RepoURL != "" {
+		return strings.TrimSuffix(entry.RepoURL, ".git")
+	}
+	canon := ResolveCanonicalPipelineName(ctx, "integration", "ph", serviceName, "main", "")
+	if canon != "" {
+		return fmt.Sprintf("https://github.com/oona-insurance/%s", canon)
+	}
+	return fmt.Sprintf("https://github.com/oona-insurance/%s", serviceName)
+}
+
 // RenderServiceDetail renders the catalog detail view
 func RenderServiceDetail(w http.ResponseWriter, r *http.Request) {
 	tmpl, err := parsePage("catalog_detail.html")
@@ -410,41 +447,102 @@ func RenderServiceDetail(w http.ResponseWriter, r *http.Request) {
 	domain := "Integration"
 	country := "PH"
 	description := "Microservice component"
-	repoURL := fmt.Sprintf("https://github.com/oona-insurance/%s", serviceName)
+	repoURL := ""
+	requestorEmail := "admin@oona-insurance.com"
+	jiraID := "OONA-1001"
 
 	var serviceID string
 	savedPipelineName := ""
 	serviceStatus := "PENDING_INFRA"
-	// Try to find service in catalog store first
-	if entry, found := ServiceCatalog.FindByNameOrID(serviceParam); found {
-		serviceID = entry.ID
-		serviceName = entry.Name
-		domain = entry.Domain
-		country = entry.Country
-		description = entry.Description
-		repoURL = entry.RepoURL
-		serviceStatus = entry.Status
-		savedPipelineName = entry.PipelineName
+
+	// 1. Try DB catalog entry first if available
+	if DB != nil {
+		if catEntry, err := DB.GetCatalogEntryByName(r.Context(), serviceParam); err == nil {
+			serviceID = fmt.Sprintf("%x-%x-%x-%x-%x", catEntry.ID.Bytes[0:4], catEntry.ID.Bytes[4:6], catEntry.ID.Bytes[6:8], catEntry.ID.Bytes[8:10], catEntry.ID.Bytes[10:16])
+			serviceName = catEntry.Name
+			if catEntry.Domain.Valid && catEntry.Domain.String != "" {
+				domain = catEntry.Domain.String
+			}
+			if catEntry.Country.Valid && catEntry.Country.String != "" {
+				country = strings.ToUpper(catEntry.Country.String)
+			}
+			if catEntry.Description != "" {
+				description = catEntry.Description
+			}
+			if catEntry.RepoUrl.Valid && catEntry.RepoUrl.String != "" {
+				repoURL = catEntry.RepoUrl.String
+			}
+			if catEntry.PipelineName.Valid && catEntry.PipelineName.String != "" {
+				savedPipelineName = catEntry.PipelineName.String
+			}
+			if catEntry.JiraID.Valid && catEntry.JiraID.String != "" {
+				jiraID = catEntry.JiraID.String
+			}
+			if catEntry.RequestorEmail.Valid && catEntry.RequestorEmail.String != "" {
+				requestorEmail = catEntry.RequestorEmail.String
+			}
+			serviceStatus = catEntry.Status
+		}
 	}
 
-	// Auto-derive status from real ticket DB - this is the single source of truth
+	// 2. Try in-memory / catalog store fallback
+	if entry, found := ServiceCatalog.FindByNameOrID(serviceParam); found {
+		if serviceID == "" {
+			serviceID = entry.ID
+		}
+		if serviceName == "" {
+			serviceName = entry.Name
+		}
+		if domain == "" || domain == "Integration" {
+			domain = entry.Domain
+		}
+		if country == "" || country == "PH" {
+			country = entry.Country
+		}
+		if description == "" || description == "Microservice component" {
+			description = entry.Description
+		}
+		if repoURL == "" {
+			repoURL = entry.RepoURL
+		}
+		if serviceStatus == "PENDING_INFRA" && entry.Status != "" {
+			serviceStatus = entry.Status
+		}
+		if savedPipelineName == "" {
+			savedPipelineName = entry.PipelineName
+		}
+		if entry.RequestorEmail != "" {
+			requestorEmail = entry.RequestorEmail
+		}
+		if entry.JiraID != "" {
+			jiraID = entry.JiraID
+		}
+	}
+
+	// 3. Auto-derive status and true onboarding repo_url from real ticket DB - this is the single source of truth
 	if DB != nil {
 		tickets, tErr := DB.ListTickets(r.Context())
 		if tErr == nil {
 			for _, t := range tickets {
 				if strings.EqualFold(t.ServiceName, serviceName) || strings.EqualFold(t.ServiceName, serviceParam) {
 					serviceStatus = DeriveStatusFromTickets(string(t.Status))
-					if t.PipelineName != "" && (t.Status == db.TicketStatusJENKINSREADY || t.Status == db.TicketStatusLIVE) {
+					if t.PipelineName != "" && (t.Status == db.TicketStatusJENKINSREADY || t.Status == db.TicketStatusLIVE || savedPipelineName == "") {
 						savedPipelineName = t.PipelineName
 					}
-					if domain == "" {
+					if domain == "" || domain == "Integration" {
 						domain = t.Domain
 					}
-					if country == "" {
+					if country == "" || country == "PH" {
 						country = strings.ToUpper(t.Country)
 					}
 					if t.Description != "" && (description == "" || description == "Microservice component") {
 						description = t.Description
+					}
+					if t.RepoUrl != "" {
+						repoURL = t.RepoUrl
+					}
+					if t.JiraIssueID.Valid && t.JiraIssueID.String != "" {
+						jiraID = t.JiraIssueID.String
 					}
 					break
 				}
@@ -549,6 +647,15 @@ func RenderServiceDetail(w http.ResponseWriter, r *http.Request) {
 		pipelineName = ResolveCanonicalPipelineName(r.Context(), domain, country, serviceName, branch, savedPipelineName)
 	}
 
+	if repoURL == "" {
+		if pipelineName != "" {
+			repoURL = fmt.Sprintf("https://github.com/oona-insurance/%s", pipelineName)
+		} else {
+			repoURL = fmt.Sprintf("https://github.com/oona-insurance/%s", serviceName)
+		}
+	}
+	repoURL = strings.TrimSuffix(repoURL, ".git")
+
 	// Fetch data in parallel (TechDocs, Branches, EnvVars) for maximum page speed
 	var rawMD []byte
 	var availableBranches []string
@@ -590,16 +697,6 @@ func RenderServiceDetail(w http.ResponseWriter, r *http.Request) {
 		availableBranches = append([]string{branch}, availableBranches...)
 	}
 
-	requestorEmail := "admin@oona-insurance.com"
-	jiraID := "OONA-1001"
-	if entry, found := ServiceCatalog.FindByNameOrID(serviceParam); found {
-		if entry.RequestorEmail != "" {
-			requestorEmail = entry.RequestorEmail
-		}
-		if entry.JiraID != "" {
-			jiraID = entry.JiraID
-		}
-	}
 	if claims != nil && claims.Email != "" && (requestorEmail == "" || requestorEmail == "developer@oona-insurance.com") {
 		requestorEmail = claims.Email
 	}
@@ -807,7 +904,7 @@ func CatalogDocsHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		docPath = cleanDoc
 	}
-	repoURL := fmt.Sprintf("https://github.com/oona-insurance/%s", serviceName)
+	repoURL := ResolveServiceRepoURL(r.Context(), serviceName)
 
 	rawMD, err := docs.FetchTechDoc(r.Context(), repoURL, docPath)
 	if err != nil {
