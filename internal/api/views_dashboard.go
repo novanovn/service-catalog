@@ -51,7 +51,7 @@ func RenderDashboard(w http.ResponseWriter, r *http.Request) {
 
 		// Get real counts
 		dbCatalogCount, err := DB.CountCatalogEntries(ctx)
-		if err == nil && dbCatalogCount > 0 {
+		if err == nil {
 			catalogCount = dbCatalogCount
 		}
 
@@ -133,11 +133,6 @@ func RenderDashboard(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 		}
-	}
-
-	// If no cache or empty, account for the active microservice known finding (1 Medium in health-renewal-svc)
-	if totalCritical == 0 && totalHigh == 0 && totalMedium == 0 && totalLow == 0 {
-		totalMedium = 1
 	}
 
 	totalVulns := totalCritical + totalHigh + totalMedium + totalLow
