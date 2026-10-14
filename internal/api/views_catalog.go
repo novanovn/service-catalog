@@ -78,6 +78,22 @@ func getUserShelfScope(ctx context.Context, claims *auth.Claims) (shelves []stri
 	return user.AssignedShelves, false
 }
 
+// parseServiceSortTime extracts creation time for sorting catalog entries by recently added
+func parseServiceSortTime(svc CatalogEntry, ticketMap map[string]db.Ticket) time.Time {
+	if t, ok := ticketMap[strings.ToLower(svc.Name)]; ok && t.CreatedAt.Valid {
+		return t.CreatedAt.Time
+	}
+	if svc.CreatedAt != "" {
+		if pt, err := time.Parse("2006-01-02 15:04", svc.CreatedAt); err == nil {
+			return pt
+		}
+		if pt, err := time.Parse("2006-01-02", svc.CreatedAt); err == nil {
+			return pt
+		}
+	}
+	return time.Time{}
+}
+
 func RenderCatalogList(w http.ResponseWriter, r *http.Request) {
 	tmpl, err := parsePage("catalog_list.html")
 	if err != nil {
@@ -108,11 +124,11 @@ func RenderCatalogList(w http.ResponseWriter, r *http.Request) {
 
 	allServices := ServiceCatalog.ListAll()
 
+	ticketMap := make(map[string]db.Ticket)
 	// Auto-derive status from real ticket DB status
 	if DB != nil {
 		tickets, tErr := DB.ListTickets(r.Context())
 		if tErr == nil {
-			ticketMap := make(map[string]db.Ticket)
 			for _, t := range tickets {
 				key := strings.ToLower(t.ServiceName)
 				if existing, ok := ticketMap[key]; !ok || t.CreatedAt.Time.After(existing.CreatedAt.Time) {
@@ -128,6 +144,9 @@ func RenderCatalogList(w http.ResponseWriter, r *http.Request) {
 					}
 					if t.RepoUrl != "" && (allServices[i].RepoURL == "" || allServices[i].RepoURL == fmt.Sprintf("https://github.com/oona-insurance/%s", svc.Name)) {
 						allServices[i].RepoURL = strings.TrimSuffix(t.RepoUrl, ".git")
+					}
+					if allServices[i].CreatedAt == "" && t.CreatedAt.Valid {
+						allServices[i].CreatedAt = t.CreatedAt.Time.Format("2006-01-02 15:04")
 					}
 				}
 				allServices[i].PipelineName = ResolveCanonicalPipelineName(r.Context(), svc.Domain, svc.Country, svc.Name, "main", savedPipeline)
@@ -372,32 +391,59 @@ func RenderCatalogList(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	var recentCountryServices []CatalogEntry
+	if activeCountry != nil {
+		var countryServices []CatalogEntry
+		for _, svc := range allServices {
+			if strings.EqualFold(svc.Country, activeCountry.Code) {
+				countryServices = append(countryServices, svc)
+			}
+		}
+
+		sort.SliceStable(countryServices, func(i, j int) bool {
+			ti := parseServiceSortTime(countryServices[i], ticketMap)
+			tj := parseServiceSortTime(countryServices[j], ticketMap)
+			if !ti.Equal(tj) {
+				return ti.After(tj)
+			}
+			return countryServices[i].Name < countryServices[j].Name
+		})
+
+		maxRecent := 6
+		if len(countryServices) < maxRecent {
+			maxRecent = len(countryServices)
+		}
+		recentCountryServices = countryServices[:maxRecent]
+	}
+
 	data := struct {
-		Title               string
-		User                *auth.Claims
-		Level               string // "root", "country", "domain"
-		Breadcrumbs         []CatalogBreadcrumb
-		Services            []CatalogEntry
-		Countries           []MainShelfCountry
-		ActiveCountry       *MainShelfCountry
-		ActiveSubShelf      *SubShelfDomain
-		TotalServices       int
-		HasCountryScope     bool
-		ShowAllCountries    bool
-		OtherCountriesCount int
+		Title                 string
+		User                  *auth.Claims
+		Level                 string // "root", "country", "domain"
+		Breadcrumbs           []CatalogBreadcrumb
+		Services              []CatalogEntry
+		Countries             []MainShelfCountry
+		ActiveCountry         *MainShelfCountry
+		ActiveSubShelf        *SubShelfDomain
+		RecentCountryServices []CatalogEntry
+		TotalServices         int
+		HasCountryScope       bool
+		ShowAllCountries      bool
+		OtherCountriesCount   int
 	}{
-		Title:               "Service Catalog",
-		User:                claims,
-		Level:               level,
-		Breadcrumbs:         breadcrumbs,
-		Services:            allServices,
-		Countries:           visibleCountries,
-		ActiveCountry:       activeCountry,
-		ActiveSubShelf:      activeSubShelf,
-		TotalServices:       len(allServices),
-		HasCountryScope:     hasCountryScope,
-		ShowAllCountries:    showAllCountries,
-		OtherCountriesCount: otherCount,
+		Title:                 "Service Catalog",
+		User:                  claims,
+		Level:                 level,
+		Breadcrumbs:           breadcrumbs,
+		Services:              allServices,
+		Countries:             visibleCountries,
+		ActiveCountry:         activeCountry,
+		ActiveSubShelf:        activeSubShelf,
+		RecentCountryServices: recentCountryServices,
+		TotalServices:         len(allServices),
+		HasCountryScope:       hasCountryScope,
+		ShowAllCountries:      showAllCountries,
+		OtherCountriesCount:   otherCount,
 	}
 
 	tmpl.ExecuteTemplate(w, "base", data)

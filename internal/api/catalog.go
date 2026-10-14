@@ -169,7 +169,7 @@ func (cs *CatalogStore) ListAll() []CatalogEntry {
 					JiraID:          jiraID,
 					AWSLastModified: lastMod,
 					AWSLastInvoked:  lastInv,
-					CreatedAt:       e.CreatedAt.Time.Format("2006-01-02"),
+					CreatedAt:       e.CreatedAt.Time.Format("2006-01-02 15:04"),
 					DeployedEnvs:    e.DeployedEnvs,
 				})
 			}
